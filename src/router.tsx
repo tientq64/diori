@@ -1,9 +1,10 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { Auth } from './pages/Auth/Auth'
+import { EditPage } from './pages/EditPage/EditPage'
 import { Layout } from './pages/Layout/Layout'
 import { Logged } from './pages/Logged/Logged'
 import { Login } from './pages/Login/Login'
-import { Notes } from './pages/Notes/Notes'
+import { NotesPage } from './pages/NotesPage/NotesPage'
 import { Register } from './pages/Register/Register'
 
 export const router = createBrowserRouter([
@@ -35,7 +36,11 @@ export const router = createBrowserRouter([
 				children: [
 					{
 						path: 'notes',
-						element: <Notes />
+						element: <NotesPage />
+					},
+					{
+						path: 'edit',
+						element: <EditPage />
 					}
 				]
 			}
