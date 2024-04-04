@@ -1,9 +1,9 @@
-import { DatePickerView, Dropdown, NavBar, PickerView, SearchBar } from 'antd-mobile'
+import { DatePickerView, Dropdown, NavBar, SearchBar } from 'antd-mobile'
+import { PickerValue } from 'antd-mobile/es/components/picker-view'
 import dayjs, { Dayjs } from 'dayjs'
-import { upperFirst } from 'lodash'
+import { range, upperFirst } from 'lodash'
 import { WheelEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import VietnameseDate from 'vietnamese-date'
 import { NoteCard } from '../../components/NoteCard/NoteCard'
 import { Page } from '../../components/Page/Page'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
@@ -53,27 +53,16 @@ export function NotesPage() {
 		let time = currentTime.startOf('week').subtract(7, 'week')
 		for (let i = 0; i < 15 * 7; i++) {
 			const year = time.year()
-			const date = time.format('YYYY-MM-DD')
-			const note: Note = store.notes[date] ?? {
-				date,
-				time,
-				lunar: new VietnameseDate(time.toDate()),
-				year,
-				title: '',
-				isTitled: false,
-				thumbnailUrl: '',
-				photoKey: '',
-				numberPhotos: 0
-			}
+			const note: Note = store.getNote(time) ?? store.makeNote(time)
 			notes.push(note)
 			years.add(year)
 			time = time.add(1, 'day')
 		}
-		for (const year of years) {
-			loadYear.trigger(year)
-		}
 		setCurrentNotes(notes)
-	}, [currentTime, store.notes])
+		for (const year of years) {
+			loadYear.run(year)
+		}
+	}, [currentTime.format('YYYY-MM-DD'), store.notes])
 
 	useEffect(() => {
 		if (currentNotes.length === 0) return
@@ -85,6 +74,7 @@ export function NotesPage() {
 			<div className="flex flex-col h-full">
 				<NavBar
 					className="pr-8"
+					backArrow={null}
 					right={
 						<div className="flex justify-end items-center gap-4">
 							<SearchBar className="flex-1" placeholder="Tìm kiếm..." />
@@ -95,8 +85,8 @@ export function NotesPage() {
 					<Dropdown closeOnClickAway>
 						<Dropdown.Item key="year" title={currentTime.year()}>
 							<DatePickerView
-								min={currentTime.subtract(10, 'year').toDate()}
-								max={currentTime.add(10, 'year').toDate()}
+								min={dayjs().subtract(100, 'year').toDate()}
+								max={dayjs().add(100, 'year').toDate()}
 								precision="year"
 								value={currentTime.toDate()}
 								onChange={handleYearChange}
@@ -115,15 +105,11 @@ export function NotesPage() {
 
 				<div
 					ref={scrollRef}
-					className="flex-1 grid grid-cols-7 auto-rows-[18%] gap-4 px-4 overflow-auto bg-gray-50 dark:bg-neutral-900"
+					className="flex-1 grid grid-cols-7 auto-rows-[18%] gap-4 px-4 overflow-auto bg-neutral-50 dark:bg-neutral-900"
 					onScroll={handleScroll}
 				>
 					{currentNotes.map((note) => (
-						<NoteCard
-							key={note.date}
-							note={note}
-							onClick={() => handleNoteClick(note)}
-						/>
+						<NoteCard key={note.date} note={note} onClick={() => handleNoteClick(note)} />
 					))}
 				</div>
 			</div>

@@ -1,8 +1,9 @@
-import { Button, Form, Input, NavBar } from 'antd-mobile'
+import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { useStore } from '../../store/useStore'
+import { formValidateMessages } from '../../utils/formValidateMessages'
 import { useLogin } from './useLogin'
 
 export type LoginValues = {
@@ -14,14 +15,18 @@ export function Login() {
 
 	const [form] = Form.useForm()
 	const navigate = useNavigate()
-	const { trigger, data, isMutating, error } = useLogin()
-
-	const handleLogin = (values: LoginValues) => {
-		trigger(values)
-	}
+	const { run, data, loading, error } = useLogin()
 
 	useEffect(() => {
 		if (!error) return
+		if (error.status === 401) {
+			Modal.alert({
+				title: 'Đã xảy ra lỗi',
+				content: 'Personal access token đã hết hạn. Hãy tạo mới và đăng ký lại.',
+				confirmText: 'OK'
+			})
+			return
+		}
 		form.setFields([
 			{
 				name: 'pass',
@@ -36,7 +41,7 @@ export function Login() {
 	}, [store.token])
 
 	useEffect(() => {
-		form.setFieldValue('pass', 'tien')
+		form.setFieldValue('pass', 'test')
 		form.submit()
 	}, [])
 
@@ -61,8 +66,9 @@ export function Login() {
 				<Form
 					form={form}
 					layout="horizontal"
-					disabled={isMutating || data}
-					onFinish={handleLogin}
+					disabled={loading || data}
+					validateMessages={formValidateMessages}
+					onFinish={run}
 				>
 					<Form.Item>
 						<div className="mx-auto my-24 text-center text-9xl">🏕️</div>
@@ -81,13 +87,7 @@ export function Login() {
 					</Form.Item>
 
 					<Form.Item>
-						<Button
-							type="submit"
-							color="primary"
-							size="large"
-							block
-							loading={isMutating}
-						>
+						<Button type="submit" color="primary" size="large" block loading={loading}>
 							Đăng nhập
 						</Button>
 					</Form.Item>

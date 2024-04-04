@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { Store, useStore } from '../../store/useStore'
+import { formValidateMessages } from '../../utils/formValidateMessages'
 import { useRegister } from './useRegister'
 
 export type RegisterValues = {
@@ -14,12 +15,8 @@ export type RegisterValues = {
 export function Register() {
 	const [form] = Form.useForm()
 	const store = useStore()
-	const { trigger, data, isMutating, error } = useRegister()
+	const { run, data, loading, error } = useRegister()
 	const navigate = useNavigate()
-
-	const handleRegister = (values: RegisterValues) => {
-		trigger(values)
-	}
 
 	useEffect(() => {
 		if (!error) return
@@ -65,8 +62,9 @@ export function Register() {
 				<Form
 					form={form}
 					layout="horizontal"
-					disabled={isMutating || data}
-					onFinish={handleRegister}
+					disabled={loading || data}
+					validateMessages={formValidateMessages}
+					onFinish={run}
 				>
 					<Form.Item
 						label="Personal access token"
@@ -106,13 +104,7 @@ export function Register() {
 						<Input type="password" />
 					</Form.Item>
 					<Form.Item>
-						<Button
-							type="submit"
-							color="primary"
-							size="large"
-							block
-							loading={isMutating}
-						>
+						<Button type="submit" color="primary" size="large" block loading={loading}>
 							Đăng ký
 						</Button>
 					</Form.Item>

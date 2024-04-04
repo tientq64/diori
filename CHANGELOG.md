@@ -1,0 +1,3 @@
+## 1.0.0 (4 tháng 4, 2024)
+
+* GitHub API không dùng [REST](https://octokit.github.io/rest.js/v18) nữa, chuyển sang dùng [GraphQL](https://docs.github.com/en/graphql/reference). Tại REST có vấn đề khi cache, nên dùng GraphQL nó không cache, lại còn linh hoạt nữa, tiết kiệm băng thông. Với cả nó cũng get được nội dung khi get danh sách file, nên không cần dùng tên file làm nội dung nữa, giúp có thể download repo về mà không mở được do tên file quá dài. Như vậy repo cũng cần được cấu trúc lại, không dùng một repo lưu văn bản, các repo khác lưu hình ảnh nữa, mà mỗi repo bây giờ sẽ lưu một tháng trong năm.

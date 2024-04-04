@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
-import { useStore } from '../store/useStore'
 import { OctokitResponse } from '@octokit/types'
+import { useStore } from '../store/useStore'
 
 export function getOctokit(token?: string) {
 	const store = useStore.getState()
@@ -21,6 +21,10 @@ export function getOctokit(token?: string) {
 			store.setRateLimitTimeReset(Number(reset) * 1000)
 		}
 	}
+
+	rest.hook.before('request', (options) => {
+		options.headers['if-none-match'] = ''
+	})
 
 	rest.hook.after('request', (res) => {
 		handleResponse(res)

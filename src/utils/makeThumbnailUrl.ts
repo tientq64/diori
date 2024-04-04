@@ -1,7 +1,7 @@
 import Pica from 'pica'
 
 /**
- * Tạo hình thu nhỏ, dạng data URL, kích thước 80x80.
+ * Tạo hình thu nhỏ, kích thước 80x80, định dạng webp, trả về data URL.
  */
 export async function makeThumbnailUrl(
 	/** Blob URL. */
@@ -39,5 +39,10 @@ export async function makeThumbnailUrl(
 		unsharpThreshold: 0
 	})
 
-	return canvas.toDataURL('image/webp', 0.4)
+	let dataUrl = ''
+	for (let quality = 0.4; quality > 0; quality -= 0.05) {
+		dataUrl = canvas.toDataURL('image/webp', quality)
+		if (dataUrl.length <= 2500) break
+	}
+	return dataUrl
 }

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
-import { base64ToMinBase64 } from '../src/utils/base64ToMinBase64'
+import { compressBase64 } from '../src/utils/compressBase64'
 import { base64ToText } from '../src/utils/base64ToText'
 import { intToRadix62 } from '../src/utils/intToRadix62'
-import { minBase64ToBase64 } from '../src/utils/minBase64ToBase64'
+import { decompressBase64 } from '../src/utils/decompressBase64'
 import { radix62ToInt } from '../src/utils/radix62ToInt'
 import { textToBase64 } from '../src/utils/textToBase64'
 
@@ -18,6 +18,7 @@ describe('utils', () => {
 	})
 
 	test('intToRadix62', () => {
+		expect(intToRadix62(0)).toBe('0')
 		expect(intToRadix62(3)).toBe('3')
 		expect(intToRadix62(11)).toBe('b')
 		expect(intToRadix62(1047)).toBe('gT')
@@ -25,23 +26,20 @@ describe('utils', () => {
 	})
 
 	test('radix62ToInt', () => {
+		expect(radix62ToInt('0')).toBe(0)
 		expect(radix62ToInt('3')).toBe(3)
 		expect(radix62ToInt('b')).toBe(11)
 		expect(radix62ToInt('gT')).toBe(1047)
 		expect(radix62ToInt('4a4')).toBe(16000)
 	})
 
-	test('base64ToMinBase64', () => {
-		expect(base64ToMinBase64('')).toBe('')
-		expect(base64ToMinBase64('bmjAAhAAAAuq10AAAAAAIGvDAAAAAAAAAAAAAAAvQ==')).toBe(
-			"bmj'h^uq10-3IGvD-cvQ=="
-		)
+	test('compressBase64', () => {
+		expect(compressBase64('')).toBe('')
+		expect(compressBase64('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')).toBe('䢶䵃䱟卄㒎缡㸌磕嚥㕕䋯埂')
 	})
 
-	test('minBase64ToBase64', () => {
-		expect(minBase64ToBase64('')).toBe('')
-		expect(minBase64ToBase64("bmj'h^uq10-3IGvD-cvQ==")).toBe(
-			'bmjAAhAAAAuq10AAAAAAIGvDAAAAAAAAAAAAAAAvQ=='
-		)
+	test('decompressBase64', () => {
+		expect(decompressBase64('')).toBe('')
+		expect(decompressBase64('䢶䵃䱟卄㒎缡㸌磕嚥㕕䋯埂')).toBe('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')
 	})
 })

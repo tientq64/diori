@@ -5,5 +5,5 @@ export function intToRadix62(int: number): string {
 		radix62 = charset[int % charset.length] + radix62
 		int = Math.floor(int / charset.length)
 	}
-	return radix62
+	return radix62 || '0'
 }

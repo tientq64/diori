@@ -1,5 +1,5 @@
-import dayjs, { Dayjs } from 'dayjs'
-import { ReactNode, useEffect, useState } from 'react'
+import dayjs from 'dayjs'
+import { ReactNode } from 'react'
 import { useStore } from '../../store/useStore'
 
 type PageProps = {
@@ -8,17 +8,6 @@ type PageProps = {
 
 export function Page({ children }: PageProps) {
 	const store = useStore()
-	const [now, setNow] = useState<Dayjs>(dayjs())
-
-	useEffect(() => {
-		const intervalId = setInterval(() => {
-			setNow(dayjs())
-		})
-
-		return () => {
-			clearInterval(intervalId)
-		}
-	}, [now])
 
 	return (
 		<div className="flex flex-col h-full">
@@ -28,22 +17,20 @@ export function Page({ children }: PageProps) {
 				<div className="flex align-middle gap-4">
 					{store.userName && (
 						<div className="flex gap-3">
-							<img
-								className="h-5 rounded"
-								src={store.userAvatar}
-								alt="Ảnh đại diện"
-							/>
-							Tài khoản: {store.userName}
+							<img className="h-5 rounded" src={store.userAvatar} alt="Ảnh đại diện" />
+							<div className="flex gap-1">
+								Tài khoản:
+								<a href="https://github.com/settings/tokens?type=beta" target="_blank">
+									{store.userName}
+								</a>
+							</div>
 						</div>
 					)}
 
 					{store.orgName && (
 						<div>
 							Tổ chức: {}
-							<a
-								href={`https://github.com/${store.orgName}/diori-main`}
-								target="_blank"
-							>
+							<a href={`https://github.com/${store.orgName}/diori-main`} target="_blank">
 								{store.orgName}
 							</a>
 						</div>
@@ -51,10 +38,12 @@ export function Page({ children }: PageProps) {
 				</div>
 
 				<div className="flex align-middle gap-4">
+					<div>{dayjs().format('HH:mm:ss.SSS')}</div>
+
 					{store.rateLimitTimeReset && (
 						<div>
-							Giới hạn API: Còn lại {store.rateLimitRemaining} / {store.rateLimit},
-							đặt lại sau {store.rateLimitTimeReset.from(now, true)}
+							Giới hạn API: Còn lại {store.rateLimitRemaining} / {store.rateLimit}, đặt lại sau{' '}
+							{store.rateLimitTimeReset.from(store.nowPerMinute, true)}
 						</div>
 					)}
 				</div>

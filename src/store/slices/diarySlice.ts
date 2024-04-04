@@ -1,8 +1,8 @@
 import { RestEndpointMethodTypes } from '@octokit/rest'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import VietnameseDate from 'vietnamese-date'
 import { parseNoteFromNoteData } from '../../utils/parseNoteFromNoteData'
 import { SliceCreator } from '../useStore'
-import VietnameseDate from 'vietnamese-date'
 
 /**
  * Một mục trong nhật ký.
@@ -44,9 +44,7 @@ export type Note = {
 export type Notes = Record<Note['date'], Note>
 
 export type NoteData = Required<
-	NonNullable<
-		RestEndpointMethodTypes['repos']['createOrUpdateFileContents']['response']['data']['content']
-	>
+	NonNullable<RestEndpointMethodTypes['repos']['createOrUpdateFileContents']['response']['data']['content']>
 >
 
 export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
@@ -56,15 +54,39 @@ export type Diary = {
 	notes: Notes
 	years: Statuses
 
+	getNote: (date: string | Dayjs) => Note
+	makeNote: (time: Dayjs) => Note
 	updateOrAddNoteFromData: (data: NoteData) => void
+	removeNote: (note: Note) => void
 
 	setYear: (year: number, status: Status) => void
 }
 
-export const diarySlice: SliceCreator<Diary> = (set) => ({
+export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 	notes: {},
 	years: {},
 	editingNote: null,
+
+	getNote: (date) => {
+		if (dayjs.isDayjs(date)) {
+			date = date.format('YYYY-MM-DD')
+		}
+		return get().notes[date]
+	},
+
+	makeNote: (time) => {
+		return {
+			date: time.format('YYYY-MM-DD'),
+			time,
+			lunar: new VietnameseDate(time.toDate()),
+			year: time.year(),
+			title: '',
+			isTitled: false,
+			thumbnailUrl: '',
+			photoKey: '',
+			numberPhotos: 0
+		}
+	},
 
 	updateOrAddNoteFromData: (data) => {
 		set((state) => {
@@ -76,6 +98,12 @@ export const diarySlice: SliceCreator<Diary> = (set) => ({
 			} else {
 				Object.assign(notes[date], parsedNote)
 			}
+		})
+	},
+
+	removeNote: (note) => {
+		set((state) => {
+			delete state.notes[note.date]
 		})
 	},
 

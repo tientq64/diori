@@ -1,0 +1,17 @@
+.formItemNoPadding {
+	padding-left: 0;
+
+	:global {
+		.adm-list-item-content {
+			padding-right: 0;
+		}
+
+		.adm-list-item-content-main {
+			padding: 0;
+		}
+
+		.adm-list-item-description {
+			padding: 0 16px;
+		}
+	}
+}

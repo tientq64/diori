@@ -35,14 +35,10 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 			<div className="flex">
 				<div className="flex-1">
 					{note.thumbnailUrl && (
-						<img
-							className="w-20 h-20 min-w-20 rounded"
-							src={note.thumbnailUrl}
-							alt="Thumbnail"
-						/>
+						<img className="w-20 h-20 min-w-20 rounded" src={note.thumbnailUrl} alt="Thumbnail" />
 					)}
 					{!note.thumbnailUrl && note.sha && (
-						<div className="w-20 h-20 rounded bg-gray-100" />
+						<div className="w-20 h-20 rounded bg-neutral-100 dark:bg-neutral-700" />
 					)}
 				</div>
 
@@ -51,13 +47,13 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 						{note.time.format('DD-MM')}
 						<span className="hidden group-hover:inline">-{note.year}</span>
 					</div>
-					<div className="text-gray-400">
+					<div className="text-neutral-400 dark:text-neutral-500">
 						{note.lunar.day}-{note.lunar.month}
 					</div>
 				</div>
 			</div>
 
-			{note.title}
+			<div className="line-clamp-2 break-words dark:text-neutral-400">{note.title}</div>
 
 			{note.time.isToday() && (
 				<div className="flex-1 flex items-end justify-center">

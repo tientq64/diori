@@ -11,6 +11,7 @@ export type User = {
 	rateLimit: number
 	rateLimitRemaining: number
 	rateLimitTimeReset: Dayjs | null
+	nowPerMinute: Dayjs
 
 	setOrgName: (orgName: string) => void
 	setEncryptedToken: (encryptedToken: string) => void
@@ -18,6 +19,7 @@ export type User = {
 	setRateLimit: (rateLimit: number) => void
 	setRateLimitRemaining: (rateLimitRemaining: number) => void
 	setRateLimitTimeReset: (rateLimitReset: number) => void
+	setNowPerMinute: (time: Dayjs) => void
 
 	fetchUserData: (token: string) => void
 }
@@ -31,6 +33,7 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	rateLimit: 5000,
 	rateLimitRemaining: 5000,
 	rateLimitTimeReset: null,
+	nowPerMinute: dayjs(),
 
 	setOrgName: (orgName) => {
 		set({ orgName })
@@ -55,6 +58,10 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	setRateLimitTimeReset: (rateLimitReset) => {
 		const rateLimitTimeReset = dayjs(rateLimitReset)
 		set({ rateLimitTimeReset })
+	},
+
+	setNowPerMinute: (time) => {
+		set({ nowPerMinute: time })
 	},
 
 	fetchUserData: async (token) => {

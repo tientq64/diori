@@ -9,6 +9,10 @@
 	height: 100%;
 }
 
+.adm-nav-bar-left {
+	font-size: 16px;
+}
+
 .adm-nav-bar-right {
 	display: flex;
 	justify-content: end;
@@ -23,14 +27,23 @@
 	height: 100%;
 }
 
+.adm-form-item-label {
+	display: flex;
+	align-items: center;
+}
+
 .adm-list-body,
 .adm-list-body-inner,
 .adm-list-item-content,
 .adm-list-item-content-main,
-.adm-form-item-child,
 .adm-form-item-child-inner,
 .adm-text-area {
 	height: 100%;
+}
+
+.adm-form-item-child {
+	min-height: 0;
+	flex: 1;
 }
 
 .adm-list-body-inner,
@@ -86,4 +99,13 @@
 
 .adm-popover-menu-item {
 	user-select: none;
+}
+
+.adm-toast-icon {
+	display: flex;
+	justify-content: center;
+}
+
+.monaco-editor {
+	position: absolute;
 }

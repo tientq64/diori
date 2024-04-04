@@ -1,7 +1,7 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -11,7 +11,9 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@monaco-editor/react": "^4.6.0",
 		"@octokit/rest": "^20.0.2",
+		"ahooks": "^3.7.11",
 		"antd-mobile": "^5.35.0",
 		"antd-mobile-icons": "^0.3.0",
 		"clsx": "^2.1.0",
@@ -19,13 +21,13 @@
 		"dayjs": "^1.11.10",
 		"immer": "^10.0.4",
 		"lodash": "^4.17.21",
+		"monaco-editor": "^0.47.0",
 		"nanoid": "^5.0.6",
 		"pica": "^9.0.1",
 		"react": "^18.2.0",
 		"react-activation": "^0.12.4",
 		"react-dom": "^18.2.0",
 		"react-router-dom": "^6.22.3",
-		"swr": "^2.2.5",
 		"vietnamese-date": "^1.0.0",
 		"zustand": "^4.5.2"
 	},
@@ -35,10 +37,10 @@
 		"@types/lodash": "^4.17.0",
 		"@types/pica": "^9.0.4",
 		"@types/prop-types": "^15.7.12",
-		"@types/react": "^18.2.73",
+		"@types/react": "^18.2.74",
 		"@types/react-dom": "^18.2.23",
-		"@typescript-eslint/eslint-plugin": "^7.4.0",
-		"@typescript-eslint/parser": "^7.4.0",
+		"@typescript-eslint/eslint-plugin": "^7.5.0",
+		"@typescript-eslint/parser": "^7.5.0",
 		"@vitejs/plugin-react-swc": "^3.6.0",
 		"autoprefixer": "^10.4.19",
 		"eslint": "^8.57.0",
@@ -48,9 +50,10 @@
 		"prettier": "^3.2.5",
 		"prop-types": "^15.8.1",
 		"sass": "^1.72.0",
+		"simple-zustand-devtools": "^1.1.0",
 		"tailwindcss": "^3.4.3",
 		"typescript": "^5.4.3",
-		"vite": "^5.2.6",
+		"vite": "^5.2.7",
 		"vitest": "^1.4.0"
 	}
 }

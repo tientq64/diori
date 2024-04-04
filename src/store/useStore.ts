@@ -1,3 +1,4 @@
+import { mountStoreDevtool } from 'simple-zustand-devtools'
 import { StateCreator, create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
@@ -32,3 +33,7 @@ export const useStore = create<Store>()(
 		})
 	)
 )
+
+if (import.meta.env.DEV) {
+	mountStoreDevtool('dev:store', useStore)
+}
