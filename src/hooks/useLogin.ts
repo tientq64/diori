@@ -1,9 +1,9 @@
 import { useRequest } from 'ahooks'
-import { useStore } from '../../store/useStore'
-import { decryptText } from '../../utils/decryptText'
-import { slowHashText } from '../../utils/slowHashText'
-import { LoginValues } from './Login'
-import { getOctokit } from '../../helpers/getOctokit'
+import { useStore } from '../store/useStore'
+import { decryptText } from '../utils/decryptText'
+import { slowHashText } from '../utils/slowHashText'
+import { LoginValues } from '../pages/Login/Login'
+import { getOctokit } from '../utils/getOctokit'
 
 export function useLogin() {
 	const store = useStore()

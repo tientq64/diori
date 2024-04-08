@@ -15,22 +15,21 @@ import {
 	Toast
 } from 'antd-mobile'
 import { DeleteOutline, EyeOutline, InformationCircleOutline, PictureOutline } from 'antd-mobile-icons'
-import clsx from 'clsx'
 import { differenceBy, findIndex, reject, some, upperFirst } from 'lodash'
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { useBlocker } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
+import { PersonsManagerDropdown } from '../../components/PersonsManagerDropdown/PersonsManagerDropdown'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
+import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
+import { useSave } from '../../hooks/useSave'
 import { Note } from '../../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../../store/slices/editingSlice'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
-import styles from './EditPage.module.scss'
-import { useGetNoteEdit } from './useGetNoteEdit'
-import { useSave } from './useSave'
 
 export function EditPage() {
 	const editingNote = useStore((state) => state.editingNote)
@@ -89,6 +88,28 @@ export function EditPage() {
 	const beforeEditorMount = (monaco: typeof Monaco) => {
 		monaco.languages.register({ id: 'diori' })
 
+		const personNames = store.persons.map((person) => {
+			const names = person.aliasNames
+				.concat(person.name)
+				.map((name) => name.replace(/ \(.*\)$/, ''))
+				.sort((nameA, nameB) => nameB.length - nameA.length)
+				.join('|')
+			return names
+		})
+		const personNamesRegex = personNames.length ? RegExp(`(?:${personNames.join('|')})(?=[\\s.,:;!?)\\]}])`) : /~^/
+
+		const properNounNames = store.properNouns.map((properNoun) => {
+			const names = properNoun.aliasNames
+				.concat(properNoun.name)
+				.map((name) => name.replace(/ \(.*\)$/, ''))
+				.sort((nameA, nameB) => nameB.length - nameA.length)
+				.join('|')
+			return names
+		})
+		const properNounsRegex = properNounNames.length
+			? RegExp(`(?:${properNounNames.join('|')})(?=[\\s.,:;!?)\\]}])`)
+			: /~^/
+
 		monaco.languages.setMonarchTokensProvider('diori', {
 			tokenizer: {
 				root: [
@@ -101,19 +122,27 @@ export function EditPage() {
 						action: 'gray'
 					},
 					{
-						regex: /([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?|((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012]))|[12]\d{3}/,
+						regex: /(([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?)(?=[\s.,:;!?)\]}])/,
 						action: 'red'
 					},
 					{
-						regex: /\d+(tr|[kpt%])|\d+/,
+						regex: /((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012])\/[12]\d{3})(?=[\s.,:;!?)\]}])/,
+						action: 'red'
+					},
+					{
+						regex: /(((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012]))|[12]\d{3})(?=[\s.,:;!?)\]}])/,
+						action: 'red'
+					},
+					{
+						regex: /(\d+(tr|[kpt%])|\d+)(?=[\s.,:;!?)\]}])/,
 						action: 'orange'
 					},
 					{
-						regex: /Chi|Khương|Quyền|Kiên|Hải|Khải|Thắng|Tuyết|Hoàng/,
+						regex: personNamesRegex,
 						action: 'blue'
 					},
 					{
-						regex: /ao cá Bác Hồ|trại Chiêu|Golden Mark|ĐHCN|zalo/,
+						regex: properNounsRegex,
 						action: 'purple'
 					},
 					{
@@ -195,7 +224,7 @@ export function EditPage() {
 		const url = URL.createObjectURL(file)
 		const thumbnailUrl = await makeThumbnailUrl(url)
 		return {
-			key: editingNote.time.date() + nanoid(6),
+			key: editingNote.time.format('DD') + nanoid(6),
 			thumbnailUrl,
 			url
 		}
@@ -270,6 +299,11 @@ export function EditPage() {
 	}, [save.data])
 
 	useEffect(() => {
+		if (images.length <= 4) return
+		form.setFieldValue('images', images.slice(0, 4))
+	}, [images.length])
+
+	useEffect(() => {
 		const hasDefaultPhoto = some(images, { key: defaultPhotoKey })
 		if (hasDefaultPhoto) return
 		const photoKey = images.length > 0 ? images[0].key : ''
@@ -305,7 +339,16 @@ export function EditPage() {
 	return (
 		<Page>
 			<div className="flex flex-col h-full">
-				<NavBar onBack={() => history.back()} back="Trở về" right={<QuickSettingsButton />}>
+				<NavBar
+					onBack={() => history.back()}
+					back="Trở về"
+					right={
+						<div className="flex justify-end items-center gap-4">
+							<PersonsManagerDropdown />
+							<QuickSettingsButton />
+						</div>
+					}
+				>
 					{upperFirst(editingNote.time.format('dddd, D MMMM, YYYY'))}
 				</NavBar>
 
@@ -346,7 +389,7 @@ export function EditPage() {
 							</Form.Item>
 
 							<Form.Item
-								className={clsx('flex-1 min-h-0', styles.formItemNoPadding)}
+								className="flex-1 min-h-0 adm-list-item-no-padding"
 								name="content"
 								rules={[
 									{
@@ -421,7 +464,9 @@ export function EditPage() {
 													key: 'preview',
 													text: 'Xem ảnh',
 													icon: <EyeOutline />,
-													onClick: () => showPreviewImage(image)
+													onClick: () => {
+														showPreviewImage(image)
+													}
 												},
 												{
 													key: 'setDefault',
@@ -436,8 +481,9 @@ export function EditPage() {
 													key: 'remove',
 													text: 'Xóa bỏ',
 													icon: <DeleteOutline />,
-													onClick: () =>
+													onClick: () => {
 														form.setFieldValue('images', reject(images, { key: image.key }))
+													}
 												}
 											]}
 										>

@@ -1,7 +1,7 @@
 import { useRequest } from 'ahooks'
-import { getOctokit } from '../../helpers/getOctokit'
-import { Status } from '../../store/slices/diarySlice'
-import { useStore } from '../../store/useStore'
+import { getOctokit } from '../utils/getOctokit'
+import { Status } from '../store/slices/diarySlice'
+import { useStore } from '../store/useStore'
 
 export function useLoadYear() {
 	const store = useStore()

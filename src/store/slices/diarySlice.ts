@@ -53,6 +53,8 @@ export type Statuses = Record<string, Status>
 export type Diary = {
 	notes: Notes
 	years: Statuses
+	currentTime: Dayjs
+	currentScrollTop?: number
 
 	getNote: (date: string | Dayjs) => Note
 	makeNote: (time: Dayjs) => Note
@@ -60,12 +62,17 @@ export type Diary = {
 	removeNote: (note: Note) => void
 
 	setYear: (year: number, status: Status) => void
+
+	setCurrentTime: (time: Dayjs) => void
+	setCurrentScrollTop: (scrollTop: number) => void
 }
 
 export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 	notes: {},
 	years: {},
 	editingNote: null,
+	currentTime: dayjs(),
+	currentScrollTop: undefined,
 
 	getNote: (date) => {
 		if (dayjs.isDayjs(date)) {
@@ -111,5 +118,13 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 		set((state) => {
 			state.years[year] = status
 		})
+	},
+
+	setCurrentTime: (time) => {
+		set({ currentTime: time })
+	},
+
+	setCurrentScrollTop: (scrollTop) => {
+		set({ currentScrollTop: scrollTop })
 	}
 })

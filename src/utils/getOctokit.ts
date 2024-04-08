@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest'
 import { OctokitResponse } from '@octokit/types'
 import { useStore } from '../store/useStore'
 
-export function getOctokit(token?: string) {
+export function getOctokit(token?: string): Octokit {
 	const store = useStore.getState()
 
 	const rest = new Octokit({ auth: token || store.token })

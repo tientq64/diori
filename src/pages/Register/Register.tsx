@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { Store, useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
-import { useRegister } from './useRegister'
+import { useRegister } from '../../hooks/useRegister'
 
 export type RegisterValues = {
 	token: Store['token']
@@ -59,6 +59,7 @@ export function Register() {
 				>
 					Đăng ký
 				</NavBar>
+
 				<Form
 					form={form}
 					layout="horizontal"
@@ -77,6 +78,7 @@ export function Register() {
 					>
 						<Input />
 					</Form.Item>
+
 					<Form.Item
 						label="Tên tổ chức Github"
 						name="orgName"
@@ -90,6 +92,7 @@ export function Register() {
 					>
 						<Input />
 					</Form.Item>
+
 					<Form.Item
 						label="Mật khẩu"
 						name="pass"
@@ -103,6 +106,7 @@ export function Register() {
 					>
 						<Input type="password" />
 					</Form.Item>
+
 					<Form.Item>
 						<Button type="submit" color="primary" size="large" block loading={loading}>
 							Đăng ký

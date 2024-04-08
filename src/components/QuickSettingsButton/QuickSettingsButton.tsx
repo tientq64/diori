@@ -3,8 +3,8 @@ import { QuickSettingsSection } from '../QuickSettingsSection/QuickSettingsSecti
 
 export function QuickSettingsButton() {
 	return (
-		<Dropdown>
-			<Dropdown.Item key="setting" title="Cài đặt">
+		<Dropdown closeOnClickAway>
+			<Dropdown.Item key="setting" title="Cài đặt" destroyOnClose>
 				<QuickSettingsSection />
 			</Dropdown.Item>
 		</Dropdown>

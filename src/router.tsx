@@ -5,7 +5,9 @@ import { Layout } from './pages/Layout/Layout'
 import { Logged } from './pages/Logged/Logged'
 import { Login } from './pages/Login/Login'
 import { NotesPage } from './pages/NotesPage/NotesPage'
+import { PersonsPage } from './pages/PersonsPage/PersonsPage'
 import { Register } from './pages/Register/Register'
+import { Settings } from './pages/Settings/Settings'
 
 export const router = createBrowserRouter([
 	{
@@ -15,6 +17,10 @@ export const router = createBrowserRouter([
 			{
 				index: true,
 				element: <Navigate to="/login" replace />
+			},
+			{
+				path: 'settings',
+				element: <Settings />
 			},
 			{
 				path: '',
@@ -41,6 +47,10 @@ export const router = createBrowserRouter([
 					{
 						path: 'edit',
 						element: <EditPage />
+					},
+					{
+						path: 'persons',
+						element: <PersonsPage />
 					}
 				]
 			}

@@ -1,41 +1,46 @@
 import { DatePickerView, Dropdown, NavBar, SearchBar } from 'antd-mobile'
-import { PickerValue } from 'antd-mobile/es/components/picker-view'
-import dayjs, { Dayjs } from 'dayjs'
-import { range, upperFirst } from 'lodash'
+import dayjs from 'dayjs'
+import { upperFirst } from 'lodash'
 import { WheelEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NoteCard } from '../../components/NoteCard/NoteCard'
 import { Page } from '../../components/Page/Page'
+import { PersonsManagerDropdown } from '../../components/PersonsManagerDropdown/PersonsManagerDropdown'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
+import { useLoadYear } from '../../hooks/useLoadYear'
 import { Note } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
-import { useLoadYear } from './useLoadYear'
 
 export function NotesPage() {
 	const store = useStore()
 	const navigate = useNavigate()
 	const loadYear = useLoadYear()
-	const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
+	const currentTime = useStore((state) => state.currentTime)
+	const setCurrentTime = useStore((state) => state.setCurrentTime)
+	const currentScrollTop = useStore((state) => state.currentScrollTop)
+	const setCurrentScrollTop = useStore((state) => state.setCurrentScrollTop)
 	const [currentNotes, setCurrentNotes] = useState<Note[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
-	const scrollToMiddle = () => {
+	const scrollTo = (scrollTop?: number) => {
 		const scrollEl = scrollRef.current!
-		scrollEl.scrollTo(0, (scrollEl.scrollHeight - scrollEl.clientHeight) / 2)
+		scrollEl.scrollTo(0, scrollTop ?? (scrollEl.scrollHeight - scrollEl.clientHeight) / 2)
 	}
 
 	const handleScroll = (event: WheelEvent<HTMLDivElement>) => {
 		const scrollEl = event.currentTarget
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
-		const offset = 200
 		if (scrollTop === 0) {
-			scrollToMiddle()
+			scrollTo()
+			return
 		}
+		const offset = 200
 		if (scrollTop <= offset) {
 			setCurrentTime(currentTime.subtract(4, 'week'))
 		} else if (scrollTop >= scrollHeight - clientHeight - offset) {
 			setCurrentTime(currentTime.add(4, 'week'))
 		}
+		setCurrentScrollTop(scrollTop)
 	}
 
 	const handleYearChange = (date: Date) => {
@@ -66,7 +71,7 @@ export function NotesPage() {
 
 	useEffect(() => {
 		if (currentNotes.length === 0) return
-		scrollToMiddle()
+		scrollTo(currentScrollTop)
 	}, [currentNotes.length > 0])
 
 	return (
@@ -78,12 +83,14 @@ export function NotesPage() {
 					right={
 						<div className="flex justify-end items-center gap-4">
 							<SearchBar className="flex-1" placeholder="Tìm kiếm..." />
+
+							<PersonsManagerDropdown />
 							<QuickSettingsButton />
 						</div>
 					}
 				>
 					<Dropdown closeOnClickAway>
-						<Dropdown.Item key="year" title={currentTime.year()}>
+						<Dropdown.Item key="year" title={currentTime.year()} destroyOnClose>
 							<DatePickerView
 								min={dayjs().subtract(100, 'year').toDate()}
 								max={dayjs().add(100, 'year').toDate()}

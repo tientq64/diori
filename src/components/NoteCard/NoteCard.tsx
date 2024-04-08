@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { MouseEvent, useMemo } from 'react'
-import { isLoadedStatus } from '../../helpers/isLoadedStatus'
+import { isLoadedStatus } from '../../utils/isLoadedStatus'
 import { Note, Status } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
 

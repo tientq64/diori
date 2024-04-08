@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
-import { useLogin } from './useLogin'
+import { useLogin } from '../../hooks/useLogin'
 
 export type LoginValues = {
 	pass: string

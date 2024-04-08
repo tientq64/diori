@@ -1,10 +1,10 @@
 import { useRequest } from 'ahooks'
 import { Modal } from 'antd-mobile'
-import { getOctokit } from '../../helpers/getOctokit'
-import { useStore } from '../../store/useStore'
-import { encryptText } from '../../utils/encryptText'
-import { slowHashText } from '../../utils/slowHashText'
-import { RegisterValues } from './Register'
+import { getOctokit } from '../utils/getOctokit'
+import { useStore } from '../store/useStore'
+import { encryptText } from '../utils/encryptText'
+import { slowHashText } from '../utils/slowHashText'
+import { RegisterValues } from '../pages/Register/Register'
 
 export function useRegister() {
 	const store = useStore()
@@ -35,6 +35,9 @@ export function useRegister() {
 				await rest.repos.createInOrg({
 					org: orgName,
 					name: 'diori-main',
+					private: true,
+					homepage: 'https://diori.vercel.app',
+					auto_init: true,
 					has_issues: false,
 					has_projects: false,
 					has_wiki: false

@@ -1,11 +1,11 @@
+import './utils/configDayjs'
+
 import { useInterval } from 'ahooks'
 import { ConfigProvider } from 'antd-mobile'
 import antdLocaleEnUS from 'antd-mobile/cjs/locales/en-US'
 import dayjs from 'dayjs'
 import { useEffect } from 'react'
-import { AliveScope } from 'react-activation'
 import { RouterProvider } from 'react-router-dom'
-import './helpers/configDayjs'
 import { router } from './router'
 import { useStore } from './store/useStore'
 
@@ -33,9 +33,7 @@ export function App() {
 			}}
 		>
 			<ConfigProvider locale={antdLocaleEnUS}>
-				<AliveScope>
-					<RouterProvider router={router} />
-				</AliveScope>
+				<RouterProvider router={router} />
 			</ConfigProvider>
 		</div>
 	)

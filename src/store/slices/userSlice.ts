@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { SliceCreator } from '../useStore'
-import { getOctokit } from '../../helpers/getOctokit'
+import { getOctokit } from '../../utils/getOctokit'
 
 export type User = {
 	orgName: string

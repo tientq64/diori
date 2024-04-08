@@ -1,13 +1,13 @@
 import { useRequest } from 'ahooks'
 import { ImageUploadItem, Toast } from 'antd-mobile'
 import { find, truncate } from 'lodash'
-import { getOctokit } from '../../helpers/getOctokit'
-import { NoteData } from '../../store/slices/diarySlice'
-import { NoteEdit, Photo } from '../../store/slices/editingSlice'
-import { useStore } from '../../store/useStore'
-import { compressBase64 } from '../../utils/compressBase64'
-import { textToBase64 } from '../../utils/textToBase64'
-import { textToCompressedBase64 } from '../../utils/textToCompressedBase64'
+import { getOctokit } from '../utils/getOctokit'
+import { NoteData } from '../store/slices/diarySlice'
+import { NoteEdit, Photo } from '../store/slices/editingSlice'
+import { useStore } from '../store/useStore'
+import { compressBase64 } from '../utils/compressBase64'
+import { textToBase64 } from '../utils/textToBase64'
+import { textToCompressedBase64 } from '../utils/textToCompressedBase64'
 
 export function useSave() {
 	const editingNote = useStore((state) => state.editingNote)

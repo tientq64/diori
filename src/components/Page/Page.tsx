@@ -17,7 +17,7 @@ export function Page({ children }: PageProps) {
 				<div className="flex align-middle gap-4">
 					{store.userName && (
 						<div className="flex gap-3">
-							<img className="h-5 rounded" src={store.userAvatar} alt="Ảnh đại diện" />
+							<img className="w-5 h-5 rounded" src={store.userAvatar} alt="Ảnh đại diện" />
 							<div className="flex gap-1">
 								Tài khoản:
 								<a href="https://github.com/settings/tokens?type=beta" target="_blank">

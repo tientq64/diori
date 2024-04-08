@@ -28,7 +28,9 @@ export const useStore = create<Store>()(
 				encryptedToken: state.encryptedToken,
 				fontFamily: state.fontFamily,
 				fontSize: state.fontSize,
-				isDarkMode: state.isDarkMode
+				isDarkMode: state.isDarkMode,
+				persons: state.persons,
+				properNouns: state.properNouns
 			})
 		})
 	)
