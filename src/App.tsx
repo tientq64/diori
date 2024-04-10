@@ -17,7 +17,10 @@ export function App() {
 	}, 1000 * 60)
 
 	useEffect(() => {
-		document.documentElement.setAttribute('data-prefers-color-scheme', store.isDarkMode ? 'dark' : 'light')
+		document.documentElement.setAttribute(
+			'data-prefers-color-scheme',
+			store.isDarkMode ? 'dark' : 'light'
+		)
 	}, [store.isDarkMode])
 
 	useEffect(() => {

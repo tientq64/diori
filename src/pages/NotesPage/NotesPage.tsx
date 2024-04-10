@@ -10,6 +10,9 @@ import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickS
 import { useLoadYear } from '../../hooks/useLoadYear'
 import { Note } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
+import { ProperNounsManagerDropdown } from '../../components/ProperNounsManagerDropdown/ProperNounsManagerDropdown'
+
+let currentScrollTop: number | undefined = undefined
 
 export function NotesPage() {
 	const store = useStore()
@@ -17,8 +20,6 @@ export function NotesPage() {
 	const loadYear = useLoadYear()
 	const currentTime = useStore((state) => state.currentTime)
 	const setCurrentTime = useStore((state) => state.setCurrentTime)
-	const currentScrollTop = useStore((state) => state.currentScrollTop)
-	const setCurrentScrollTop = useStore((state) => state.setCurrentScrollTop)
 	const [currentNotes, setCurrentNotes] = useState<Note[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -30,17 +31,16 @@ export function NotesPage() {
 	const handleScroll = (event: WheelEvent<HTMLDivElement>) => {
 		const scrollEl = event.currentTarget
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
-		if (scrollTop === 0) {
-			scrollTo()
-			return
-		}
 		const offset = 200
 		if (scrollTop <= offset) {
 			setCurrentTime(currentTime.subtract(4, 'week'))
 		} else if (scrollTop >= scrollHeight - clientHeight - offset) {
 			setCurrentTime(currentTime.add(4, 'week'))
 		}
-		setCurrentScrollTop(scrollTop)
+		currentScrollTop = scrollTop
+		if (scrollTop === 0) {
+			scrollTo()
+		}
 	}
 
 	const handleYearChange = (date: Date) => {
@@ -67,7 +67,7 @@ export function NotesPage() {
 		for (const year of years) {
 			loadYear.run(year)
 		}
-	}, [currentTime.format('YYYY-MM-DD'), store.notes])
+	}, [currentTime.format('YYYYMMDD'), store.notes])
 
 	useEffect(() => {
 		if (currentNotes.length === 0) return
@@ -85,6 +85,7 @@ export function NotesPage() {
 							<SearchBar className="flex-1" placeholder="Tìm kiếm..." />
 
 							<PersonsManagerDropdown />
+							<ProperNounsManagerDropdown />
 							<QuickSettingsButton />
 						</div>
 					}
@@ -116,7 +117,11 @@ export function NotesPage() {
 					onScroll={handleScroll}
 				>
 					{currentNotes.map((note) => (
-						<NoteCard key={note.date} note={note} onClick={() => handleNoteClick(note)} />
+						<NoteCard
+							key={note.date}
+							note={note}
+							onClick={() => handleNoteClick(note)}
+						/>
 					))}
 				</div>
 			</div>

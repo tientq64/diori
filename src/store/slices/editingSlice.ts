@@ -1,5 +1,5 @@
 import { SliceCreator } from '../useStore'
-import { Note } from './diarySlice'
+import { Note, NoteData } from './diarySlice'
 
 export type NoteEdit = {
 	date: string
@@ -9,6 +9,8 @@ export type NoteEdit = {
 	photos: Photo[]
 	defaultPhotoKey: string
 }
+
+export type NoteEditJSON = Pick<NoteEdit, 'date'> & Partial<NoteEdit>
 
 export type Photo = {
 	key: string

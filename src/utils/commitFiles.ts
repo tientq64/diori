@@ -48,7 +48,7 @@ export async function commitFiles(
 	})
 	const commitSHA = res.data.sha
 
-	const addedFileSHAs = []
+	const addedFileSHAs: string[] = []
 	for (const file of addedFiles) {
 		res = await rest.git.createBlob({
 			owner: orgName,
@@ -65,11 +65,11 @@ export async function commitFiles(
 		repo: repoName,
 		base_tree: commitSHA,
 		tree: [
-			...(addedFiles.map((file) => ({
+			...(addedFiles.map((file, i) => ({
 				path: file.path,
 				mode: '100644',
 				type: 'commit',
-				content: file.content
+				sha: addedFileSHAs[i]
 			})) as Tree),
 
 			...(deletedPaths.map((path) => ({
@@ -91,7 +91,7 @@ export async function commitFiles(
 	})
 	const newCommitSHA = res.data.sha
 
-	res = await rest.git.createRef({
+	res = await rest.git.updateRef({
 		owner: orgName,
 		repo: repoName,
 		ref: 'heads/main',

@@ -14,11 +14,16 @@ import {
 	Space,
 	Toast
 } from 'antd-mobile'
-import { DeleteOutline, EyeOutline, InformationCircleOutline, PictureOutline } from 'antd-mobile-icons'
-import { differenceBy, findIndex, reject, some, upperFirst } from 'lodash'
+import {
+	DeleteOutline,
+	EyeOutline,
+	InformationCircleOutline,
+	PictureOutline
+} from 'antd-mobile-icons'
+import { differenceBy, findIndex, range, reject, some, uniq, upperFirst } from 'lodash'
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { PersonsManagerDropdown } from '../../components/PersonsManagerDropdown/PersonsManagerDropdown'
@@ -30,6 +35,7 @@ import { NoteEdit, Photo } from '../../store/slices/editingSlice'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
+import { ProperNounsManagerDropdown } from '../../components/ProperNounsManagerDropdown/ProperNounsManagerDropdown'
 
 export function EditPage() {
 	const editingNote = useStore((state) => state.editingNote)
@@ -45,6 +51,11 @@ export function EditPage() {
 	const images = Form.useWatch<ImageUploadItem[]>('images', form) ?? []
 	const [maxImagesCount] = useState(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState('')
+	const usedPhotoKeys = useRef<string[]>([])
+	const monacoRef = useRef<typeof Monaco>()
+	const monarchTokensDisposer = useRef<Monaco.IDisposable>()
+	const languageConfigurationDisposer = useRef<Monaco.IDisposable>()
+	const completionItemDisposer = useRef<Monaco.IDisposable>()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
@@ -86,80 +97,214 @@ export function EditPage() {
 	}, [save.loading, unsaved])
 
 	const beforeEditorMount = (monaco: typeof Monaco) => {
+		monacoRef.current ??= monaco
+
 		monaco.languages.register({ id: 'diori' })
 
-		const personNames = store.persons.map((person) => {
-			const names = person.aliasNames
-				.concat(person.name)
-				.map((name) => name.replace(/ \(.*\)$/, ''))
-				.sort((nameA, nameB) => nameB.length - nameA.length)
-				.join('|')
-			return names
-		})
-		const personNamesRegex = personNames.length ? RegExp(`(?:${personNames.join('|')})(?=[\\s.,:;!?)\\]}])`) : /~^/
-
-		const properNounNames = store.properNouns.map((properNoun) => {
-			const names = properNoun.aliasNames
-				.concat(properNoun.name)
-				.map((name) => name.replace(/ \(.*\)$/, ''))
-				.sort((nameA, nameB) => nameB.length - nameA.length)
-				.join('|')
-			return names
-		})
-		const properNounsRegex = properNounNames.length
-			? RegExp(`(?:${properNounNames.join('|')})(?=[\\s.,:;!?)\\]}])`)
+		const personNames: string[] = uniq(
+			store.properNoun
+				.flatMap((person) => {
+					const names = person.aliasNames
+						.concat(person.name)
+						.map((name) => name.replace(/ \(.*\)$/, ''))
+					return names
+				})
+				.toSorted((nameA, nameB) => nameB.length - nameA.length)
+		)
+		const personNamesRegex: RegExp = personNames.length
+			? RegExp(`(?:${personNames.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
 			: /~^/
 
-		monaco.languages.setMonarchTokensProvider('diori', {
+		const properNounNames: string[] = uniq(
+			store.properNouns
+				.flatMap((properNoun) => {
+					const names = properNoun.aliasNames
+						.concat(properNoun.name)
+						.map((name) => name.replace(/ \(.*\)$/, ''))
+					return names
+				})
+				.toSorted((nameA, nameB) => nameB.length - nameA.length)
+		)
+		const properNounsRegex: RegExp = properNounNames.length
+			? RegExp(`(?:${properNounNames.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
+			: /~^/
+
+		monarchTokensDisposer.current?.dispose()
+		monarchTokensDisposer.current = monaco.languages.setMonarchTokensProvider('diori', {
 			tokenizer: {
 				root: [
 					{
-						regex: /".*?"/,
-						action: 'green'
+						// Trích dẫn, lời nói.
+						regex: /"/,
+						action: { token: 'green-italic', next: '@quote' }
 					},
 					{
-						regex: /\(.*?\)/,
-						action: 'gray'
+						// Chú thích.
+						regex: /\(/,
+						action: { token: 'gray', next: '@note' }
 					},
 					{
-						regex: /(([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?)(?=[\s.,:;!?)\]}])/,
-						action: 'red'
+						// Chi tiết link.
+						regex: /^(\[.+?\])(: *)([^"\n]+?)((?: *".+?")?)$/,
+						action: ['gray', 'gray', 'aqua-italic', 'green-italic']
 					},
 					{
-						regex: /((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012])\/[12]\d{3})(?=[\s.,:;!?)\]}])/,
-						action: 'red'
+						// Link.
+						regex: /(\[)(.+?)(\])(\[.+?\])/,
+						action: ['aqua', 'aqua-italic', 'aqua', 'gray']
 					},
 					{
-						regex: /(((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012]))|[12]\d{3})(?=[\s.,:;!?)\]}])/,
-						action: 'red'
+						// Giờ phút.
+						regex: /(([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?)(?=[\s.,:;!?)\]}]|$)/,
+						action: 'red-italic'
 					},
 					{
-						regex: /(\d+(tr|[kpt%])|\d+)(?=[\s.,:;!?)\]}])/,
-						action: 'orange'
+						// Ngày tháng năm.
+						regex: /((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012])\/[12]\d{3})(?=[\s.,:;!?)\]}]|$)/,
+						action: 'red-italic'
 					},
 					{
+						// Ngày tháng, năm.
+						regex: /(((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012]))|[12]\d{3})(?=[\s.,:;!?)\]}]|$)/,
+						action: 'red-italic'
+					},
+					{
+						// Tỷ số.
+						regex: /(\d+-\d+)(?=[\s.,:;!?)\]}]|$)/,
+						action: 'orange-italic'
+					},
+					{
+						// Đơn vị, số.
+						regex: /(\d+(tr|[kpt%])|\d+)(?=[\s.,:;!?)\]}]|$)/,
+						action: 'orange-italic'
+					},
+					{
+						// Tên người.
 						regex: personNamesRegex,
-						action: 'blue'
+						action: 'blue-italic'
 					},
 					{
+						// Tên riêng.
 						regex: properNounsRegex,
-						action: 'purple'
+						action: 'purple-italic'
+					},
+					{
+						include: '@emotions'
 					},
 					{
 						regex: /[\p{L}\d]+/
+					}
+				],
+				note: [
+					{
+						include: '@emotions'
+					},
+					{
+						regex: /\)/,
+						action: { token: 'gray', next: '@pop' }
+					},
+					{
+						regex: /\(/,
+						action: { token: 'gray', next: '@push' }
+					},
+					{
+						regex: /.+?/,
+						action: { token: 'gray-italic' }
+					}
+				],
+				quote: [
+					{
+						include: '@emotions'
+					},
+					{
+						regex: /"/,
+						action: { token: 'green-italic', next: '@pop' }
+					},
+					{
+						regex: /.+?/,
+						action: { token: 'green-italic' }
+					}
+				],
+				emotions: [
+					{
+						regex: /:["']?[()]+|:["']?>|:[D3v]|[;=]\)+/,
+						action: 'yellow'
 					}
 				]
 			},
 			unicode: true
 		})
 
-		monaco.languages.setLanguageConfiguration('diori', {
+		languageConfigurationDisposer.current?.dispose()
+		languageConfigurationDisposer.current = monaco.languages.setLanguageConfiguration('diori', {
 			autoClosingPairs: [
 				{ open: '(', close: ')' },
 				{ open: '[', close: ']' },
 				{ open: '{', close: '}' },
 				{ open: '"', close: '"' }
 			]
+		})
+
+		completionItemDisposer.current?.dispose()
+		completionItemDisposer.current = monaco.languages.registerCompletionItemProvider('diori', {
+			provideCompletionItems(model, position) {
+				const wordPosition = model.getWordUntilPosition(position)
+				const range = new monaco.Range(
+					position.lineNumber,
+					wordPosition.startColumn,
+					position.lineNumber,
+					wordPosition.endColumn
+				)
+				const suggestions = store.properNoun.map<Monaco.languages.CompletionItem>(
+					(person) => {
+						return {
+							label: person.name,
+							insertText: person.name,
+							kind: Monaco.languages.CompletionItemKind.User,
+							documentation: person.description,
+							range
+						}
+					}
+				)
+				return { suggestions }
+			}
+		})
+
+		monaco.languages.registerLinkProvider('diori', {
+			provideLinks(model) {
+				const value = model.getValue()
+				let iterator
+
+				const links: Record<string, string[]> = {}
+				iterator = value.matchAll(/^\[(.+?)\]: *([^"\n]+?)(?: *"(.+?)")?$/gm)
+				for (const item of iterator) {
+					links[item[1]] = [item[1], item[2], item[3]]
+				}
+
+				const editorLinks: Monaco.languages.ILink[] = []
+				iterator = value.matchAll(/\[.+?\]\[(.+?)\]/dg)
+				for (const item of iterator) {
+					const link = links[item[1]]
+					if (!link) continue
+					const [start, end] = item.indices![0]
+					const startPosition = model.getPositionAt(start)
+					const endPosition = model.getPositionAt(end - item[1].length - 2)
+					const editorLink: Monaco.languages.ILink = {
+						range: new monaco.Range(
+							startPosition.lineNumber,
+							startPosition.column,
+							endPosition.lineNumber,
+							endPosition.column
+						),
+						url: link[1],
+						tooltip: (link[2] ? `${link[2]} \u2013 ` : '') + link[1]
+					}
+					editorLinks.push(editorLink)
+				}
+				return {
+					links: editorLinks
+				}
+			}
 		})
 
 		monaco.editor.defineTheme('diori-dark', {
@@ -174,46 +319,91 @@ export function EditPage() {
 			rules: [
 				{
 					token: 'green',
+					foreground: '#c3e88d'
+				},
+				{
+					token: 'green-italic',
 					foreground: '#c3e88d',
 					fontStyle: 'italic'
 				},
 				{
 					token: 'gray',
+					foreground: '#697098'
+				},
+				{
+					token: 'gray-italic',
 					foreground: '#697098',
 					fontStyle: 'italic'
 				},
 				{
 					token: 'red',
+					foreground: '#ff5874'
+				},
+				{
+					token: 'red-italic',
 					foreground: '#ff5874',
 					fontStyle: 'italic'
 				},
 				{
 					token: 'orange',
+					foreground: '#f78c6c'
+				},
+				{
+					token: 'orange-italic',
 					foreground: '#f78c6c',
 					fontStyle: 'italic'
 				},
 				{
 					token: 'blue',
+					foreground: '#7986e7'
+				},
+				{
+					token: 'blue-italic',
 					foreground: '#7986e7',
 					fontStyle: 'italic'
 				},
 				{
 					token: 'purple',
+					foreground: '#c792ea'
+				},
+				{
+					token: 'purple-italic',
 					foreground: '#c792ea',
+					fontStyle: 'italic'
+				},
+				{
+					token: 'aqua',
+					foreground: '#89ddff'
+				},
+				{
+					token: 'aqua-italic',
+					foreground: '#89ddff',
+					fontStyle: 'italic'
+				},
+				{
+					token: 'yellow',
+					foreground: '#ffcb6b'
+				},
+				{
+					token: 'yellow-italic',
+					foreground: '#ffcb6b',
 					fontStyle: 'italic'
 				}
 			]
 		})
 	}
 
-	const handleEditorMount = (editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
+	const handleEditorMount = (
+		editor: Monaco.editor.IStandaloneCodeEditor,
+		monaco: typeof Monaco
+	) => {
 		const model = editor.getModel()
 		if (!model) return
 
-		const { CtrlCmd, Shift, Alt } = monaco.KeyMod
-		const { KeyCode } = monaco
-
 		model.setEOL(monaco.editor.EndOfLineSequence.LF)
+
+		const { CtrlCmd } = monaco.KeyMod
+		const { KeyCode } = monaco
 
 		editor.addCommand(CtrlCmd | KeyCode.KeyS, () => {
 			form.submit()
@@ -223,11 +413,12 @@ export function EditPage() {
 	const localImageUpload = async (file: File): Promise<ImageUploadItem> => {
 		const url = URL.createObjectURL(file)
 		const thumbnailUrl = await makeThumbnailUrl(url)
-		return {
-			key: editingNote.time.format('DD') + nanoid(6),
-			thumbnailUrl,
-			url
-		}
+		let key: string
+		do {
+			key = nanoid(6)
+		} while (usedPhotoKeys.current.includes(key))
+		usedPhotoKeys.current.push(key)
+		return { key, thumbnailUrl, url }
 	}
 
 	const showPreviewImage = (defaultImage: ImageUploadItem) => {
@@ -289,9 +480,15 @@ export function EditPage() {
 	}, [blocker.state])
 
 	useUpdateEffect(() => {
-		const note: Note = store.getNote(editingNote.time) ?? store.makeNote(editingNote.time)
-		store.setEditingNote(note)
+		const newEditingNote: Note =
+			store.getNote(editingNote.time) ?? store.makeNote(editingNote.time)
+		store.setEditingNote(newEditingNote)
 	}, [store.notes[editingNote.date]])
+
+	useEffect(() => {
+		if (!monacoRef.current) return
+		beforeEditorMount(monacoRef.current)
+	}, [store.properNoun])
 
 	useEffect(() => {
 		if (!save.data) return
@@ -324,6 +521,7 @@ export function EditPage() {
 			images: photos.map((photo) => ({ ...photo }))
 		})
 		setDefaultPhotoKey(defaultPhotoKey)
+		usedPhotoKeys.current = photos.map((photo) => photo.key)
 	}, [noteEdit])
 
 	useLayoutEffect(() => {
@@ -333,6 +531,9 @@ export function EditPage() {
 	useEffect(() => {
 		return () => {
 			// store.setEditingNote(null)
+			monarchTokensDisposer.current?.dispose()
+			completionItemDisposer.current?.dispose()
+			languageConfigurationDisposer.current?.dispose()
 		}
 	}, [])
 
@@ -345,6 +546,7 @@ export function EditPage() {
 					right={
 						<div className="flex justify-end items-center gap-4">
 							<PersonsManagerDropdown />
+							<ProperNounsManagerDropdown />
 							<QuickSettingsButton />
 						</div>
 					}
@@ -384,7 +586,11 @@ export function EditPage() {
 								]}
 							>
 								<Input
-									placeholder={noteEdit && noteEdit.title && !noteEdit.isTitled ? noteEdit.title : ''}
+									placeholder={
+										noteEdit && noteEdit.title && !noteEdit.isTitled
+											? noteEdit.title
+											: ''
+									}
 								/>
 							</Form.Item>
 
@@ -482,12 +688,17 @@ export function EditPage() {
 													text: 'Xóa bỏ',
 													icon: <DeleteOutline />,
 													onClick: () => {
-														form.setFieldValue('images', reject(images, { key: image.key }))
+														form.setFieldValue(
+															'images',
+															reject(images, { key: image.key })
+														)
 													}
 												}
 											]}
 										>
-											<div onDoubleClick={() => showPreviewImage(image)}>{imageNode}</div>
+											<div onDoubleClick={() => showPreviewImage(image)}>
+												{imageNode}
+											</div>
 										</Popover.Menu>
 									)}
 								/>

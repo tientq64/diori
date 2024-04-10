@@ -1,9 +1,9 @@
-import { Button, Collapse, Form, Input, Slider, Space, Switch } from 'antd-mobile'
+import { Button, Form, Input, Slider, Space, Switch } from 'antd-mobile'
 import { range } from 'lodash'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { Kbd } from '../Kbd/Kbd'
-import { Link, useNavigate } from 'react-router-dom'
 
 export function QuickSettingsSection() {
 	const navigate = useNavigate()

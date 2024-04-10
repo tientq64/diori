@@ -2,9 +2,9 @@ import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
-import { Store, useStore } from '../../store/useStore'
-import { formValidateMessages } from '../../utils/formValidateMessages'
 import { useRegister } from '../../hooks/useRegister'
+import { Store } from '../../store/useStore'
+import { formValidateMessages } from '../../utils/formValidateMessages'
 
 export type RegisterValues = {
 	token: Store['token']
@@ -14,11 +14,11 @@ export type RegisterValues = {
 
 export function Register() {
 	const [form] = Form.useForm()
-	const store = useStore()
-	const { run, data, loading, error } = useRegister()
+	const register = useRegister()
 	const navigate = useNavigate()
 
 	useEffect(() => {
+		const error: any = register.error
 		if (!error) return
 		if (error.status === 401) {
 			form.setFields([
@@ -34,10 +34,10 @@ export function Register() {
 			content: error.message,
 			confirmText: 'OK'
 		})
-	}, [error])
+	}, [register.error])
 
 	useEffect(() => {
-		if (!data) return
+		if (!register.data) return
 		Modal.alert({
 			title: 'Đăng ký thành công',
 			content: 'Bạn đã đăng ký thành công, hãy đăng nhập!',
@@ -45,7 +45,7 @@ export function Register() {
 		}).then(() => {
 			navigate('/login')
 		})
-	}, [data])
+	}, [register.data])
 
 	return (
 		<Page>
@@ -63,9 +63,9 @@ export function Register() {
 				<Form
 					form={form}
 					layout="horizontal"
-					disabled={loading || data}
+					disabled={register.loading || register.data}
 					validateMessages={formValidateMessages}
-					onFinish={run}
+					onFinish={register.run}
 				>
 					<Form.Item
 						label="Personal access token"
@@ -108,7 +108,7 @@ export function Register() {
 					</Form.Item>
 
 					<Form.Item>
-						<Button type="submit" color="primary" size="large" block loading={loading}>
+						<Button type="submit" color="primary" size="large" block loading={register.loading}>
 							Đăng ký
 						</Button>
 					</Form.Item>

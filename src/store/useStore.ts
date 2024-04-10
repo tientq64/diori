@@ -29,7 +29,7 @@ export const useStore = create<Store>()(
 				fontFamily: state.fontFamily,
 				fontSize: state.fontSize,
 				isDarkMode: state.isDarkMode,
-				persons: state.persons,
+				persons: state.properNoun,
 				properNouns: state.properNouns
 			})
 		})

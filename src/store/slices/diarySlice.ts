@@ -44,7 +44,9 @@ export type Note = {
 export type Notes = Record<Note['date'], Note>
 
 export type NoteData = Required<
-	NonNullable<RestEndpointMethodTypes['repos']['createOrUpdateFileContents']['response']['data']['content']>
+	NonNullable<
+		RestEndpointMethodTypes['repos']['createOrUpdateFileContents']['response']['data']['content']
+	>
 >
 
 export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
@@ -54,7 +56,6 @@ export type Diary = {
 	notes: Notes
 	years: Statuses
 	currentTime: Dayjs
-	currentScrollTop?: number
 
 	getNote: (date: string | Dayjs) => Note
 	makeNote: (time: Dayjs) => Note
@@ -64,7 +65,6 @@ export type Diary = {
 	setYear: (year: number, status: Status) => void
 
 	setCurrentTime: (time: Dayjs) => void
-	setCurrentScrollTop: (scrollTop: number) => void
 }
 
 export const diarySlice: SliceCreator<Diary> = (set, get) => ({
@@ -72,7 +72,6 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 	years: {},
 	editingNote: null,
 	currentTime: dayjs(),
-	currentScrollTop: undefined,
 
 	getNote: (date) => {
 		if (dayjs.isDayjs(date)) {
@@ -122,9 +121,5 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 
 	setCurrentTime: (time) => {
 		set({ currentTime: time })
-	},
-
-	setCurrentScrollTop: (scrollTop) => {
-		set({ currentScrollTop: scrollTop })
 	}
 })

@@ -3,92 +3,101 @@ import { groupBy, isEqual, some, toPairs } from 'lodash'
 import { useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
 import { useSaveSettings } from '../../hooks/useSaveSettings'
-import { Person } from '../../store/slices/settingsSlice'
+import { ProperNoun } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { removeToneMarks } from '../../utils/removeToneMarks'
 
-export function PersonsManager() {
+export function ProperNounsManager() {
 	const store = useStore()
 	const [form] = Form.useForm()
-	const [editingPerson, setEditingPerson] = useState<Person | undefined>()
-	const editingPersonName = Form.useWatch<string>('name', form) ?? ''
-	const editingPersonAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? []
-	const editingPersonDescription = Form.useWatch<string>('description', form) ?? ''
+	const [editingProperNoun, setEditingProperNoun] = useState<ProperNoun | undefined>()
+	const editingProperNounName = Form.useWatch<string>('name', form) ?? ''
+	const editingProperNounAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? []
+	const editingProperNounDescription = Form.useWatch<string>('description', form) ?? ''
 	const saveSettings = useSaveSettings()
 
-	const groups = useMemo<[string, Person[]][]>(() => {
-		const sortedPersons = store.persons.toSorted((personA, personB) => {
-			return removeToneMarks(personA.name).localeCompare(removeToneMarks(personB.name))
+	const groups = useMemo<[string, ProperNoun[]][]>(() => {
+		const sortedProperNouns = store.properNouns.toSorted((properNounA, properNounB) => {
+			return removeToneMarks(properNounA.name).localeCompare(
+				removeToneMarks(properNounB.name)
+			)
 		})
-		return toPairs(groupBy(sortedPersons, (person) => removeToneMarks(person.name[0])))
-	}, [store.persons])
+		return toPairs(
+			groupBy(sortedProperNouns, (properNoun) => removeToneMarks(properNoun.name[0]))
+		)
+	}, [store.properNouns])
 
 	const isFormVisible = useMemo<boolean>(() => {
-		return editingPerson !== undefined
-	}, [editingPerson])
+		return editingProperNoun !== undefined
+	}, [editingProperNoun])
 
-	const isEditingNewPerson = useMemo<boolean>(() => {
-		if (!editingPerson) return true
-		if (some(store.persons, { id: editingPerson.id })) return false
+	const isEditingNewProperNoun = useMemo<boolean>(() => {
+		if (!editingProperNoun) return true
+		if (some(store.properNouns, { id: editingProperNoun.id })) return false
 		return true
-	}, [editingPerson?.id])
+	}, [editingProperNoun?.id])
 
 	const unsaved = useMemo<boolean>(() => {
-		if (!editingPerson) return false
-		if (editingPersonName !== editingPerson.name) return true
-		if (!isEqual(editingPersonAliasNames, editingPerson.aliasNames)) return true
-		if (editingPersonDescription !== editingPerson.description) return true
+		if (!editingProperNoun) return false
+		if (editingProperNounName !== editingProperNoun.name) return true
+		if (!isEqual(editingProperNounAliasNames, editingProperNoun.aliasNames)) return true
+		if (editingProperNounDescription !== editingProperNoun.description) return true
 		return false
-	}, [editingPerson, editingPersonName, editingPersonAliasNames, editingPersonDescription])
+	}, [
+		editingProperNoun,
+		editingProperNounName,
+		editingProperNounAliasNames,
+		editingProperNounDescription
+	])
 
-	const handlePersonClick = (person?: Person): void => {
+	const handleProperNounClick = (properNoun?: ProperNoun): void => {
 		let id = 1
-		while (some(store.persons, { id })) {
+		while (some(store.properNouns, { id })) {
 			id++
 		}
-		person ??= {
+		properNoun ??= {
 			id,
 			name: '',
 			aliasNames: [],
 			description: ''
 		}
-		form.setFieldsValue(person)
-		setEditingPerson(person)
+		form.setFieldsValue(properNoun)
+		setEditingProperNoun(properNoun)
 	}
 
-	const handleRemovePerson = (person?: Person): void => {
-		if (!person) return
-		store.removePerson(editingPerson)
-		setEditingPerson(undefined)
+	const handleRemoveProperNoun = (properNoun?: ProperNoun): void => {
+		if (!properNoun) return
+		store.removePerson(editingProperNoun)
+		setEditingProperNoun(undefined)
 	}
 
-	const saveEditingPerson = (): void => {
-		if (!editingPerson) return
+	const saveEditingProperNoun = (): void => {
+		if (!editingProperNoun) return
 		if (!unsaved) return
-		const newPerson: Person = {
-			id: editingPerson.id,
-			name: editingPersonName,
-			aliasNames: editingPersonAliasNames,
-			description: editingPersonDescription
+		const newProperNoun: ProperNoun = {
+			id: editingProperNoun.id,
+			name: editingProperNounName,
+			aliasNames: editingProperNounAliasNames,
+			description: editingProperNounDescription
 		}
-		store.addOrUpdatePerson(newPerson)
-		setEditingPerson(undefined)
+		store.addOrUpdateProperNoun(newProperNoun)
+		setEditingProperNoun(undefined)
 	}
 
 	return (
 		<div className="flex flex-col h-full">
 			<div className="flex-1 overflow-hidden">
 				<IndexBar>
-					{groups.map(([letter, persons]) => (
+					{groups.map(([letter, properNouns]) => (
 						<IndexBar.Panel key={letter} index={letter}>
 							<List>
-								{persons.map((person) => (
+								{properNouns.map((properNoun) => (
 									<List.Item
-										key={person.id}
+										key={properNoun.id}
 										clickable
-										description={person.aliasNames.join(', ')}
-										extra={person.description}
-										onClick={() => handlePersonClick(person)}
+										description={properNoun.aliasNames.join(', ')}
+										extra={properNoun.description}
+										onClick={() => handleProperNounClick(properNoun)}
 									>
 										{((splitedName) =>
 											splitedName && (
@@ -100,7 +109,7 @@ export function PersonsManager() {
 														</div>
 													)}
 												</div>
-											))(person.name.match(/^(.+?)( \(.*\))?$/))}
+											))(properNoun.name.match(/^(.+?)( \(.*\))?$/))}
 									</List.Item>
 								))}
 							</List>
@@ -113,7 +122,7 @@ export function PersonsManager() {
 				<div className="flex-1"></div>
 
 				<div className="flex-1 text-center">
-					<Button onClick={() => handlePersonClick()}>Thêm mới</Button>
+					<Button onClick={() => handleProperNounClick()}>Thêm mới</Button>
 				</div>
 
 				<div className="flex-1 text-right">
@@ -128,13 +137,13 @@ export function PersonsManager() {
 				showCloseButton
 				closeOnMaskClick={!unsaved}
 				destroyOnClose
-				onClose={() => setEditingPerson(undefined)}
+				onClose={() => setEditingProperNoun(undefined)}
 			>
 				<Form
 					form={form}
 					mode="card"
 					layout="horizontal"
-					onFinish={() => saveEditingPerson()}
+					onFinish={() => saveEditingProperNoun()}
 				>
 					<Form.Item
 						label="Tên"
@@ -147,7 +156,7 @@ export function PersonsManager() {
 							}
 						]}
 					>
-						<Input autoFocus={isEditingNewPerson} />
+						<Input autoFocus={isEditingNewProperNoun} />
 					</Form.Item>
 
 					<Form.Item
@@ -190,10 +199,10 @@ export function PersonsManager() {
 								Lưu
 							</Button>
 
-							{!isEditingNewPerson && (
+							{!isEditingNewProperNoun && (
 								<Button
 									color="danger"
-									onClick={() => handleRemovePerson(editingPerson)}
+									onClick={() => handleRemoveProperNoun(editingProperNoun)}
 								>
 									Xóa
 								</Button>

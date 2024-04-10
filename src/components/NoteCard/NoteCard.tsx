@@ -35,7 +35,11 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 			<div className="flex">
 				<div className="flex-1">
 					{note.thumbnailUrl && (
-						<img className="w-20 h-20 min-w-20 rounded" src={note.thumbnailUrl} alt="Thumbnail" />
+						<img
+							className="w-20 h-20 min-w-20 rounded"
+							src={note.thumbnailUrl}
+							alt="Thumbnail"
+						/>
 					)}
 					{!note.thumbnailUrl && note.sha && (
 						<div className="w-20 h-20 rounded bg-neutral-100 dark:bg-neutral-700" />

@@ -1,4 +1,4 @@
-import { findIndex } from 'lodash'
+import { findIndex, remove } from 'lodash'
 import { SliceCreator } from '../useStore'
 
 export type Person = {
@@ -9,7 +9,7 @@ export type Person = {
 }
 
 export type ProperNoun = {
-	id: string
+	id: number
 	name: string
 	aliasNames: string[]
 	description: string
@@ -27,7 +27,10 @@ export type Settings = {
 	setIsDarkMode: (isDarkMode: boolean) => void
 	setPersons: (persons: Person[]) => void
 	addOrUpdatePerson: (person: Person) => void
+	removePerson: (person?: Person) => void
 	setProperNouns: (properNouns: ProperNoun[]) => void
+	addOrUpdateProperNoun: (properNouns: ProperNoun) => void
+	removeProperNoun: (properNouns?: ProperNoun) => void
 	getSettingsJSON: () => Partial<Settings>
 }
 
@@ -65,8 +68,33 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		})
 	},
 
+	removePerson: (person) => {
+		if (!person) return
+		set((state) => {
+			remove(state.persons, { id: person.id })
+		})
+	},
+
 	setProperNouns: (properNouns) => {
 		set({ properNouns })
+	},
+
+	addOrUpdateProperNoun: (properNoun) => {
+		set((state) => {
+			const index = findIndex(state.persons, { id: properNoun.id })
+			if (index === -1) {
+				state.properNouns.push(properNoun)
+			} else {
+				state.properNouns[index] = properNoun
+			}
+		})
+	},
+
+	removeProperNoun: (properNoun) => {
+		if (!properNoun) return
+		set((state) => {
+			remove(state.properNouns, { id: properNoun.id })
+		})
 	},
 
 	getSettingsJSON: () => {

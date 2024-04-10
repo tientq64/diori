@@ -3,7 +3,7 @@ import { ImageUploadItem, Toast } from 'antd-mobile'
 import { find, truncate } from 'lodash'
 import { getOctokit } from '../utils/getOctokit'
 import { NoteData } from '../store/slices/diarySlice'
-import { NoteEdit, Photo } from '../store/slices/editingSlice'
+import { NoteEdit, NoteEditJSON, Photo } from '../store/slices/editingSlice'
 import { useStore } from '../store/useStore'
 import { compressBase64 } from '../utils/compressBase64'
 import { textToBase64 } from '../utils/textToBase64'
@@ -22,16 +22,17 @@ export function useSave() {
 			removedImages: Photo[],
 			defaultPhotoKey: string,
 			noteEdit: NoteEdit
-		) => {
+		): Promise<NoteEdit | void> => {
 			if (!editingNote) return
 
 			const { time, sha } = editingNote
 
-			let newTitle = title
-			if (!title) {
-				const longestLine = content
+			let newTitle: string = title
+			if (!title && content.length) {
+				const longestLine: string = content
 					.split(/\n+/)
 					.map((line) => line.replace(/ +/g, ' ').trim())
+					.filter((line) => !/^\[.+?\]: *[^"\n]+?(?: *".+?")?$/.test(line[0]))
 					.sort((a, b) => b.length - a.length)[0]
 				newTitle = truncate(longestLine, {
 					length: 60,
@@ -46,7 +47,11 @@ export function useSave() {
 				time.format('MMDD'),
 				textToCompressedBase64(newTitle),
 				title ? 'T' : '',
-				defaultPhoto ? compressBase64(defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', '')) : '',
+				defaultPhoto
+					? compressBase64(
+							defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', '')
+						)
+					: '',
 				defaultPhotoKey.substring(2),
 				images.length >= 2 ? images.length : ''
 			]
@@ -55,8 +60,10 @@ export function useSave() {
 
 			const isDeleteOnly: boolean = hasSha && !newTitle && !content && images.length === 0
 			const isCreateNewOnly: boolean = !isDeleteOnly && !hasSha && path !== editingNote.path
-			const isCreateNewAndDeleteOld: boolean = !isDeleteOnly && hasSha && path !== editingNote.path
-			const isUpdateOnly: boolean = !isDeleteOnly && !isCreateNewOnly && !isCreateNewAndDeleteOld
+			const isCreateNewAndDeleteOld: boolean =
+				!isDeleteOnly && hasSha && path !== editingNote.path
+			const isUpdateOnly: boolean =
+				!isDeleteOnly && !isCreateNewOnly && !isCreateNewAndDeleteOld
 
 			const newNoteEdit: NoteEdit = {
 				date: noteEdit.date,
@@ -69,7 +76,16 @@ export function useSave() {
 				})),
 				defaultPhotoKey
 			}
-			const newNoteEditBase64 = textToBase64(JSON.stringify(newNoteEdit))
+			const newNoteEditData: NoteEditJSON = {
+				date: newNoteEdit.date,
+				title: newNoteEdit.title || undefined,
+				isTitled: newNoteEdit.isTitled || undefined,
+				content: newNoteEdit.content || '',
+				photos: newNoteEdit.photos.length > 0 ? newNoteEdit.photos : undefined,
+				defaultPhotoKey:
+					newNoteEdit.photos.length >= 2 ? newNoteEdit.defaultPhotoKey : undefined
+			}
+			const newNoteEditBase64 = textToBase64(JSON.stringify(newNoteEditData))
 
 			const rest = getOctokit()
 

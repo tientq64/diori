@@ -12,12 +12,12 @@ export type LoginValues = {
 
 export function Login() {
 	const store = useStore()
-
 	const [form] = Form.useForm()
 	const navigate = useNavigate()
-	const { run, data, loading, error } = useLogin()
+	const login = useLogin()
 
 	useEffect(() => {
+		const error: any = login.error
 		if (!error) return
 		if (error.status === 401) {
 			Modal.alert({
@@ -33,7 +33,7 @@ export function Login() {
 				errors: [error.message]
 			}
 		])
-	}, [error])
+	}, [login.error])
 
 	useEffect(() => {
 		if (!store.token) return
@@ -66,9 +66,9 @@ export function Login() {
 				<Form
 					form={form}
 					layout="horizontal"
-					disabled={loading || data}
+					disabled={login.loading || login.data}
 					validateMessages={formValidateMessages}
-					onFinish={run}
+					onFinish={login.run}
 				>
 					<Form.Item>
 						<div className="mx-auto my-24 text-center text-9xl">🏕️</div>
@@ -87,7 +87,7 @@ export function Login() {
 					</Form.Item>
 
 					<Form.Item>
-						<Button type="submit" color="primary" size="large" block loading={loading}>
+						<Button type="submit" color="primary" size="large" block loading={login.loading}>
 							Đăng nhập
 						</Button>
 					</Form.Item>
