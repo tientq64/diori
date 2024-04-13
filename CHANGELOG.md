@@ -7,3 +7,7 @@
 * Lại quyết định không chuyển sang GraphQL nữa, tại thử nghiệm thấy GraphQL tuy trả về data nhỏ nhưng phản hồi khá chậm. Tạo repo bằng GraphQL cũng không có tùy chọn `auto_init`, nên không thể commit mà không tạo thủ công commit đầu tiên.
 * Thêm tính năng "quản lý mọi người". Những người được thêm sẽ được tô sáng cú pháp tên trong trình chỉnh sửa.
 * Có thể lưu cài đặt lên GitHub, lưu vào tập tin `settings.json`.
+
+## 1.1.0 (14 tháng 4, 2024)
+
+* Hoàn thiện hầu hết chức năng của app, vẫn còn thiếu phần xem ảnh.

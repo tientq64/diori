@@ -1,15 +1,14 @@
 import { findIndex, remove } from 'lodash'
 import { SliceCreator } from '../useStore'
 
-export type Person = {
-	id: number
-	name: string
-	aliasNames: string[]
-	description: string
+export enum EntityTypes {
+	PERSON = 'person',
+	PROPER_NOUN = 'properNoun'
 }
 
-export type ProperNoun = {
+export type Entity = {
 	id: number
+	type: EntityTypes
 	name: string
 	aliasNames: string[]
 	description: string
@@ -19,27 +18,22 @@ export type Settings = {
 	fontFamily: string
 	fontSize: number
 	isDarkMode: boolean
-	persons: Person[]
-	properNouns: ProperNoun[]
+	entities: Entity[]
 
 	setFontFamily: (fontFamily: string) => void
 	setFontSize: (fontSize: number) => void
 	setIsDarkMode: (isDarkMode: boolean) => void
-	setPersons: (persons: Person[]) => void
-	addOrUpdatePerson: (person: Person) => void
-	removePerson: (person?: Person) => void
-	setProperNouns: (properNouns: ProperNoun[]) => void
-	addOrUpdateProperNoun: (properNouns: ProperNoun) => void
-	removeProperNoun: (properNouns?: ProperNoun) => void
+	setEntities: (entities: Entity[]) => void
+	addOrUpdateEntity: (entity: Entity) => void
+	removeEntity: (entity?: Entity) => void
 	getSettingsJSON: () => Partial<Settings>
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 	fontFamily: 'Arial',
-	fontSize: 13,
-	isDarkMode: false,
-	persons: [],
-	properNouns: [],
+	fontSize: 14,
+	isDarkMode: true,
+	entities: [],
 
 	setFontFamily: (fontFamily) => {
 		set({ fontFamily })
@@ -53,47 +47,25 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		set({ isDarkMode })
 	},
 
-	setPersons: (persons) => {
-		set({ persons })
+	setEntities: (entities) => {
+		set({ entities })
 	},
 
-	addOrUpdatePerson: (person) => {
+	addOrUpdateEntity: (entity) => {
 		set((state) => {
-			const index = findIndex(state.persons, { id: person.id })
+			const index = findIndex(state.entities, { id: entity.id })
 			if (index === -1) {
-				state.persons.push(person)
+				state.entities.push(entity)
 			} else {
-				state.persons[index] = person
+				state.entities[index] = entity
 			}
 		})
 	},
 
-	removePerson: (person) => {
-		if (!person) return
+	removeEntity: (entity) => {
+		if (!entity) return
 		set((state) => {
-			remove(state.persons, { id: person.id })
-		})
-	},
-
-	setProperNouns: (properNouns) => {
-		set({ properNouns })
-	},
-
-	addOrUpdateProperNoun: (properNoun) => {
-		set((state) => {
-			const index = findIndex(state.persons, { id: properNoun.id })
-			if (index === -1) {
-				state.properNouns.push(properNoun)
-			} else {
-				state.properNouns[index] = properNoun
-			}
-		})
-	},
-
-	removeProperNoun: (properNoun) => {
-		if (!properNoun) return
-		set((state) => {
-			remove(state.properNouns, { id: properNoun.id })
+			remove(state.entities, { id: entity.id })
 		})
 	},
 
@@ -103,8 +75,7 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 			fontFamily: state.fontFamily,
 			fontSize: state.fontSize,
 			isDarkMode: state.isDarkMode,
-			persons: state.persons,
-			properNouns: state.properNouns
+			entities: state.entities
 		}
 	}
 })

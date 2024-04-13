@@ -1,6 +1,5 @@
-import './utils/configDayjs'
+import './utils/configs'
 
-import { useInterval } from 'ahooks'
 import { ConfigProvider } from 'antd-mobile'
 import antdLocaleEnUS from 'antd-mobile/cjs/locales/en-US'
 import dayjs from 'dayjs'
@@ -12,9 +11,9 @@ import { useStore } from './store/useStore'
 export function App() {
 	const store = useStore()
 
-	const clearNowInterval = useInterval(() => {
-		store.setNowPerMinute(dayjs())
-	}, 1000 * 60)
+	const resizeHandle = (): void => {
+		store.updateResponsive()
+	}
 
 	useEffect(() => {
 		document.documentElement.setAttribute(
@@ -24,7 +23,17 @@ export function App() {
 	}, [store.isDarkMode])
 
 	useEffect(() => {
-		return clearNowInterval
+		const intervalId: number = setInterval(() => {
+			store.setNowPerMinute(dayjs())
+		}, 1000 * 60)
+
+		window.addEventListener('resize', resizeHandle)
+		resizeHandle()
+
+		return () => {
+			clearInterval(intervalId)
+			window.removeEventListener('resize', resizeHandle)
+		}
 	}, [])
 
 	return (

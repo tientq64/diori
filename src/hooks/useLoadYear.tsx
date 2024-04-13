@@ -1,7 +1,8 @@
 import { useRequest } from 'ahooks'
 import { getOctokit } from '../utils/getOctokit'
-import { Status } from '../store/slices/diarySlice'
+import { Note, Status } from '../store/slices/diarySlice'
 import { useStore } from '../store/useStore'
+import { parseNoteFromNoteData } from '../utils/parseNote'
 
 export function useLoadYear() {
 	const store = useStore()
@@ -22,7 +23,8 @@ export function useLoadYear() {
 					path: `days/${year}`
 				})
 				for (const data of res.data as []) {
-					store.updateOrAddNoteFromData(data)
+					const newNote: Note = parseNoteFromNoteData(data)
+					store.updateOrAddNote(newNote)
 				}
 			} catch (error: any) {
 				if (error.status === 404) {

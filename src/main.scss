@@ -2,6 +2,12 @@
 
 [data-prefers-color-scheme='dark'] {
 	color-scheme: dark;
+
+	&:root {
+		--adm-color-border: #27272a;
+		--adm-color-background: #18181b;
+		--adm-color-box: #09090b;
+	}
 }
 
 .ka-wrapper,
@@ -19,8 +25,10 @@
 	align-items: center;
 }
 
-.adm-list-item-content-prefix {
-	width: 20rem;
+@media (min-width: 768px) {
+	.adm-list-item-content-prefix {
+		width: 20rem;
+	}
 }
 
 .adm-form .adm-list {
@@ -130,6 +138,11 @@
 }
 
 .adm-toast-icon {
+	display: flex;
+	justify-content: center;
+}
+
+.adm-error-block-image {
 	display: flex;
 	justify-content: center;
 }

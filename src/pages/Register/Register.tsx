@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { useRegister } from '../../hooks/useRegister'
-import { Store } from '../../store/useStore'
+import { Store, useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 
 export type RegisterValues = {
@@ -13,6 +13,7 @@ export type RegisterValues = {
 }
 
 export function Register() {
+	const store = useStore()
 	const [form] = Form.useForm()
 	const register = useRegister()
 	const navigate = useNavigate()
@@ -62,7 +63,7 @@ export function Register() {
 
 				<Form
 					form={form}
-					layout="horizontal"
+					layout={store.isMd ? 'horizontal' : 'vertical'}
 					disabled={register.loading || register.data}
 					validateMessages={formValidateMessages}
 					onFinish={register.run}
@@ -108,7 +109,13 @@ export function Register() {
 					</Form.Item>
 
 					<Form.Item>
-						<Button type="submit" color="primary" size="large" block loading={register.loading}>
+						<Button
+							type="submit"
+							color="primary"
+							size="large"
+							block
+							loading={register.loading}
+						>
 							Đăng ký
 						</Button>
 					</Form.Item>

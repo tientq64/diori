@@ -2,11 +2,10 @@ import Pica from 'pica'
 
 /**
  * Tạo hình thu nhỏ, kích thước 80x80, định dạng webp, trả về data URL.
+ * @param blobUrl Blob URL.
+ * @returns Data URL hình thu nhỏ.
  */
-export async function makeThumbnailUrl(
-	/** Blob URL. */
-	blobUrl: string
-): Promise<string> {
+export async function makeThumbnailUrl(blobUrl: string): Promise<string> {
 	const image = new Image()
 	await new Promise((resolve) => {
 		image.onload = () => {
@@ -39,7 +38,7 @@ export async function makeThumbnailUrl(
 		unsharpThreshold: 0
 	})
 
-	let dataUrl = ''
+	let dataUrl: string = ''
 	for (let quality = 0.4; quality > 0; quality -= 0.05) {
 		dataUrl = canvas.toDataURL('image/webp', quality)
 		if (dataUrl.length <= 2500) break

@@ -3,14 +3,13 @@ import dayjs from 'dayjs'
 import { upperFirst } from 'lodash'
 import { WheelEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { NoteCard } from '../../components/NoteCard/NoteCard'
 import { Page } from '../../components/Page/Page'
-import { PersonsManagerDropdown } from '../../components/PersonsManagerDropdown/PersonsManagerDropdown'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
 import { useLoadYear } from '../../hooks/useLoadYear'
 import { Note } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
-import { ProperNounsManagerDropdown } from '../../components/ProperNounsManagerDropdown/ProperNounsManagerDropdown'
 
 let currentScrollTop: number | undefined = undefined
 
@@ -38,7 +37,7 @@ export function NotesPage() {
 			setCurrentTime(currentTime.add(4, 'week'))
 		}
 		currentScrollTop = scrollTop
-		if (scrollTop === 0) {
+		if (scrollTop === 0 && store.isMd) {
 			scrollTo()
 		}
 	}
@@ -78,19 +77,17 @@ export function NotesPage() {
 		<Page>
 			<div className="flex flex-col h-full">
 				<NavBar
-					className="pr-8"
+					className="md:pl-4 md:pr-8"
 					backArrow={null}
 					right={
-						<div className="flex justify-end items-center gap-4">
-							<SearchBar className="flex-1" placeholder="Tìm kiếm..." />
-
-							<PersonsManagerDropdown />
-							<ProperNounsManagerDropdown />
+						<div className="flex justify-end items-center md:gap-4">
+							{store.isMd && <SearchBar placeholder="Tìm kiếm..." />}
+							<EntitiesManagerDropdown />
 							<QuickSettingsButton />
 						</div>
 					}
 				>
-					<Dropdown closeOnClickAway>
+					<Dropdown closeOnClickAway arrow={store.isMd ? undefined : false}>
 						<Dropdown.Item key="year" title={currentTime.year()} destroyOnClose>
 							<DatePickerView
 								min={dayjs().subtract(100, 'year').toDate()}
@@ -103,8 +100,8 @@ export function NotesPage() {
 					</Dropdown>
 				</NavBar>
 
-				<div className="flex justify-around gap-4 border-b dark:border-neutral-700 pl-4 pr-8 text-center">
-					{dayjs.weekdays(true).map((weekday) => (
+				<div className="flex justify-around md:gap-4 border-b dark:border-zinc-700 md:pl-4 md:pr-8 text-center">
+					{dayjs[store.isMd ? 'weekdays' : 'weekdaysMin'](true).map((weekday) => (
 						<div key={weekday} className="flex-1">
 							{upperFirst(weekday)}
 						</div>
@@ -113,7 +110,7 @@ export function NotesPage() {
 
 				<div
 					ref={scrollRef}
-					className="flex-1 grid grid-cols-7 auto-rows-[18%] gap-4 px-4 overflow-auto bg-neutral-50 dark:bg-neutral-900"
+					className="flex-1 grid grid-cols-7 auto-rows-[18%] md:gap-4 md:px-4 overflow-auto bg-zinc-50 dark:bg-zinc-900"
 					onScroll={handleScroll}
 				>
 					{currentNotes.map((note) => (

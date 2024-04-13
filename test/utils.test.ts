@@ -35,11 +35,15 @@ describe('utils', () => {
 
 	test('compressBase64', () => {
 		expect(compressBase64('')).toBe('')
-		expect(compressBase64('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')).toBe('䢶䵃䱟卄㒎缡㸌磕嚥㕕䋯埂')
+		expect(compressBase64('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')).toBe(
+			'bmj.h!uq10~3_IGvvD-~cvQ==='
+		)
 	})
 
 	test('decompressBase64', () => {
 		expect(decompressBase64('')).toBe('')
-		expect(decompressBase64('䢶䵃䱟卄㒎缡㸌磕嚥㕕䋯埂')).toBe('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')
+		expect(decompressBase64('bmj.h!uq10~3_IGvvD-~cvQ===')).toBe(
+			'bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ==='
+		)
 	})
 })

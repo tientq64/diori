@@ -1,23 +1,20 @@
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import dayjs, { Dayjs } from 'dayjs'
 import VietnameseDate from 'vietnamese-date'
-import { parseNoteFromNoteData } from '../../utils/parseNoteFromNoteData'
 import { SliceCreator } from '../useStore'
 
-/**
- * Một mục trong nhật ký.
- */
+/** Một mục trong nhật ký. */
 export type Note = {
-	/** Ngày của mục này, dạng YYYY-MM-DD. */
+	/** Ngày của mục này, dạng `YYYY-MM-DD`. */
 	date: string
 
-	/** Đối tượng Dayjs của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới mỗi khi dùng. */
+	/** Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới mỗi khi dùng. */
 	time: Dayjs
 
 	/** Ngày âm lịch. */
 	lunar: VietnameseDate
 
-	/** Năm. Mục đích lấy năm nhanh hơn, không cần phải gọi dayjs.year(). */
+	/** Năm. Mục đích lấy năm nhanh hơn, không cần phải gọi `time.year()`. */
 	year: number
 
 	/** Tiêu đề. Nếu không được đặt khi lưu, sẽ được tạo tự động dựa trên nội dung. */
@@ -35,12 +32,17 @@ export type Note = {
 	/** Số lượng hình ảnh. */
 	numberPhotos: number
 
-	/** Đường dẫn tập tin Github. */
+	/** Đường dẫn tập tin GitHub. */
 	path?: string
 
-	/** SHA của tập tin Github. */
+	/** SHA của tập tin GitHub. */
 	sha?: string
 }
+
+/**
+ * Đối tượng lưu các mục nhật ký. Chỉ các mục có thuộc tính `path` và `sha` mới được lưu vào đây.
+ * Key là thuộc tính `date` của mục.
+ */
 export type Notes = Record<Note['date'], Note>
 
 export type NoteData = Required<
@@ -59,11 +61,9 @@ export type Diary = {
 
 	getNote: (date: string | Dayjs) => Note
 	makeNote: (time: Dayjs) => Note
-	updateOrAddNoteFromData: (data: NoteData) => void
+	updateOrAddNote: (note: Note) => void
 	removeNote: (note: Note) => void
-
 	setYear: (year: number, status: Status) => void
-
 	setCurrentTime: (time: Dayjs) => void
 }
 
@@ -94,15 +94,14 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 		}
 	},
 
-	updateOrAddNoteFromData: (data) => {
+	updateOrAddNote: (note) => {
 		set((state) => {
-			const parsedNote = parseNoteFromNoteData(data)
 			const { notes } = state
-			const { date } = parsedNote
+			const { date } = note
 			if (!notes[date]) {
-				notes[date] = parsedNote
+				notes[date] = note
 			} else {
-				Object.assign(notes[date], parsedNote)
+				Object.assign(notes[date], note)
 			}
 		})
 	},

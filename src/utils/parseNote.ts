@@ -4,9 +4,13 @@ import { decompressBase64 } from './decompressBase64'
 import { compressedBase64ToText } from './compressedBase64ToText'
 import VietnameseDate from 'vietnamese-date'
 
-export function parseNoteFromNoteData(data: NoteData): Note {
-	const { path, sha } = data
-
+/**
+ * Phân tích cú pháp mục nhật ký từ path file GitHub và SHA.
+ * @param path Đường dẫn file GitHub của mục nhật ký này.
+ * @param sha SHA của file GitHub.
+ * @returns Một mục nhật ký mới.
+ */
+export function parseNoteFromPathAndSha(path: string, sha: string): Note {
 	let [yearStr, fileName] = path.split('/').slice(-2)
 	const year = Number(yearStr)
 	const chunks = fileName.replace(/\.json$/, '').split(';')
@@ -21,7 +25,7 @@ export function parseNoteFromNoteData(data: NoteData): Note {
 	const photoKey = chunks[4] ? time.format('DD') + chunks[4] : ''
 	const numberPhotos = Number(chunks[5] || (thumbnailUrl ? 1 : 0))
 
-	const note: Note = {
+	const newNote: Note = {
 		date,
 		time,
 		lunar: new VietnameseDate(time.toDate()),
@@ -34,5 +38,15 @@ export function parseNoteFromNoteData(data: NoteData): Note {
 		path,
 		sha
 	}
-	return note
+	return newNote
+}
+
+/**
+ * Phân tích cú pháp mục nhật ký từ data.
+ * @param data Data để phân tích cú pháp, thường là data của trường data trả về từ REST API.
+ * @returns Một mục nhật ký mới
+ */
+export function parseNoteFromNoteData(data: NoteData): Note {
+	let { path, sha } = data
+	return parseNoteFromPathAndSha(path, sha)
 }

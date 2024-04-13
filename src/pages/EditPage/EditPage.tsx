@@ -20,22 +20,22 @@ import {
 	InformationCircleOutline,
 	PictureOutline
 } from 'antd-mobile-icons'
-import { differenceBy, findIndex, range, reject, some, uniq, upperFirst } from 'lodash'
-import * as Monaco from 'monaco-editor'
+import { differenceBy, filter, findIndex, reject, some, upperFirst } from 'lodash'
+import type * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker } from 'react-router-dom'
+import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { Page } from '../../components/Page/Page'
-import { PersonsManagerDropdown } from '../../components/PersonsManagerDropdown/PersonsManagerDropdown'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
 import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
 import { useSave } from '../../hooks/useSave'
 import { Note } from '../../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../../store/slices/editingSlice'
+import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
-import { ProperNounsManagerDropdown } from '../../components/ProperNounsManagerDropdown/ProperNounsManagerDropdown'
 
 export function EditPage() {
 	const editingNote = useStore((state) => state.editingNote)
@@ -43,19 +43,20 @@ export function EditPage() {
 	if (!editingNote) return
 
 	const store = useStore()
-	const [form] = Form.useForm()
 	const getNoteEdit = useGetNoteEdit()
 	const save = useSave()
+	const [form] = Form.useForm()
 	const title = Form.useWatch<string>('title', form) ?? ''
 	const content = Form.useWatch<string>('content', form) ?? ''
 	const images = Form.useWatch<ImageUploadItem[]>('images', form) ?? []
-	const [maxImagesCount] = useState(4)
-	const [defaultPhotoKey, setDefaultPhotoKey] = useState('')
+	const [maxImagesCount] = useState<number>(4)
+	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
 	const monacoRef = useRef<typeof Monaco>()
 	const monarchTokensDisposer = useRef<Monaco.IDisposable>()
 	const languageConfigurationDisposer = useRef<Monaco.IDisposable>()
 	const completionItemDisposer = useRef<Monaco.IDisposable>()
+	const linkDisposer = useRef<Monaco.IDisposable>()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
@@ -73,6 +74,14 @@ export function EditPage() {
 	const removedImages = useMemo<Photo[]>(() => {
 		return differenceBy(noteEdit.photos, images, 'key')
 	}, [images, noteEdit.photos])
+
+	const persons = useMemo<Entity[]>(() => {
+		return filter(store.entities, { type: EntityTypes.PERSON })
+	}, [store.entities])
+
+	const properNouns = useMemo<Entity[]>(() => {
+		return filter(store.entities, { type: EntityTypes.PROPER_NOUN })
+	}, [store.entities])
 
 	const unsaved = useMemo<boolean>(() => {
 		if (getNoteEdit.loading) return false
@@ -96,38 +105,30 @@ export function EditPage() {
 		return true
 	}, [save.loading, unsaved])
 
-	const beforeEditorMount = (monaco: typeof Monaco) => {
+	const beforeEditorMount = (monaco: typeof Monaco): void => {
 		monacoRef.current ??= monaco
 
 		monaco.languages.register({ id: 'diori' })
 
-		const personNames: string[] = uniq(
-			store.properNoun
-				.flatMap((person) => {
-					const names = person.aliasNames
-						.concat(person.name)
+		const groups: Record<string, Entity[]> = {
+			person: persons,
+			properNoun: properNouns
+		}
+		const regexes: Record<string, RegExp> = {}
+		for (const type of Object.values(EntityTypes)) {
+			const names: string[] = groups[type]
+				.flatMap((entity) => {
+					const names = entity.aliasNames
+						.concat(entity.name)
 						.map((name) => name.replace(/ \(.*\)$/, ''))
 					return names
 				})
 				.toSorted((nameA, nameB) => nameB.length - nameA.length)
-		)
-		const personNamesRegex: RegExp = personNames.length
-			? RegExp(`(?:${personNames.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
-			: /~^/
-
-		const properNounNames: string[] = uniq(
-			store.properNouns
-				.flatMap((properNoun) => {
-					const names = properNoun.aliasNames
-						.concat(properNoun.name)
-						.map((name) => name.replace(/ \(.*\)$/, ''))
-					return names
-				})
-				.toSorted((nameA, nameB) => nameB.length - nameA.length)
-		)
-		const properNounsRegex: RegExp = properNounNames.length
-			? RegExp(`(?:${properNounNames.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
-			: /~^/
+			const regex: RegExp = names.length
+				? RegExp(`(?:${names.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
+				: /~^/
+			regexes[type] = regex
+		}
 
 		monarchTokensDisposer.current?.dispose()
 		monarchTokensDisposer.current = monaco.languages.setMonarchTokensProvider('diori', {
@@ -179,14 +180,14 @@ export function EditPage() {
 						action: 'orange-italic'
 					},
 					{
-						// Tên người.
-						regex: personNamesRegex,
-						action: 'blue-italic'
+						// Tên riêng.
+						regex: regexes[EntityTypes.PROPER_NOUN],
+						action: 'purple-italic'
 					},
 					{
-						// Tên riêng.
-						regex: properNounsRegex,
-						action: 'purple-italic'
+						// Tên người.
+						regex: regexes[EntityTypes.PERSON],
+						action: 'blue-italic'
 					},
 					{
 						include: '@emotions'
@@ -229,6 +230,10 @@ export function EditPage() {
 					{
 						regex: /:["']?[()]+|:["']?>|:[D3v]|[;=]\)+/,
 						action: 'yellow'
+					},
+					{
+						regex: /\p{Emoji}/,
+						action: 'yellow'
 					}
 				]
 			},
@@ -255,13 +260,13 @@ export function EditPage() {
 					position.lineNumber,
 					wordPosition.endColumn
 				)
-				const suggestions = store.properNoun.map<Monaco.languages.CompletionItem>(
-					(person) => {
+				const suggestions = store.entities.map<Monaco.languages.CompletionItem>(
+					(entity) => {
 						return {
-							label: person.name,
-							insertText: person.name,
-							kind: Monaco.languages.CompletionItemKind.User,
-							documentation: person.description,
+							label: entity.name,
+							insertText: entity.name,
+							kind: monaco.languages.CompletionItemKind.User,
+							documentation: entity.description,
 							range
 						}
 					}
@@ -270,7 +275,8 @@ export function EditPage() {
 			}
 		})
 
-		monaco.languages.registerLinkProvider('diori', {
+		linkDisposer.current?.dispose()
+		linkDisposer.current = monaco.languages.registerLinkProvider('diori', {
 			provideLinks(model) {
 				const value = model.getValue()
 				let iterator
@@ -311,7 +317,7 @@ export function EditPage() {
 			base: 'vs-dark',
 			inherit: true,
 			colors: {
-				'editor.background': '#1a1a1a',
+				'editor.background': '#18181b',
 				'editor.foreground': '#e6e6e6',
 				'editor.findMatchBorder': '#ffcb6b',
 				'editor.findMatchHighlightBackground': '#ffcb6b66'
@@ -396,7 +402,7 @@ export function EditPage() {
 	const handleEditorMount = (
 		editor: Monaco.editor.IStandaloneCodeEditor,
 		monaco: typeof Monaco
-	) => {
+	): void => {
 		const model = editor.getModel()
 		if (!model) return
 
@@ -421,21 +427,20 @@ export function EditPage() {
 		return { key, thumbnailUrl, url }
 	}
 
-	const showPreviewImage = (defaultImage: ImageUploadItem) => {
-		const defaultIndex = findIndex(images, { key: defaultImage.key })
+	const showPreviewImage = (defaultImage: ImageUploadItem): void => {
 		ImageViewer.Multi.show({
 			images: images.map((image) => image.url ?? image.thumbnailUrl),
-			defaultIndex
+			defaultIndex: findIndex(images, { key: defaultImage.key })
 		})
 	}
 
-	const handleRestorePhoto = (photo: Photo) => {
+	const handleRestorePhoto = (photo: Photo): void => {
 		if (images.length >= maxImagesCount) return
 		const image = { ...photo } as ImageUploadItem
 		form.setFieldValue('images', [...images, image])
 	}
 
-	const handleSave = () => {
+	const handleSave = (): void => {
 		if (!canSave) return
 		save.run(title, content, images, addedImages, removedImages, defaultPhotoKey, noteEdit)
 	}
@@ -488,7 +493,7 @@ export function EditPage() {
 	useEffect(() => {
 		if (!monacoRef.current) return
 		beforeEditorMount(monacoRef.current)
-	}, [store.properNoun])
+	}, [store.entities])
 
 	useEffect(() => {
 		if (!save.data) return
@@ -534,6 +539,7 @@ export function EditPage() {
 			monarchTokensDisposer.current?.dispose()
 			completionItemDisposer.current?.dispose()
 			languageConfigurationDisposer.current?.dispose()
+			linkDisposer.current?.dispose()
 		}
 	}, [])
 
@@ -542,16 +548,17 @@ export function EditPage() {
 			<div className="flex flex-col h-full">
 				<NavBar
 					onBack={() => history.back()}
-					back="Trở về"
+					back={store.isMd ? 'Trở về' : ''}
 					right={
 						<div className="flex justify-end items-center gap-4">
-							<PersonsManagerDropdown />
-							<ProperNounsManagerDropdown />
+							<EntitiesManagerDropdown />
 							<QuickSettingsButton />
 						</div>
 					}
 				>
-					{upperFirst(editingNote.time.format('dddd, D MMMM, YYYY'))}
+					{upperFirst(
+						editingNote.time.format(store.isMd ? 'dddd, D MMMM, YYYY' : 'DD-MM-YYYY')
+					)}
 				</NavBar>
 
 				<div className="flex-1 min-h-0">
@@ -610,7 +617,9 @@ export function EditPage() {
 									options={{
 										fontFamily: store.fontFamily,
 										fontSize: 16,
-										wordWrap: 'on',
+										wordWrap: store.isMd ? 'wordWrapColumn' : 'on',
+										wordWrapColumn: 160,
+										wrappingStrategy: 'advanced',
 										lineNumbers: 'off',
 										lineDecorationsWidth: 0,
 										insertSpaces: false,
@@ -621,7 +630,8 @@ export function EditPage() {
 											top: 12
 										},
 										minimap: {
-											renderCharacters: false
+											renderCharacters: false,
+											enabled: store.isMd
 										},
 										stickyScroll: {
 											enabled: false

@@ -26,7 +26,7 @@ export function QuickSettingsSection() {
 			<Form
 				form={form}
 				mode="card"
-				layout="horizontal"
+				layout={store.isMd ? 'horizontal' : 'vertical'}
 				initialValues={initialValues}
 				validateMessages={formValidateMessages}
 				onFinish={handleSaveSettings}
@@ -53,22 +53,31 @@ export function QuickSettingsSection() {
 						popover
 						min={10}
 						max={20}
-						marks={Object.fromEntries(range(10, 21).map((fontSize) => [fontSize, fontSize + 'px']))}
+						marks={Object.fromEntries(
+							range(10, 21).map((fontSize) => [fontSize, fontSize])
+						)}
 						onChange={store.setFontSize as any}
 					/>
 				</Form.Item>
 
-				<Form.Item label="Chế độ tối" name="isDarkMode" valuePropName="checked">
+				<Form.Item
+					label="Chế độ tối"
+					name="isDarkMode"
+					valuePropName="checked"
+					layout="horizontal"
+					childElementPosition={store.isMd ? 'normal' : 'right'}
+				>
 					<Switch onChange={store.setIsDarkMode} />
 				</Form.Item>
 
 				<Form.Item className="text-center">
-					<div className="pb-4 text-center text-sm text-neutral-500">
-						Có thể nhấn <Kbd>Enter</Kbd> để áp dụng thay đổi khi đang gõ đối với các trường văn bản.
+					<div className="pb-4 text-center text-sm text-zinc-500">
+						Có thể nhấn <Kbd>Enter</Kbd> để áp dụng thay đổi khi đang gõ đối với các
+						trường văn bản.
 					</div>
 
 					<Space>
-						<Button type="submit" color="primary">
+						<Button type="submit" color="primary" disabled={store.isXs}>
 							Lưu cài đặt
 						</Button>
 

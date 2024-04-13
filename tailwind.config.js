@@ -6,7 +6,10 @@ export default {
 		'./index.html'
 	],
 	theme: {
-		extend: {}
+		screens: {
+			'xs': { min: '0px', max: '767px' },
+			'md': { min: '768px'}
+		}
 	},
 	darkMode: ['selector', 'html[data-prefers-color-scheme="dark"]'],
 	plugins: []

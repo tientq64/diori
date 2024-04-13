@@ -1,5 +1,5 @@
 import { SliceCreator } from '../useStore'
-import { Note, NoteData } from './diarySlice'
+import { Note } from './diarySlice'
 
 export type NoteEdit = {
 	date: string

@@ -1,0 +1,19 @@
+{
+	"name": "Diori",
+	"short_name": "Diori",
+	"description": "App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
+	"theme_color": "#18181b",
+	"background_color": "#18181b",
+	"categories": [
+		"lifestyle"
+	],
+	"icons": [
+		{
+			"src": "/assets/images/book.png",
+			"sizes": "128x128",
+			"type": "image/png"
+		}
+	],
+	"start_url": "/",
+	"display": "standalone"
+}

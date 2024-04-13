@@ -11,16 +11,16 @@ type CommitFilesOptions = {
 	message: string
 
 	/** Các tập tin thêm vào commit. */
-	addedFiles: AddedCommitFiles[]
+	addedFiles?: AddedCommitFile[]
 
 	/** Các đường dẫn tập tin xóa khi commit. */
-	deletedPaths: string[]
+	deletedPaths?: string[]
 }
 
 /**
  * Tập tin thêm vào commit.
  */
-export type AddedCommitFiles = {
+export type AddedCommitFile = {
 	/** Đường dẫn tập tin trên GitHub. */
 	path: string
 
@@ -37,9 +37,11 @@ type Tree = RestEndpointMethodTypes['git']['createTree']['parameters']['tree']
  */
 export async function commitFiles(
 	rest: Octokit,
-	{ orgName, repoName, message, addedFiles, deletedPaths }: CommitFilesOptions
+	{ orgName, repoName, message, addedFiles = [], deletedPaths = [] }: CommitFilesOptions
 ): Promise<string[]> {
 	let res
+
+	if (addedFiles.length === 0 && deletedPaths.length === 0) return []
 
 	res = await rest.repos.getCommit({
 		owner: orgName,

@@ -12,8 +12,9 @@ export function compressBase64(base64: string): string {
 		})
 
 		.replace(/AA/g, '.')
-
-		.replace(/-1/g, '!')
+		.replace('UklGR', '(')
+		.replace('XRUJQ', ')')
+		.replace(/==$/, '~')
 
 	return compressedBase64
 }

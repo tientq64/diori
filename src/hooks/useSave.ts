@@ -1,11 +1,15 @@
 import { useRequest } from 'ahooks'
 import { ImageUploadItem, Toast } from 'antd-mobile'
 import { find, truncate } from 'lodash'
-import { getOctokit } from '../utils/getOctokit'
-import { NoteData } from '../store/slices/diarySlice'
+import { Note, NoteData } from '../store/slices/diarySlice'
 import { NoteEdit, NoteEditJSON, Photo } from '../store/slices/editingSlice'
 import { useStore } from '../store/useStore'
+import { AddedCommitFile, commitFiles } from '../utils/commitFiles'
 import { compressBase64 } from '../utils/compressBase64'
+import { getOctokit } from '../utils/getOctokit'
+import { makeCompressImageBase64 } from '../utils/makeCompressImageBase64'
+import { makePhotoPath } from '../utils/makePhotoPath'
+import { parseNoteFromNoteData, parseNoteFromPathAndSha } from '../utils/parseNote'
 import { textToBase64 } from '../utils/textToBase64'
 import { textToCompressedBase64 } from '../utils/textToCompressedBase64'
 
@@ -25,7 +29,7 @@ export function useSave() {
 		): Promise<NoteEdit | void> => {
 			if (!editingNote) return
 
-			const { time, sha } = editingNote
+			const { time, sha, year } = editingNote
 
 			let newTitle: string = title
 			if (!title && content.length) {
@@ -55,15 +59,15 @@ export function useSave() {
 				defaultPhotoKey.substring(2),
 				images.length >= 2 ? images.length : ''
 			]
-			const path = `days/${editingNote.year}/${chunks.join(';').replace(/;+$/, '')}.json`
+			const path = `days/${year}/${chunks.join(';').replace(/;+$/, '')}.json`
 			const hasSha = sha !== undefined
 
 			const isDeleteOnly: boolean = hasSha && !newTitle && !content && images.length === 0
 			const isCreateNewOnly: boolean = !isDeleteOnly && !hasSha && path !== editingNote.path
-			const isCreateNewAndDeleteOld: boolean =
+			const isCreateNewAndDeleteOldOnly: boolean =
 				!isDeleteOnly && hasSha && path !== editingNote.path
 			const isUpdateOnly: boolean =
-				!isDeleteOnly && !isCreateNewOnly && !isCreateNewAndDeleteOld
+				!isDeleteOnly && !isCreateNewOnly && !isCreateNewAndDeleteOldOnly
 
 			const newNoteEdit: NoteEdit = {
 				date: noteEdit.date,
@@ -85,35 +89,109 @@ export function useSave() {
 				defaultPhotoKey:
 					newNoteEdit.photos.length >= 2 ? newNoteEdit.defaultPhotoKey : undefined
 			}
-			const newNoteEditBase64 = textToBase64(JSON.stringify(newNoteEditData))
+			const newNoteEditJson: string = JSON.stringify(newNoteEditData)
+			const newNoteEditBase64: string = textToBase64(newNoteEditJson)
 
 			const rest = getOctokit()
 
-			if (isCreateNewOnly || isCreateNewAndDeleteOld || isUpdateOnly) {
+			if (isCreateNewOnly || isUpdateOnly) {
 				const res = await rest.repos.createOrUpdateFileContents({
 					owner: store.orgName,
 					repo: 'diori-main',
 					path: path,
 					content: newNoteEditBase64,
-					message: `Thêm/cập nhật ngày ${time.format('DD-MM-YYYY')}`,
+					message: `${isCreateNewOnly ? 'Thêm' : 'Cập nhật'} ngày ${time.format('DD-MM-YYYY')}`,
 					sha: isCreateNewOnly ? undefined : sha
 				})
-				store.updateOrAddNoteFromData(res.data.content as NoteData)
-				console.log(1, res)
+				const newNote: Note = parseNoteFromNoteData(res.data.content as NoteData)
+				store.updateOrAddNote(newNote)
 			}
 
-			if (isDeleteOnly || isCreateNewAndDeleteOld) {
-				const res = await rest.repos.deleteFile({
+			if (isDeleteOnly) {
+				await rest.repos.deleteFile({
 					owner: store.orgName,
 					repo: 'diori-main',
 					path: editingNote.path!,
 					message: `Xóa ngày ${time.format('DD-MM-YYYY')}`,
 					sha: sha!
 				})
-				if (isDeleteOnly) {
-					store.removeNote(editingNote)
+				store.removeNote(editingNote)
+			}
+
+			if (isCreateNewAndDeleteOldOnly) {
+				const [newNoteSHA] = await commitFiles(rest, {
+					orgName: store.orgName,
+					repoName: 'diori-main',
+					message: `Tạo lại ngày ${time.format('DD-MM-YYYY')}`,
+					addedFiles: [
+						{
+							path,
+							content: newNoteEditBase64
+						}
+					],
+					deletedPaths: editingNote.path ? [editingNote.path] : []
+				})
+				const newNote: Note = parseNoteFromPathAndSha(path, newNoteSHA)
+				store.updateOrAddNote(newNote)
+			}
+
+			const isCreateNewPhotosOnly: boolean =
+				addedImages.length > 0 && removedImages.length === 0
+			const isCreateNewAndDeletePhotosOnly: boolean =
+				addedImages.length > 0 && removedImages.length > 0
+			const isDeletePhotosOnly: boolean = addedImages.length === 0 && removedImages.length > 0
+
+			const addedFiles: AddedCommitFile[] = []
+			for (const image of addedImages) {
+				const imageContent: string = await makeCompressImageBase64(image.url)
+				const addedFile: AddedCommitFile = {
+					path: makePhotoPath(time, image.key as string),
+					content: imageContent
 				}
-				console.log(2, res)
+				addedFiles.push(addedFile)
+			}
+
+			const photosRepoName = `diori-photos-${year}`
+
+			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly) {
+				try {
+					await rest.repos.get({
+						owner: store.orgName,
+						repo: photosRepoName
+					})
+				} catch (error: any) {
+					if (error.status !== 404) throw error
+
+					await rest.repos.createInOrg({
+						org: store.orgName,
+						name: photosRepoName,
+						private: true,
+						description: `Ảnh năm ${year}.`,
+						auto_init: true,
+						has_issues: false,
+						has_projects: false,
+						has_wiki: false
+					})
+				}
+			}
+
+			let photosCommitMessage: string = ''
+			if (addedImages.length > 0) {
+				photosCommitMessage += `Thêm ${addedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}\n`
+			}
+			if (removedImages.length > 0) {
+				photosCommitMessage += `Xóa ${removedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}\n`
+			}
+			photosCommitMessage = photosCommitMessage.trimEnd()
+
+			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
+				await commitFiles(rest, {
+					orgName: store.orgName,
+					repoName: photosRepoName,
+					message: photosCommitMessage,
+					addedFiles,
+					deletedPaths: removedImages.map((image) => makePhotoPath(time, image.key))
+				})
 			}
 
 			Toast.show({

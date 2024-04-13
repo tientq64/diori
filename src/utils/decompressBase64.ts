@@ -2,8 +2,9 @@ import { radix62ToInt } from './radix62ToInt'
 
 export function decompressBase64(compressedBase64: string): string {
 	const base64 = compressedBase64
-		.replace(/!/g, '-1')
-
+		.replace(/~$/, '==')
+		.replace(')', 'XRUJQ')
+		.replace('(', 'UklGR')
 		.replace(/\./g, 'AA')
 
 		.replace(/\^[\da-zA-Z]{3}|=[\da-zA-Z]{2}|~[\da-zA-Z]/g, (s) => {

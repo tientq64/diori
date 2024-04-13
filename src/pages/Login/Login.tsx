@@ -5,6 +5,7 @@ import { Page } from '../../components/Page/Page'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { useLogin } from '../../hooks/useLogin'
+import { useAsyncEffect } from 'ahooks'
 
 export type LoginValues = {
 	pass: string
@@ -16,15 +17,16 @@ export function Login() {
 	const navigate = useNavigate()
 	const login = useLogin()
 
-	useEffect(() => {
+	useAsyncEffect(async () => {
 		const error: any = login.error
 		if (!error) return
 		if (error.status === 401) {
-			Modal.alert({
+			await Modal.alert({
 				title: 'Đã xảy ra lỗi',
 				content: 'Personal access token đã hết hạn. Hãy tạo mới và đăng ký lại.',
 				confirmText: 'OK'
 			})
+			window.open('https://github.com/settings/tokens?type=beta', '_blank')
 			return
 		}
 		form.setFields([
@@ -87,7 +89,13 @@ export function Login() {
 					</Form.Item>
 
 					<Form.Item>
-						<Button type="submit" color="primary" size="large" block loading={login.loading}>
+						<Button
+							type="submit"
+							color="primary"
+							size="large"
+							block
+							loading={login.loading}
+						>
 							Đăng nhập
 						</Button>
 					</Form.Item>

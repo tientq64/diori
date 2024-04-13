@@ -36,6 +36,7 @@ export function useRegister() {
 					org: orgName,
 					name: 'diori-main',
 					private: true,
+					description: 'Nhật ký.',
 					homepage: 'https://diori.vercel.app',
 					auto_init: true,
 					has_issues: false,
