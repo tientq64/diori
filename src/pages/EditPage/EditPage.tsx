@@ -1,3 +1,4 @@
+import { Fancybox } from '@fancyapps/ui'
 import { Editor } from '@monaco-editor/react'
 import { useUpdateEffect } from 'ahooks'
 import {
@@ -5,7 +6,6 @@ import {
 	Form,
 	ImageUploadItem,
 	ImageUploader,
-	ImageViewer,
 	Input,
 	Modal,
 	NavBar,
@@ -21,7 +21,7 @@ import {
 	PictureOutline
 } from 'antd-mobile-icons'
 import { differenceBy, filter, findIndex, reject, some, upperFirst } from 'lodash'
-import type * as Monaco from 'monaco-editor'
+import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker } from 'react-router-dom'
@@ -29,6 +29,7 @@ import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdow
 import { Page } from '../../components/Page/Page'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
 import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
+import { usePhotosLoader } from '../../hooks/usePhotosLoader'
 import { useSave } from '../../hooks/useSave'
 import { Note } from '../../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../../store/slices/editingSlice'
@@ -36,6 +37,10 @@ import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
+import { setupEditor } from './setupEditor'
+
+import '@fancyapps/ui/dist/fancybox/fancybox.css'
+import spinnerImage from '../../assets/images/spinner.svg'
 
 export function EditPage() {
 	const editingNote = useStore((state) => state.editingNote)
@@ -52,11 +57,9 @@ export function EditPage() {
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
+	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
-	const monarchTokensDisposer = useRef<Monaco.IDisposable>()
-	const languageConfigurationDisposer = useRef<Monaco.IDisposable>()
-	const completionItemDisposer = useRef<Monaco.IDisposable>()
-	const linkDisposer = useRef<Monaco.IDisposable>()
+	const editorDisposer = useRef<Monaco.IDisposable>()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
@@ -107,295 +110,11 @@ export function EditPage() {
 
 	const beforeEditorMount = (monaco: typeof Monaco): void => {
 		monacoRef.current ??= monaco
-
-		monaco.languages.register({ id: 'diori' })
-
-		const groups: Record<string, Entity[]> = {
-			person: persons,
-			properNoun: properNouns
-		}
-		const regexes: Record<string, RegExp> = {}
-		for (const type of Object.values(EntityTypes)) {
-			const names: string[] = groups[type]
-				.flatMap((entity) => {
-					const names = entity.aliasNames
-						.concat(entity.name)
-						.map((name) => name.replace(/ \(.*\)$/, ''))
-					return names
-				})
-				.toSorted((nameA, nameB) => nameB.length - nameA.length)
-			const regex: RegExp = names.length
-				? RegExp(`(?:${names.join('|')})(?=[\\s.,:;!?)\\]}]|$)`)
-				: /~^/
-			regexes[type] = regex
-		}
-
-		monarchTokensDisposer.current?.dispose()
-		monarchTokensDisposer.current = monaco.languages.setMonarchTokensProvider('diori', {
-			tokenizer: {
-				root: [
-					{
-						// Trích dẫn, lời nói.
-						regex: /"/,
-						action: { token: 'green-italic', next: '@quote' }
-					},
-					{
-						// Chú thích.
-						regex: /\(/,
-						action: { token: 'gray', next: '@note' }
-					},
-					{
-						// Chi tiết link.
-						regex: /^(\[.+?\])(: *)([^"\n]+?)((?: *".+?")?)$/,
-						action: ['gray', 'gray', 'aqua-italic', 'green-italic']
-					},
-					{
-						// Link.
-						regex: /(\[)(.+?)(\])(\[.+?\])/,
-						action: ['aqua', 'aqua-italic', 'aqua', 'gray']
-					},
-					{
-						// Giờ phút.
-						regex: /(([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?)(?=[\s.,:;!?)\]}]|$)/,
-						action: 'red-italic'
-					},
-					{
-						// Ngày tháng năm.
-						regex: /((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012])\/[12]\d{3})(?=[\s.,:;!?)\]}]|$)/,
-						action: 'red-italic'
-					},
-					{
-						// Ngày tháng, năm.
-						regex: /(((0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012]))|[12]\d{3})(?=[\s.,:;!?)\]}]|$)/,
-						action: 'red-italic'
-					},
-					{
-						// Tỷ số.
-						regex: /(\d+-\d+)(?=[\s.,:;!?)\]}]|$)/,
-						action: 'orange-italic'
-					},
-					{
-						// Đơn vị, số.
-						regex: /(\d+(tr|[kpt%])|\d+)(?=[\s.,:;!?)\]}]|$)/,
-						action: 'orange-italic'
-					},
-					{
-						// Tên riêng.
-						regex: regexes[EntityTypes.PROPER_NOUN],
-						action: 'purple-italic'
-					},
-					{
-						// Tên người.
-						regex: regexes[EntityTypes.PERSON],
-						action: 'blue-italic'
-					},
-					{
-						include: '@emotions'
-					},
-					{
-						regex: /[\p{L}\d]+/
-					}
-				],
-				note: [
-					{
-						include: '@emotions'
-					},
-					{
-						regex: /\)/,
-						action: { token: 'gray', next: '@pop' }
-					},
-					{
-						regex: /\(/,
-						action: { token: 'gray', next: '@push' }
-					},
-					{
-						regex: /.+?/,
-						action: { token: 'gray-italic' }
-					}
-				],
-				quote: [
-					{
-						include: '@emotions'
-					},
-					{
-						regex: /"/,
-						action: { token: 'green-italic', next: '@pop' }
-					},
-					{
-						regex: /.+?/,
-						action: { token: 'green-italic' }
-					}
-				],
-				emotions: [
-					{
-						regex: /:["']?[()]+|:["']?>|:[D3v]|[;=]\)+/,
-						action: 'yellow'
-					},
-					{
-						regex: /\p{Emoji}/,
-						action: 'yellow'
-					}
-				]
-			},
-			unicode: true
-		})
-
-		languageConfigurationDisposer.current?.dispose()
-		languageConfigurationDisposer.current = monaco.languages.setLanguageConfiguration('diori', {
-			autoClosingPairs: [
-				{ open: '(', close: ')' },
-				{ open: '[', close: ']' },
-				{ open: '{', close: '}' },
-				{ open: '"', close: '"' }
-			]
-		})
-
-		completionItemDisposer.current?.dispose()
-		completionItemDisposer.current = monaco.languages.registerCompletionItemProvider('diori', {
-			provideCompletionItems(model, position) {
-				const wordPosition = model.getWordUntilPosition(position)
-				const range = new monaco.Range(
-					position.lineNumber,
-					wordPosition.startColumn,
-					position.lineNumber,
-					wordPosition.endColumn
-				)
-				const suggestions = store.entities.map<Monaco.languages.CompletionItem>(
-					(entity) => {
-						return {
-							label: entity.name,
-							insertText: entity.name,
-							kind: monaco.languages.CompletionItemKind.User,
-							documentation: entity.description,
-							range
-						}
-					}
-				)
-				return { suggestions }
-			}
-		})
-
-		linkDisposer.current?.dispose()
-		linkDisposer.current = monaco.languages.registerLinkProvider('diori', {
-			provideLinks(model) {
-				const value = model.getValue()
-				let iterator
-
-				const links: Record<string, string[]> = {}
-				iterator = value.matchAll(/^\[(.+?)\]: *([^"\n]+?)(?: *"(.+?)")?$/gm)
-				for (const item of iterator) {
-					links[item[1]] = [item[1], item[2], item[3]]
-				}
-
-				const editorLinks: Monaco.languages.ILink[] = []
-				iterator = value.matchAll(/\[.+?\]\[(.+?)\]/dg)
-				for (const item of iterator) {
-					const link = links[item[1]]
-					if (!link) continue
-					const [start, end] = item.indices![0]
-					const startPosition = model.getPositionAt(start)
-					const endPosition = model.getPositionAt(end - item[1].length - 2)
-					const editorLink: Monaco.languages.ILink = {
-						range: new monaco.Range(
-							startPosition.lineNumber,
-							startPosition.column,
-							endPosition.lineNumber,
-							endPosition.column
-						),
-						url: link[1],
-						tooltip: (link[2] ? `${link[2]} \u2013 ` : '') + link[1]
-					}
-					editorLinks.push(editorLink)
-				}
-				return {
-					links: editorLinks
-				}
-			}
-		})
-
-		monaco.editor.defineTheme('diori-dark', {
-			base: 'vs-dark',
-			inherit: true,
-			colors: {
-				'editor.background': '#18181b',
-				'editor.foreground': '#e6e6e6',
-				'editor.findMatchBorder': '#ffcb6b',
-				'editor.findMatchHighlightBackground': '#ffcb6b66'
-			},
-			rules: [
-				{
-					token: 'green',
-					foreground: '#c3e88d'
-				},
-				{
-					token: 'green-italic',
-					foreground: '#c3e88d',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'gray',
-					foreground: '#697098'
-				},
-				{
-					token: 'gray-italic',
-					foreground: '#697098',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'red',
-					foreground: '#ff5874'
-				},
-				{
-					token: 'red-italic',
-					foreground: '#ff5874',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'orange',
-					foreground: '#f78c6c'
-				},
-				{
-					token: 'orange-italic',
-					foreground: '#f78c6c',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'blue',
-					foreground: '#7986e7'
-				},
-				{
-					token: 'blue-italic',
-					foreground: '#7986e7',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'purple',
-					foreground: '#c792ea'
-				},
-				{
-					token: 'purple-italic',
-					foreground: '#c792ea',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'aqua',
-					foreground: '#89ddff'
-				},
-				{
-					token: 'aqua-italic',
-					foreground: '#89ddff',
-					fontStyle: 'italic'
-				},
-				{
-					token: 'yellow',
-					foreground: '#ffcb6b'
-				},
-				{
-					token: 'yellow-italic',
-					foreground: '#ffcb6b',
-					fontStyle: 'italic'
-				}
-			]
+		editorDisposer.current?.dispose()
+		editorDisposer.current = setupEditor(monaco, {
+			entities: store.entities,
+			persons,
+			properNouns
 		})
 	}
 
@@ -428,10 +147,33 @@ export function EditPage() {
 	}
 
 	const showPreviewImage = (defaultImage: ImageUploadItem): void => {
-		ImageViewer.Multi.show({
-			images: images.map((image) => image.url ?? image.thumbnailUrl),
-			defaultIndex: findIndex(images, { key: defaultImage.key })
-		})
+		Fancybox.show(
+			images.map((image) => ({
+				src: image.url || spinnerImage,
+				thumbSrc: image.thumbnailUrl,
+				id: `fancybox-image-${image.key}`
+			})),
+			{
+				startIndex: findIndex(images, { key: defaultImage.key }),
+				on: {
+					'Carousel.change': (...args) => {
+						console.log(args)
+					}
+				}
+			}
+		)
+		// const defaultImageIndex: number = findIndex(images, { key: defaultImage.key })
+		// ImageViewer.Multi.show({
+		// 	images: images.map((image) => image.url ?? image.thumbnailUrl),
+		// 	defaultIndex: defaultImageIndex,
+		// 	onIndexChange: handlePreviewImageIndexChange
+		// })
+		// handlePreviewImageIndexChange(defaultImageIndex)
+	}
+
+	const handlePreviewImageIndexChange = (index: number): void => {
+		const image: ImageUploadItem = images[index]
+		photosLoader.run(editingNote.time, image.key as string)
 	}
 
 	const handleRestorePhoto = (photo: Photo): void => {
@@ -536,10 +278,7 @@ export function EditPage() {
 	useEffect(() => {
 		return () => {
 			// store.setEditingNote(null)
-			monarchTokensDisposer.current?.dispose()
-			completionItemDisposer.current?.dispose()
-			languageConfigurationDisposer.current?.dispose()
-			linkDisposer.current?.dispose()
+			editorDisposer.current?.dispose()
 		}
 	}, [])
 

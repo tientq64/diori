@@ -17,6 +17,7 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@fancyapps/ui": "^5.0.36",
 		"@monaco-editor/react": "^4.6.0",
 		"@octokit/rest": "^20.1.0",
 		"ahooks": "^3.7.11",
