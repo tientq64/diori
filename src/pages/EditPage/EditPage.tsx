@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
 import { Fancybox } from '@fancyapps/ui'
 import { Editor } from '@monaco-editor/react'
 import { useUpdateEffect } from 'ahooks'
@@ -29,7 +31,7 @@ import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdow
 import { Page } from '../../components/Page/Page'
 import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
 import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
-import { usePhotosLoader } from '../../hooks/usePhotosLoader'
+// import { usePhotosLoader } from '../../hooks/usePhotosLoader'
 import { useSave } from '../../hooks/useSave'
 import { Note } from '../../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../../store/slices/editingSlice'
@@ -57,7 +59,7 @@ export function EditPage() {
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
-	const photosLoader = usePhotosLoader()
+	// const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
 	const editorDisposer = useRef<Monaco.IDisposable>()
 
@@ -171,10 +173,10 @@ export function EditPage() {
 		// handlePreviewImageIndexChange(defaultImageIndex)
 	}
 
-	const handlePreviewImageIndexChange = (index: number): void => {
-		const image: ImageUploadItem = images[index]
-		photosLoader.run(editingNote.time, image.key as string)
-	}
+	// const handlePreviewImageIndexChange = (index: number): void => {
+	// 	const image: ImageUploadItem = images[index]
+	// 	photosLoader.run(editingNote.time, image.key as string)
+	// }
 
 	const handleRestorePhoto = (photo: Photo): void => {
 		if (images.length >= maxImagesCount) return

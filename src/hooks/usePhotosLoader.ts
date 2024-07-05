@@ -1,6 +1,6 @@
 import { useRequest } from 'ahooks'
 import { Dayjs } from 'dayjs'
-import { useState } from 'react'
+// import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { getOctokit } from '../utils/getOctokit'
 import { find } from 'lodash'
@@ -9,7 +9,7 @@ export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 
 export function usePhotosLoader() {
 	const store = useStore()
-	const photoBlobUrls = useState<Record<string, string>>({})
+	// const photoBlobUrls = useState<Record<string, string>>({})
 
 	const request = useRequest(
 		async (time: Dayjs, photoKey: string) => {
