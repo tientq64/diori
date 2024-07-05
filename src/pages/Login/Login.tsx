@@ -21,12 +21,14 @@ export function Login() {
 		const error: any = login.error
 		if (!error) return
 		if (error.status === 401) {
-			await Modal.alert({
+			const isGoToGitHubSetting: boolean = await Modal.confirm({
 				title: 'Đã xảy ra lỗi',
 				content: 'Personal access token đã hết hạn. Hãy tạo mới và đăng ký lại.',
 				confirmText: 'OK'
 			})
-			window.open('https://github.com/settings/tokens?type=beta', '_blank')
+			if (isGoToGitHubSetting) {
+				window.open('https://github.com/settings/tokens?type=beta', '_blank')
+			}
 			return
 		}
 		form.setFields([

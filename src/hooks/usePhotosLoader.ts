@@ -9,9 +9,13 @@ export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 
 export function usePhotosLoader() {
 	const store = useStore()
+	// TEMP
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const photoBlobUrls = useState<Record<string, string>>({})
 
 	const request = useRequest(
+		// TEMP
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		async (time: Dayjs, photoKey: string) => {
 			const rest = getOctokit()
 			const repoName = `diori-photos-${time.year()}`
