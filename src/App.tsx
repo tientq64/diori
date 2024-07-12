@@ -1,4 +1,4 @@
-import './utils/configs'
+import './utils/globalConfigs'
 
 import { ConfigProvider } from 'antd-mobile'
 import antdLocaleEnUS from 'antd-mobile/cjs/locales/en-US'

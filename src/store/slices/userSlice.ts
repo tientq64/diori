@@ -3,16 +3,37 @@ import { SliceCreator } from '../useStore'
 import { getOctokit } from '../../utils/getOctokit'
 
 export type User = {
+	/** Tên tổ chức GitHub mà người dùng dùng để lưu dữ liệu nhật ký. */
 	orgName: string
+
+	/** Tên đăng nhập GitHub của người dùng. */
 	userName: string
+
+	/** URL hình đại diện GitHub của người dùng. */
 	userAvatar: string
+
+	/** GitHub personal access token đã được mã hóa. Được lưu trong `localStorage` để xác thực khi đăng nhập. */
 	encryptedToken: string
+
+	/** GitHub personal access token. */
 	token: string
+
+	/** Tổng số giới hạn lệnh gọi GitHub API. */
 	rateLimit: number
+
+	/** Giới hạn lệnh gọi GitHub API còn lại. */
 	rateLimitRemaining: number
+
+	/** Mốc thời gian mà giới hạn lệnh gọi GitHub API sẽ được đặt lại. */
 	rateLimitTimeReset: Dayjs | null
+
+	/** Giá trị thời gian hiện tại, được cập nhật mỗi phút một lần. */
 	nowPerMinute: Dayjs
+
+	/** Chiều dài màn hình lớn hơn hoặc bằng 768px? */
 	isMd: boolean
+
+	/** Chiều dài màn hình nhỏ hơn 768px? */
 	isXs: boolean
 
 	setOrgName: (orgName: string) => void
@@ -22,6 +43,10 @@ export type User = {
 	setRateLimitRemaining: (rateLimitRemaining: number) => void
 	setRateLimitTimeReset: (rateLimitReset: number) => void
 	setNowPerMinute: (time: Dayjs) => void
+
+	/**
+	 * Cập nhật giá trị responsive. Gồm 2 giá trị `isMd` và `isXs`.
+	 */
 	updateResponsive: () => void
 	fetchUserData: (token: string) => void
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequest } from 'ahooks'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
@@ -29,7 +30,7 @@ export function useSaveSettings() {
 				repo: 'diori-main',
 				path: 'settings.json',
 				message: 'Cập nhật cài đặt',
-				content: textToBase64(JSON.stringify(store.getSettingsJSON())),
+				content: textToBase64(JSON.stringify(store.getSettingProps())),
 				sha
 			})
 

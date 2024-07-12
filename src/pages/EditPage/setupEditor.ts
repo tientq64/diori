@@ -74,7 +74,7 @@ export const setupEditor = (
 						action: 'red-italic'
 					},
 					{
-						// Tỷ số.
+						// Tỷ số bóng đá.
 						regex: /(\d+-\d+)(?=[\s.,:;!?)\]}]|$)/,
 						action: 'orange-italic'
 					},
@@ -97,7 +97,7 @@ export const setupEditor = (
 						include: '@emotions'
 					},
 					{
-						regex: /[\p{L}\d]+/
+						regex: /[\p{L}\d]+/u
 					}
 				],
 				note: [
@@ -119,9 +119,6 @@ export const setupEditor = (
 				],
 				quote: [
 					{
-						include: '@emotions'
-					},
-					{
 						regex: /"/,
 						action: { token: 'green-italic', next: '@pop' }
 					},
@@ -136,7 +133,7 @@ export const setupEditor = (
 						action: 'yellow'
 					},
 					{
-						regex: /\p{Emoji}/,
+						regex: /[\p{Emoji_Presentation}]/u,
 						action: 'yellow'
 					}
 				]
@@ -301,7 +298,7 @@ export const setupEditor = (
 	})
 
 	return {
-		dispose: () => {
+		dispose: (): void => {
 			monarchTokensDisposer.dispose()
 			languageConfigurationDisposer.dispose()
 			completionItemDisposer.dispose()

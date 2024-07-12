@@ -1,19 +1,20 @@
-import { DatePickerView, Dropdown, NavBar, SearchBar } from 'antd-mobile'
+import { DatePickerView, Dropdown, NavBar } from 'antd-mobile'
 import dayjs from 'dayjs'
 import { upperFirst } from 'lodash'
-import { WheelEvent, useEffect, useRef, useState } from 'react'
+import { ReactNode, WheelEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { NoteCard } from '../../components/NoteCard/NoteCard'
 import { Page } from '../../components/Page/Page'
-import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
+import { QuickSettingsDropdown } from '../../components/QuickSettingsDropdown/QuickSettingsDropdown'
+import { SearchInput } from '../../components/SearchInput/SearchInput'
 import { useLoadYear } from '../../hooks/useLoadYear'
 import { Note } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
 
 let currentScrollTop: number | undefined = undefined
 
-export function NotesPage() {
+export function NotesPage(): ReactNode {
 	const store = useStore()
 	const navigate = useNavigate()
 	const loadYear = useLoadYear()
@@ -22,12 +23,16 @@ export function NotesPage() {
 	const [currentNotes, setCurrentNotes] = useState<Note[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
-	const scrollTo = (scrollTop?: number) => {
+	/**
+	 * Cuộn thanh cuộn dọc đến vị trí xác định trong danh sách các mục nhật ký.
+	 * @param scrollTop Vị trị thanh cuộn dọc. Nếu không được đặt, vị trí mặc định sẽ là ở giữa.
+	 */
+	const scrollTo = (scrollTop?: number): void => {
 		const scrollEl = scrollRef.current!
 		scrollEl.scrollTo(0, scrollTop ?? (scrollEl.scrollHeight - scrollEl.clientHeight) / 2)
 	}
 
-	const handleScroll = (event: WheelEvent<HTMLDivElement>) => {
+	const handleScroll = (event: WheelEvent<HTMLDivElement>): void => {
 		const scrollEl = event.currentTarget
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
 		const offset = 200
@@ -42,11 +47,11 @@ export function NotesPage() {
 		}
 	}
 
-	const handleYearChange = (date: Date) => {
+	const handleYearChange = (date: Date): void => {
 		setCurrentTime(currentTime.year(date.getFullYear()))
 	}
 
-	const handleNoteClick = (note: Note) => {
+	const handleNoteClick = (note: Note): void => {
 		store.setEditingNote(note)
 		navigate('/edit')
 	}
@@ -66,24 +71,25 @@ export function NotesPage() {
 		for (const year of years) {
 			loadYear.run(year)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentTime.format('YYYYMMDD'), store.notes])
 
 	useEffect(() => {
 		if (currentNotes.length === 0) return
 		scrollTo(currentScrollTop)
-	}, [currentNotes.length > 0])
+	}, [currentNotes.length])
 
 	return (
 		<Page>
 			<div className="flex flex-col h-full">
 				<NavBar
 					className="md:pl-4 md:pr-8"
-					backArrow={null}
+					backIcon={null}
 					right={
 						<div className="flex justify-end items-center md:gap-4">
-							{store.isMd && <SearchBar placeholder="Tìm kiếm..." />}
+							{store.isMd && <SearchInput />}
 							<EntitiesManagerDropdown />
-							<QuickSettingsButton />
+							<QuickSettingsDropdown />
 						</div>
 					}
 				>
@@ -110,16 +116,18 @@ export function NotesPage() {
 
 				<div
 					ref={scrollRef}
-					className="flex-1 grid grid-cols-7 auto-rows-[18%] md:gap-4 md:px-4 overflow-auto bg-zinc-50 dark:bg-zinc-900"
+					className="flex-1 md:px-4 overflow-auto bg-zinc-50 dark:bg-zinc-900"
 					onScroll={handleScroll}
 				>
-					{currentNotes.map((note) => (
-						<NoteCard
-							key={note.date}
-							note={note}
-							onClick={() => handleNoteClick(note)}
-						/>
-					))}
+					<div className="grid grid-cols-7 auto-rows-[16vh] md:gap-4">
+						{currentNotes.map((note) => (
+							<NoteCard
+								key={note.date}
+								note={note}
+								onClick={() => handleNoteClick(note)}
+							/>
+						))}
+					</div>
 				</div>
 			</div>
 		</Page>

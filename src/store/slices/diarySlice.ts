@@ -51,12 +51,19 @@ export type NoteData = Required<
 	>
 >
 
+/** Trạng thái tải của năm. */
 export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
+
 export type Statuses = Record<string, Status>
 
 export type Diary = {
+	/** Danh sách các mục nhật ký. Các mục này đã được lưu trên GitHub. */
 	notes: Notes
+
+	/** Danh sách trạng thái tải của năm. */
 	years: Statuses
+
+	/** Ngày đang xem trong trang `/notes`. */
 	currentTime: Dayjs
 
 	getNote: (date: string | Dayjs) => Note

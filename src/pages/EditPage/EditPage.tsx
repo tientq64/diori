@@ -25,13 +25,13 @@ import {
 import { differenceBy, filter, findIndex, reject, some, upperFirst } from 'lodash'
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useBlocker } from 'react-router-dom'
+import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useBlocker, useLocation } from 'react-router-dom'
 import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { Page } from '../../components/Page/Page'
-import { QuickSettingsButton } from '../../components/QuickSettingsButton/QuickSettingsButton'
+import { QuickSettingsDropdown } from '../../components/QuickSettingsDropdown/QuickSettingsDropdown'
 import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
-// import { usePhotosLoader } from '../../hooks/usePhotosLoader'
+import { usePhotosLoader } from '../../hooks/usePhotosLoader'
 import { useSave } from '../../hooks/useSave'
 import { Note } from '../../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../../store/slices/editingSlice'
@@ -44,12 +44,13 @@ import { setupEditor } from './setupEditor'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 import spinnerImage from '../../assets/images/spinner.svg'
 
-export function EditPage() {
+export function EditPage(): ReactNode {
 	const editingNote = useStore((state) => state.editingNote)
 
 	if (!editingNote) return
 
 	const store = useStore()
+	const location = useLocation()
 	const getNoteEdit = useGetNoteEdit()
 	const save = useSave()
 	const [form] = Form.useForm()
@@ -59,8 +60,9 @@ export function EditPage() {
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
-	// const photosLoader = usePhotosLoader()
+	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
+	const [editor, setEditor] = useState<Monaco.editor.IStandaloneCodeEditor>()
 	const editorDisposer = useRef<Monaco.IDisposable>()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
@@ -124,6 +126,8 @@ export function EditPage() {
 		editor: Monaco.editor.IStandaloneCodeEditor,
 		monaco: typeof Monaco
 	): void => {
+		setEditor(editor)
+
 		const model = editor.getModel()
 		if (!model) return
 
@@ -135,6 +139,20 @@ export function EditPage() {
 		editor.addCommand(CtrlCmd | KeyCode.KeyS, () => {
 			form.submit()
 		})
+
+		if (location.state?.findText) {
+			const matched = model
+				.findMatches(location.state.findText, false, false, false, null, true)
+				.at(0)
+			if (matched) {
+				editor.setSelection(matched.range)
+				const action = editor.getAction('actions.find')
+				if (action) {
+					action.run()
+					setTimeout(editor.setScrollTop.bind(editor), 10, 0)
+				}
+			}
+		}
 	}
 
 	const localImageUpload = async (file: File): Promise<ImageUploadItem> => {
@@ -173,10 +191,10 @@ export function EditPage() {
 		// handlePreviewImageIndexChange(defaultImageIndex)
 	}
 
-	// const handlePreviewImageIndexChange = (index: number): void => {
-	// 	const image: ImageUploadItem = images[index]
-	// 	photosLoader.run(editingNote.time, image.key as string)
-	// }
+	const handlePreviewImageIndexChange = (index: number): void => {
+		const image: ImageUploadItem = images[index]
+		photosLoader.run(editingNote.time, image.key as string)
+	}
 
 	const handleRestorePhoto = (photo: Photo): void => {
 		if (images.length >= maxImagesCount) return
@@ -240,6 +258,11 @@ export function EditPage() {
 	}, [store.entities])
 
 	useEffect(() => {
+		if (!editor) return
+		editor.updateOptions({ fontSize: store.fontSize })
+	}, [store.fontSize, editor])
+
+	useEffect(() => {
 		if (!save.data) return
 		setNoteEdit(save.data)
 	}, [save.data])
@@ -293,7 +316,7 @@ export function EditPage() {
 					right={
 						<div className="flex justify-end items-center gap-4">
 							<EntitiesManagerDropdown />
-							<QuickSettingsButton />
+							<QuickSettingsDropdown />
 						</div>
 					}
 				>

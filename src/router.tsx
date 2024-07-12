@@ -6,6 +6,7 @@ import { Logged } from './pages/Logged/Logged'
 import { Login } from './pages/Login/Login'
 import { NotesPage } from './pages/NotesPage/NotesPage'
 import { Register } from './pages/Register/Register'
+import { SearchPage } from './pages/SearchPage/SearchPage'
 import { Settings } from './pages/Settings/Settings'
 
 export const router = createBrowserRouter([
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
 					{
 						path: 'edit',
 						element: <EditPage />
+					},
+					{
+						path: 'search',
+						element: <SearchPage />
 					}
 				]
 			}

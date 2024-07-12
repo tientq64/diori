@@ -1,13 +1,21 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"type": "module",
-	"description": "App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
+	"description": "📒 App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
 	"keywords": [
 		"diary",
 		"journal",
-		"github"
+		"github",
+		"octokit-js",
+		"personal-access-token",
+		"pwa",
+		"typescript",
+		"react",
+		"zustand",
+		"antd-mobile",
+		"vite"
 	],
 	"scripts": {
 		"dev": "vite",
@@ -23,7 +31,6 @@
 		"ahooks": "^3.7.11",
 		"antd-mobile": "^5.35.0",
 		"antd-mobile-icons": "^0.3.0",
-		"clsx": "^2.1.0",
 		"crypto-js": "^4.2.0",
 		"dayjs": "^1.11.10",
 		"immer": "^10.0.4",

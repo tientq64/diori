@@ -1,7 +1,6 @@
 import {
 	Button,
 	CapsuleTabs,
-	Dialog,
 	ErrorBlock,
 	Form,
 	IndexBar,
@@ -11,10 +10,10 @@ import {
 	Radio,
 	Space
 } from 'antd-mobile'
+import { confirm } from 'antd-mobile/es/components/dialog/confirm'
 import { filter, groupBy, isEqual, some, toPairs } from 'lodash'
 import { useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
-import { useSaveSettings } from '../../hooks/useSaveSettings'
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { removeToneMarks } from '../../utils/removeToneMarks'
@@ -27,7 +26,6 @@ export function EntitiesManager() {
 	const editingEntityType = Form.useWatch<EntityTypes>('type', form) ?? 'person'
 	const editingEntityAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? []
 	const editingEntityDescription = Form.useWatch<string>('description', form) ?? ''
-	const saveSettings = useSaveSettings()
 	const [filteredEntityType, setFilteredEntityType] = useState<EntityTypes | ''>('')
 
 	const isFormVisible = useMemo<boolean>(() => {
@@ -38,7 +36,7 @@ export function EntitiesManager() {
 		if (!editingEntity) return true
 		if (some(store.entities, { id: editingEntity.id })) return false
 		return true
-	}, [editingEntity?.id])
+	}, [editingEntity, store.entities])
 
 	const filteredEntities = useMemo<Entity[]>(() => {
 		if (filteredEntityType === '') {
@@ -52,7 +50,7 @@ export function EntitiesManager() {
 			return removeToneMarks(entityA.name).localeCompare(removeToneMarks(entityB.name))
 		})
 		return toPairs(groupBy(sortedEntities, (entity) => removeToneMarks(entity.name[0])))
-	}, [store.entities, filteredEntities])
+	}, [filteredEntities])
 
 	const unsaved = useMemo<boolean>(() => {
 		if (!editingEntity) return false
@@ -87,7 +85,7 @@ export function EntitiesManager() {
 
 	const handleRemoveEntity = async (entity?: Entity): Promise<void> => {
 		if (!entity) return
-		const isConfirmedRemove: boolean = await Dialog.confirm({
+		const isConfirmedRemove: boolean = await confirm({
 			title: 'Xác nhận xóa',
 			content: `Bạn chắc chắn muốn xóa "${entity.name}"?`,
 			confirmText: 'Xóa',
@@ -180,11 +178,7 @@ export function EntitiesManager() {
 					<Button onClick={() => handleEntityClick()}>Thêm mới</Button>
 				</div>
 
-				<div className="flex-1 text-right">
-					<Button disabled={saveSettings.loading} onClick={() => saveSettings.run()}>
-						Lưu cài đặt lên GitHub
-					</Button>
-				</div>
+				<div className="flex-1"></div>
 			</div>
 
 			<Popup

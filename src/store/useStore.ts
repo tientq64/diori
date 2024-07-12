@@ -4,18 +4,20 @@ import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { Diary, diarySlice } from './slices/diarySlice'
 import { Editing, editingSlice } from './slices/editingSlice'
+import { Search, searchSlice } from './slices/searchSlice'
 import { Settings, settingsSlice } from './slices/settingsSlice'
 import { User, userSlice } from './slices/userSlice'
 
 export type SliceCreator<T> = StateCreator<Store, [['zustand/immer', never]], [], T>
 
-export type Store = User & Settings & Diary & Editing
+export type Store = User & Settings & Diary & Editing & Search
 
 const store: StateCreator<Store> = (...args) => ({
 	...userSlice(...args),
 	...settingsSlice(...args),
 	...diarySlice(...args),
-	...editingSlice(...args)
+	...editingSlice(...args),
+	...searchSlice(...args)
 })
 
 export const useStore = create<Store>()(

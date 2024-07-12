@@ -1,15 +1,21 @@
 import { Button, Form, Input, Slider, Space, Switch } from 'antd-mobile'
 import { range } from 'lodash'
 import { useNavigate } from 'react-router-dom'
+import { useSaveSettings } from '../../hooks/useSaveSettings'
+import { useSyncSettings } from '../../hooks/useSyncSettings'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { Kbd } from '../Kbd/Kbd'
+import { confirm } from 'antd-mobile/es/components/dialog/confirm'
+import { SliderValue } from 'antd-mobile/es/components/slider'
 
 export function QuickSettingsSection() {
 	const navigate = useNavigate()
 	const store = useStore()
 	const [form] = Form.useForm()
 	const fontFamily = Form.useWatch('fontFamily', form)
+	const saveSettings = useSaveSettings()
+	const syncSettings = useSyncSettings()
 
 	const initialValues = {
 		fontFamily: store.fontFamily,
@@ -19,6 +25,28 @@ export function QuickSettingsSection() {
 
 	const handleSaveSettings = (values: typeof initialValues): void => {
 		store.setFontFamily(values.fontFamily)
+	}
+
+	const handleSyncSettingsFromGitHub = async (): Promise<void> => {
+		const confirmed: boolean = await confirm({
+			content: 'Bạn chắc chắn muốn đồng bộ cài đặt từ GitHub?',
+			confirmText: 'Xác nhận',
+			cancelText: 'Hủy'
+		})
+		if (confirmed) {
+			syncSettings.run()
+		}
+	}
+
+	const handleSaveSettingsToGitHub = async (): Promise<void> => {
+		const confirmed: boolean = await confirm({
+			content: 'Bạn chắc chắn muốn lưu cài đặt lên GitHub?',
+			confirmText: 'Xác nhận',
+			cancelText: 'Hủy'
+		})
+		if (confirmed) {
+			saveSettings.run()
+		}
 	}
 
 	return (
@@ -56,7 +84,7 @@ export function QuickSettingsSection() {
 						marks={Object.fromEntries(
 							range(10, 21).map((fontSize) => [fontSize, fontSize])
 						)}
-						onChange={store.setFontSize as any}
+						onChange={store.setFontSize as (fontSize: SliderValue) => void}
 					/>
 				</Form.Item>
 
@@ -81,7 +109,23 @@ export function QuickSettingsSection() {
 							Lưu cài đặt
 						</Button>
 
-						<Button onClick={() => navigate('/settings')}>Cài đặt khác</Button>
+						<Button disabled onClick={() => navigate('/settings')}>
+							Cài đặt khác
+						</Button>
+
+						<Button
+							disabled={syncSettings.loading || saveSettings.loading}
+							onClick={handleSyncSettingsFromGitHub}
+						>
+							Đồng bộ cài đặt từ GitHub
+						</Button>
+
+						<Button
+							disabled={syncSettings.loading || saveSettings.loading}
+							onClick={handleSaveSettingsToGitHub}
+						>
+							Lưu cài đặt lên GitHub
+						</Button>
 					</Space>
 				</Form.Item>
 			</Form>

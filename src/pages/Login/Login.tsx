@@ -1,17 +1,21 @@
+import { useAsyncEffect } from 'ahooks'
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
-import { useEffect } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
+import { useLogin } from '../../hooks/useLogin'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
-import { useLogin } from '../../hooks/useLogin'
-import { useAsyncEffect } from 'ahooks'
 
 export type LoginValues = {
 	pass: string
 }
 
-export function Login() {
+/**
+ * Trang đăng nhập.
+ * @returns React node.
+ */
+export function Login(): ReactNode {
 	const store = useStore()
 	const [form] = Form.useForm()
 	const navigate = useNavigate()
@@ -39,14 +43,18 @@ export function Login() {
 		])
 	}, [login.error])
 
+	// Chuyển đến trang "/notes" khi có token.
 	useEffect(() => {
 		if (!store.token) return
 		navigate('/notes', { replace: true })
 	}, [store.token])
 
+	// Tự động đăng nhập khi dev.
 	useEffect(() => {
-		form.setFieldValue('pass', 'test')
-		form.submit()
+		if (import.meta.env.DEV) {
+			form.setFieldValue('pass', 'test')
+			form.submit()
+		}
 	}, [])
 
 	if (store.token) {
@@ -75,7 +83,7 @@ export function Login() {
 					onFinish={login.run}
 				>
 					<Form.Item>
-						<div className="mx-auto my-24 text-center text-9xl">🏕️</div>
+						<div className="mx-auto my-24 text-center text-9xl">🌃</div>
 					</Form.Item>
 
 					<Form.Item

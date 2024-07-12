@@ -6,14 +6,17 @@ type PageProps = {
 	children: ReactNode
 }
 
-export function Page({ children }: PageProps) {
+/**
+ * Thành phần tạo layout mặc định cho các trang. Mỗi trang nên được bọc trong thành phần này.
+ */
+export function Page({ children }: PageProps): ReactNode {
 	const store = useStore()
 
 	return (
 		<div className="flex flex-col h-full">
 			<div className="flex-1 min-h-0">{children}</div>
 
-			<div className="flex justify-between align-middle px-4 py-1 outline outline-1 outline-zinc-200 dark:outline-zinc-700">
+			<div className="flex justify-between align-middle px-4 py-1 outline outline-1 outline-zinc-200 dark:outline-zinc-700 text-sm">
 				<div className="flex align-middle gap-4">
 					{store.userName && (
 						<div className="flex xs:hidden gap-3">

@@ -1,5 +1,5 @@
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
-import { useEffect } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/Page/Page'
 import { useRegister } from '../../hooks/useRegister'
@@ -12,7 +12,11 @@ export type RegisterValues = {
 	pass: string
 }
 
-export function Register() {
+/**
+ * Trang đăng ký.
+ * @returns React node.
+ */
+export function Register(): ReactNode {
 	const store = useStore()
 	const [form] = Form.useForm()
 	const register = useRegister()

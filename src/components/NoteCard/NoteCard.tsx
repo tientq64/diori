@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import { MouseEvent, useMemo } from 'react'
 import { Note, Status } from '../../store/slices/diarySlice'
 import { useStore } from '../../store/useStore'
@@ -14,7 +13,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 
 	const status = useMemo<Status>(() => {
 		return years[note.year]
-	}, [years[note.year]])
+	}, [years, note.year])
 
 	const handleClick = (event: MouseEvent<HTMLDivElement>) => {
 		if (isLoadedStatus(status)) {
@@ -24,12 +23,11 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 
 	return (
 		<div
-			className={clsx(
-				'flex flex-col gap-2 xs:gap-1 md:p-2 md:rounded border dark:border-zinc-800 xs:text-center bg-white dark:bg-zinc-800 cursor-pointer group',
-				{
-					'opacity-50 pointer-events-none': !isLoadedStatus(status)
-				}
-			)}
+			className={`
+				flex flex-col gap-2 xs:gap-1 md:p-2 md:rounded border dark:border-zinc-800
+				xs:text-center bg-white dark:bg-zinc-800 cursor-pointer group
+				${isLoadedStatus(status) ? '' : 'opacity-50 pointer-events-none'}
+			`}
 			onClick={handleClick}
 		>
 			<div className="flex xs:flex-col-reverse xs:items-center">
@@ -46,7 +44,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 					)}
 				</div>
 
-				<div className="md:text-right">
+				<div className="md:text-right text-sm">
 					<div>
 						{note.time.format('DD-MM')}
 						<span className="hidden md:group-hover:inline">-{note.year}</span>
@@ -57,7 +55,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 				</div>
 			</div>
 
-			<div className="xs:text-xs xs:leading-3 line-clamp-2 break-words dark:text-zinc-400">
+			<div className="xs:text-xs text-sm xs:leading-3 line-clamp-2 break-words dark:text-zinc-400">
 				{note.title}
 			</div>
 

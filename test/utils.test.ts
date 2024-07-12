@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { compressBase64 } from '../src/utils/compressBase64'
 import { base64ToText } from '../src/utils/base64ToText'
-import { intToRadix62 } from '../src/utils/intToRadix62'
+import { compressBase64 } from '../src/utils/compressBase64'
 import { decompressBase64 } from '../src/utils/decompressBase64'
+import { intToRadix62 } from '../src/utils/intToRadix62'
 import { radix62ToInt } from '../src/utils/radix62ToInt'
+import { removeToneMarks } from '../src/utils/removeToneMarks'
 import { textToBase64 } from '../src/utils/textToBase64'
 
 describe('utils', () => {
@@ -36,14 +37,18 @@ describe('utils', () => {
 	test('compressBase64', () => {
 		expect(compressBase64('')).toBe('')
 		expect(compressBase64('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')).toBe(
-			'bmj.h!uq10~3_IGvvD-~cvQ==='
+			'bmj.h~1uq10~3_IGvvD-~cvQ=~'
 		)
 	})
 
 	test('decompressBase64', () => {
 		expect(decompressBase64('')).toBe('')
-		expect(decompressBase64('bmj.h!uq10~3_IGvvD-~cvQ===')).toBe(
+		expect(decompressBase64('bmj.h~1uq10~3_IGvvD-~cvQ=~')).toBe(
 			'bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ==='
 		)
+	})
+
+	test('removeToneMarks', () => {
+		expect(removeToneMarks('nhật ký')).toBe('nhât ky')
 	})
 })

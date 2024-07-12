@@ -7,18 +7,28 @@ export function getOctokit(token?: string): Octokit {
 
 	const rest = new Octokit({ auth: token || store.token })
 
-	const handleResponse = (res: OctokitResponse<any>) => {
-		const limit = res.headers['x-ratelimit-limit']
-		const remaining = res.headers['x-ratelimit-remaining']
-		const reset = res.headers['x-ratelimit-reset']
-		if (limit) {
-			store.setRateLimit(Number(limit))
-		}
-		if (remaining) {
-			store.setRateLimitRemaining(Number(remaining))
-		}
-		if (reset) {
-			store.setRateLimitTimeReset(Number(reset) * 1000)
+	const handleResponse = (res: OctokitResponse<unknown>) => {
+		if (res.headers['x-ratelimit-resource'] === 'core') {
+			const store = useStore.getState()
+
+			const limit = Number(res.headers['x-ratelimit-limit'])
+			const remaining = Number(res.headers['x-ratelimit-remaining'])
+			const reset = Number(res.headers['x-ratelimit-reset'])
+			if (limit) {
+				store.setRateLimit(limit)
+			}
+			if (remaining) {
+				if (
+					store.rateLimitTimeReset === null ||
+					reset !== store.rateLimitTimeReset.unix() ||
+					remaining < store.rateLimitRemaining
+				) {
+					store.setRateLimitRemaining(remaining)
+				}
+			}
+			if (reset) {
+				store.setRateLimitTimeReset(reset * 1000)
+			}
 		}
 	}
 

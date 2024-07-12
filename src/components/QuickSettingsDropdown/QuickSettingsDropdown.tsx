@@ -2,7 +2,7 @@ import { Dropdown } from 'antd-mobile'
 import { useStore } from '../../store/useStore'
 import { QuickSettingsSection } from '../QuickSettingsSection/QuickSettingsSection'
 
-export function QuickSettingsButton() {
+export function QuickSettingsDropdown() {
 	const store = useStore()
 
 	return (
