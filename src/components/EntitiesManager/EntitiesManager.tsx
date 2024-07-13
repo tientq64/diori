@@ -17,6 +17,13 @@ import { TagsInput } from 'react-tag-input-component'
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { removeToneMarks } from '../../utils/removeToneMarks'
+import {
+	BusinessRounded,
+	FaceRounded,
+	GiteRounded,
+	HomeWorkRounded,
+	SentimentSatisfiedRounded
+} from '@mui/icons-material'
 
 export function EntitiesManager() {
 	const store = useStore()

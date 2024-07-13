@@ -5,6 +5,7 @@ import { Editor } from '@monaco-editor/react'
 import { useUpdateEffect } from 'ahooks'
 import {
 	Button,
+	Dialog,
 	Form,
 	ImageUploadItem,
 	ImageUploader,
@@ -22,7 +23,7 @@ import {
 	InformationCircleOutline,
 	PictureOutline
 } from 'antd-mobile-icons'
-import { differenceBy, filter, findIndex, reject, some, upperFirst } from 'lodash'
+import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 'lodash'
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -43,6 +44,8 @@ import { setupEditor } from './setupEditor'
 
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 import spinnerImage from '../../assets/images/spinner.svg'
+import { slideType } from '@fancyapps/ui/types/Carousel/types'
+import { produce } from 'immer'
 
 export function EditPage(): ReactNode {
 	const editingNote = useStore((state) => state.editingNote)
@@ -60,6 +63,7 @@ export function EditPage(): ReactNode {
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
+	const fancybox = useRef<Fancybox | null>(null)
 	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
 	const [editor, setEditor] = useState<Monaco.editor.IStandaloneCodeEditor>()
@@ -166,34 +170,45 @@ export function EditPage(): ReactNode {
 		return { key, thumbnailUrl, url }
 	}
 
-	const showPreviewImage = (defaultImage: ImageUploadItem): void => {
-		Fancybox.show(
-			images.map((image) => ({
-				src: image.url || spinnerImage,
-				thumbSrc: image.thumbnailUrl,
-				id: `fancybox-image-${image.key}`
+	const showPreviewImage = (image: ImageUploadItem): void => {
+		const startIndex: number = findIndex(images, { key: image.key })
+
+		fancybox.current = new Fancybox(
+			images.map((image2) => ({
+				src: spinnerImage,
+				thumbSrc: image2.thumbnailUrl,
+				id: image2.key as string
 			})),
 			{
-				startIndex: findIndex(images, { key: defaultImage.key }),
+				startIndex,
 				on: {
-					'Carousel.change': (...args) => {
-						console.log(args)
+					'Carousel.selectSlide': async (_, __, slide: slideType): Promise<void> => {
+						const image: ImageUploadItem | undefined = find(images, { key: slide.id })
+						if (image === undefined) return
+						const url = await loadImagePhotoUrl(image)
+						if (url === undefined) return
+						const imageEl = slide.imageEl as HTMLImageElement | undefined
+						if (imageEl === undefined) return
+						imageEl.src = url
 					}
 				}
 			}
 		)
-		// const defaultImageIndex: number = findIndex(images, { key: defaultImage.key })
-		// ImageViewer.Multi.show({
-		// 	images: images.map((image) => image.url ?? image.thumbnailUrl),
-		// 	defaultIndex: defaultImageIndex,
-		// 	onIndexChange: handlePreviewImageIndexChange
-		// })
-		// handlePreviewImageIndexChange(defaultImageIndex)
 	}
 
-	const handlePreviewImageIndexChange = (index: number): void => {
-		const image: ImageUploadItem = images[index]
-		photosLoader.run(editingNote.time, image.key as string)
+	const loadImagePhotoUrl = async (image: ImageUploadItem): Promise<string | undefined> => {
+		if (image.url) {
+			return image.url
+		}
+		const blobUrl: string = await photosLoader.runAsync(editingNote.time, image)
+		const images2: ImageUploadItem[] = form.getFieldValue('images')
+		const image2: ImageUploadItem | undefined = find(images2, { key: image.key })
+		if (image2) {
+			image2.url = blobUrl
+			form.setFieldValue('images', images2)
+			return blobUrl
+		}
+		return undefined
 	}
 
 	const handleRestorePhoto = (photo: Photo): void => {
@@ -212,16 +227,16 @@ export function EditPage(): ReactNode {
 		if (save.loading) {
 			Toast.show('Không thể trở về trong khi đang lưu')
 		} else {
-			Modal.show({
+			Dialog.show({
 				title: 'Dữ liệu chưa được lưu',
 				content: 'Dữ liệu chưa được lưu sẽ bị mất, bạn vẫn muốn trở về?',
-				showCloseButton: true,
+				closeOnMaskClick: true,
 				closeOnAction: true,
 				actions: [
 					{
 						key: 'save',
 						text: 'Lưu',
-						primary: true,
+						bold: true,
 						onClick: () => {
 							form.submit()
 						}
@@ -236,7 +251,8 @@ export function EditPage(): ReactNode {
 					},
 					{
 						key: 'cancel',
-						text: 'Đóng'
+						text: 'Đóng',
+						className: 'text-zinc-400'
 					}
 				],
 				afterClose: () => {

@@ -107,6 +107,7 @@ export function SearchPage(): ReactNode {
 
 							{store.searchError && (
 								<Result
+									className="w-full"
 									status="error"
 									title="Đã xảy ra lỗi"
 									description={

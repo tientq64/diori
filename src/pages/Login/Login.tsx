@@ -1,7 +1,8 @@
 import { useAsyncEffect } from 'ahooks'
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import logoImage from '../../assets/images/book.png'
 import { Page } from '../../components/Page/Page'
 import { useLogin } from '../../hooks/useLogin'
 import { useStore } from '../../store/useStore'
@@ -27,8 +28,9 @@ export function Login(): ReactNode {
 		if (error.status === 401) {
 			const isGoToGitHubSetting: boolean = await Modal.confirm({
 				title: 'Đã xảy ra lỗi',
-				content: 'Personal access token đã hết hạn. Hãy tạo mới và đăng ký lại.',
-				confirmText: 'OK'
+				content: 'Personal access token đã hết hạn. Tạo một cái mới?',
+				confirmText: 'OK',
+				cancelText: 'Để sau'
 			})
 			if (isGoToGitHubSetting) {
 				window.open('https://github.com/settings/tokens?type=beta', '_blank')
@@ -63,9 +65,9 @@ export function Login(): ReactNode {
 
 	return (
 		<Page>
-			<div className="h-full">
+			<div className="flex flex-col h-full">
 				<NavBar
-					backArrow={false}
+					backIcon={null}
 					right={
 						<Button fill="none" onClick={() => navigate('/register')}>
 							Đăng ký
@@ -75,41 +77,60 @@ export function Login(): ReactNode {
 					Đăng nhập
 				</NavBar>
 
-				<Form
-					form={form}
-					layout="horizontal"
-					disabled={login.loading || login.data}
-					validateMessages={formValidateMessages}
-					onFinish={login.run}
-				>
-					<Form.Item>
-						<div className="mx-auto my-24 text-center text-9xl">🌃</div>
-					</Form.Item>
+				<div className="flex-1 flex flex-col items-center border-t border-zinc-800">
+					<div className="basis-7/12 flex items-center">
+						<img src={logoImage} />
+					</div>
 
-					<Form.Item
-						label="Mật khẩu"
-						name="pass"
-						rules={[
-							{
-								required: true
-							}
-						]}
+					<Form
+						className="w-full"
+						form={form}
+						layout="horizontal"
+						disabled={login.loading || login.data}
+						validateMessages={formValidateMessages}
+						onFinish={login.run}
 					>
-						<Input type="password" autoFocus />
-					</Form.Item>
-
-					<Form.Item>
-						<Button
-							type="submit"
-							color="primary"
-							size="large"
-							block
-							loading={login.loading}
+						<Form.Item
+							label="Mật khẩu"
+							name="pass"
+							rules={[
+								{
+									required: true
+								}
+							]}
 						>
-							Đăng nhập
-						</Button>
-					</Form.Item>
-				</Form>
+							<Input type="password" autoFocus />
+						</Form.Item>
+
+						<Form.Item>
+							<Button
+								type="submit"
+								color="primary"
+								size="large"
+								block
+								loading={login.loading}
+							>
+								Đăng nhập
+							</Button>
+						</Form.Item>
+					</Form>
+
+					<div className="basis-5/12 flex items-end gap-6 xs:gap-4 py-2">
+						<Link to="/register">Đăng ký</Link>
+						<a href="https://github.com/tientq64/diori" target="_blank">
+							GitHub
+						</a>
+						<a
+							href="https://github.com/tientq64/diori/blob/main/CHANGELOG.md"
+							target="_blank"
+						>
+							Có gì mới?
+						</a>
+						<a href="https://github.com/tientq64/diori/issues" target="_blank">
+							Báo lỗi
+						</a>
+					</div>
+				</div>
 			</div>
 		</Page>
 	)

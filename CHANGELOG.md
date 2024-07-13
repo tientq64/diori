@@ -1,11 +1,16 @@
 # Nhật ký thay đổi
 
+## 1.3.0 (13-07-2024)
+
+* Đã có thể xem ảnh đã lưu trên GitHub. Nhưng chưa được tối ưu.
+
 ## 1.2.0 (12-07-2024)
 
 * Thêm chức năng tìm kiếm.
 * Sửa lỗi giới hạn GitHub API còn lại bị nhảy lên xuống không đúng thứ tự. Bởi vì các request phản hồi không theo thứ tự.
 * Sửa nhiều thứ linh tinh.
 * Đổi icon trang đăng nhập.
+* Dùng `bun` thay `pnpm`.
 
 ## 1.1.0 (14-04-2024)
 

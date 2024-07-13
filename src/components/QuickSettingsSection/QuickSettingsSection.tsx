@@ -1,4 +1,6 @@
 import { Button, Form, Input, Slider, Space, Switch } from 'antd-mobile'
+import { confirm } from 'antd-mobile/es/components/dialog/confirm'
+import { SliderValue } from 'antd-mobile/es/components/slider'
 import { range } from 'lodash'
 import { useNavigate } from 'react-router-dom'
 import { useSaveSettings } from '../../hooks/useSaveSettings'
@@ -6,8 +8,6 @@ import { useSyncSettings } from '../../hooks/useSyncSettings'
 import { useStore } from '../../store/useStore'
 import { formValidateMessages } from '../../utils/formValidateMessages'
 import { Kbd } from '../Kbd/Kbd'
-import { confirm } from 'antd-mobile/es/components/dialog/confirm'
-import { SliderValue } from 'antd-mobile/es/components/slider'
 
 export function QuickSettingsSection() {
 	const navigate = useNavigate()
@@ -106,7 +106,7 @@ export function QuickSettingsSection() {
 
 					<Space>
 						<Button type="submit" color="primary" disabled={store.isXs}>
-							Lưu cài đặt
+							Áp dụng cài đặt
 						</Button>
 
 						<Button disabled onClick={() => navigate('/settings')}>

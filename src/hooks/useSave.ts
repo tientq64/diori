@@ -31,6 +31,7 @@ export function useSave() {
 
 			const { time, sha, year } = editingNote
 
+			/** Tiêu đề mới, hoặc tiêu đề cũ nếu có. */
 			let newTitle: string = title
 			if (!title && content.length) {
 				const longestLine: string = content
@@ -45,7 +46,8 @@ export function useSave() {
 				})
 			}
 
-			const defaultPhoto = find(images, { key: defaultPhotoKey })
+			/** Ảnh mặc định. */
+			const defaultPhoto: ImageUploadItem | undefined = find(images, { key: defaultPhotoKey })
 
 			const chunks = [
 				time.format('MMDD'),
