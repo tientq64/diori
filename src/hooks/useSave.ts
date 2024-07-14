@@ -14,7 +14,7 @@ import { textToBase64 } from '../utils/textToBase64'
 import { textToCompressedBase64 } from '../utils/textToCompressedBase64'
 
 export function useSave() {
-	const editingNote = useStore((state) => state.editingNote)
+	const editingNote = useStore<Note | null>((state) => state.editingNote)
 	const store = useStore()
 
 	const request = useRequest(
@@ -27,7 +27,7 @@ export function useSave() {
 			defaultPhotoKey: string,
 			noteEdit: NoteEdit
 		): Promise<NoteEdit | void> => {
-			if (!editingNote) return
+			if (editingNote === null) return
 
 			const { time, sha, year } = editingNote
 

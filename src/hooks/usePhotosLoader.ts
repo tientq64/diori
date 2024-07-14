@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { ImageUploadItem } from 'antd-mobile'
 import { Dayjs } from 'dayjs'
@@ -10,12 +11,12 @@ export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 
 export function usePhotosLoader() {
 	const store = useStore()
-	const blobUrlsRef = useRef<string[]>([])
+	const createdBlobUrls = useRef<string[]>([])
 
 	const request = useRequest(
 		async (time: Dayjs, image: ImageUploadItem): Promise<string> => {
-			const rest = getOctokit()
-			const repoName = `diori-photos-${time.year()}`
+			const rest: Octokit = getOctokit()
+			const repoName: string = `diori-photos-${time.year()}`
 			let res, node
 
 			res = await rest.repos.getCommit({
@@ -58,7 +59,7 @@ export function usePhotosLoader() {
 			)
 			const blob: Blob = new Blob([buf], { type: 'image/webp' })
 			const blobUrl: string = URL.createObjectURL(blob)
-			blobUrlsRef.current.push(blobUrl)
+			createdBlobUrls.current.push(blobUrl)
 
 			return blobUrl
 		},
@@ -69,7 +70,7 @@ export function usePhotosLoader() {
 
 	// Thu hồi blob URL ảnh đã tạo để giải phóng bộ nhớ.
 	useEffect(() => {
-		const blobUrls = blobUrlsRef.current
+		const blobUrls: string[] = createdBlobUrls.current
 		return () => {
 			for (const blobUrl of blobUrls) {
 				URL.revokeObjectURL(blobUrl)

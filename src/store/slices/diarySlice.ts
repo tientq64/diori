@@ -11,7 +11,7 @@ export type Note = {
 	/** Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới mỗi khi dùng. */
 	time: Dayjs
 
-	/** Ngày âm lịch. */
+	/** Đối tượng ngày âm lịch. */
 	lunar: VietnameseDate
 
 	/** Năm. Mục đích lấy năm nhanh hơn, không cần phải gọi `time.year()`. */

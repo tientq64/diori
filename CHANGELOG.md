@@ -1,5 +1,10 @@
 # Nhật ký thay đổi
 
+## 1.3.1 (15-07-2024)
+
+* Lọc file khi tải lên, chỉ lấy file hình ảnh.
+* Trình xem ảnh đã được tối ưu.
+
 ## 1.3.0 (13-07-2024)
 
 * Đã có thể xem ảnh đã lưu trên GitHub. Nhưng chưa được tối ưu.

@@ -1,16 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Fancybox } from '@fancyapps/ui'
+import '@fancyapps/ui/dist/fancybox/fancybox.css'
+import { slideType } from '@fancyapps/ui/types/Carousel/types'
 import { Editor } from '@monaco-editor/react'
 import { useUpdateEffect } from 'ahooks'
 import {
 	Button,
 	Dialog,
 	Form,
-	ImageUploadItem,
 	ImageUploader,
 	Input,
-	Modal,
 	NavBar,
 	Popover,
 	Skeleton,
@@ -27,7 +27,8 @@ import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useBlocker, useLocation } from 'react-router-dom'
+import { Blocker, useBlocker, useLocation } from 'react-router-dom'
+import spinnerImage from '../../assets/images/spinner.svg'
 import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { Page } from '../../components/Page/Page'
 import { QuickSettingsDropdown } from '../../components/QuickSettingsDropdown/QuickSettingsDropdown'
@@ -42,13 +43,16 @@ import { formValidateMessages } from '../../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
 import { setupEditor } from './setupEditor'
 
-import '@fancyapps/ui/dist/fancybox/fancybox.css'
-import spinnerImage from '../../assets/images/spinner.svg'
-import { slideType } from '@fancyapps/ui/types/Carousel/types'
-import { produce } from 'immer'
+export type ImageUploadItem = {
+	key?: string | number
+	url: string
+	thumbnailUrl?: string
+	extra?: any
+	loadUrlPromise?: Promise<string>
+}
 
 export function EditPage(): ReactNode {
-	const editingNote = useStore((state) => state.editingNote)
+	const editingNote = useStore<Note | null>((state) => state.editingNote)
 
 	if (!editingNote) return
 
@@ -63,7 +67,6 @@ export function EditPage(): ReactNode {
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
-	const fancybox = useRef<Fancybox | null>(null)
 	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
 	const [editor, setEditor] = useState<Monaco.editor.IStandaloneCodeEditor>()
@@ -107,7 +110,7 @@ export function EditPage(): ReactNode {
 		return false
 	}, [getNoteEdit.loading, title, content, addedImages, removedImages, defaultPhotoKey, noteEdit])
 
-	const blocker = useBlocker(unsaved || save.loading)
+	const blocker: Blocker = useBlocker(unsaved || save.loading)
 
 	const canSave = useMemo<boolean>(() => {
 		if (save.loading) return false
@@ -159,6 +162,18 @@ export function EditPage(): ReactNode {
 		}
 	}
 
+	const localImageBeforeUpload = async (file: File): Promise<File | null> => {
+		if (!/^image\/(jpeg|webp|png)$/.test(file.type)) {
+			return null
+		}
+		return file
+	}
+
+	/**
+	 * Hàm trả về đối tượng ảnh cần tải lên của component `ImageUploader`.
+	 * @param file Tập tin ảnh.
+	 * @returns Đối tượng ảnh.
+	 */
 	const localImageUpload = async (file: File): Promise<ImageUploadItem> => {
 		const url = URL.createObjectURL(file)
 		const thumbnailUrl = await makeThumbnailUrl(url)
@@ -170,10 +185,14 @@ export function EditPage(): ReactNode {
 		return { key, thumbnailUrl, url }
 	}
 
+	/**
+	 * Xem ảnh.
+	 * @param image Ảnh cần xem.
+	 */
 	const showPreviewImage = (image: ImageUploadItem): void => {
 		const startIndex: number = findIndex(images, { key: image.key })
 
-		fancybox.current = new Fancybox(
+		const fancybox: Fancybox = new Fancybox(
 			images.map((image2) => ({
 				src: spinnerImage,
 				thumbSrc: image2.thumbnailUrl,
@@ -185,27 +204,42 @@ export function EditPage(): ReactNode {
 					'Carousel.selectSlide': async (_, __, slide: slideType): Promise<void> => {
 						const image: ImageUploadItem | undefined = find(images, { key: slide.id })
 						if (image === undefined) return
-						const url = await loadImagePhotoUrl(image)
+						const url: string | undefined = await loadImagePhotoUrl(image)
 						if (url === undefined) return
 						const imageEl = slide.imageEl as HTMLImageElement | undefined
 						if (imageEl === undefined) return
 						imageEl.src = url
+					},
+					close: (): void => {
+						fancybox.destroy()
 					}
 				}
 			}
 		)
 	}
 
+	/**
+	 * Lấy data URL của ảnh.
+	 * @param image Ảnh cần tải, có thể là ảnh chuẩn bị tải lên hoặc ảnh đã tải lên rồi.
+	 * @returns Data URL của ảnh.
+	 */
 	const loadImagePhotoUrl = async (image: ImageUploadItem): Promise<string | undefined> => {
 		if (image.url) {
 			return image.url
+		} else if (image.loadUrlPromise) {
+			return image.loadUrlPromise
 		}
-		const blobUrl: string = await photosLoader.runAsync(editingNote.time, image)
+		const loadUrlPromise: Promise<string> = photosLoader.runAsync(editingNote.time, image)
 		const images2: ImageUploadItem[] = form.getFieldValue('images')
-		const image2: ImageUploadItem | undefined = find(images2, { key: image.key })
-		if (image2) {
-			image2.url = blobUrl
-			form.setFieldValue('images', images2)
+		const image2: ImageUploadItem = find(images2, { key: image.key })!
+		image2.loadUrlPromise = loadUrlPromise
+		form.setFieldValue('images', images2)
+		const blobUrl: string = await loadUrlPromise
+		const images3: ImageUploadItem[] = form.getFieldValue('images')
+		const image3: ImageUploadItem | undefined = find(images3, { key: image.key })
+		if (image3) {
+			image3.url = blobUrl
+			form.setFieldValue('images', images3)
 			return blobUrl
 		}
 		return undefined
@@ -345,8 +379,6 @@ export function EditPage(): ReactNode {
 					{getNoteEdit.loading && (
 						<div className="flex flex-col h-full p-4">
 							<Skeleton.Title />
-							<br />
-							<br />
 							<Skeleton.Paragraph lineCount={5} />
 							<br />
 							<Skeleton.Paragraph className="flex-1" lineCount={3} />
@@ -444,6 +476,7 @@ export function EditPage(): ReactNode {
 									maxCount={maxImagesCount}
 									multiple
 									preview={false}
+									beforeUpload={localImageBeforeUpload}
 									upload={localImageUpload}
 									renderItem={(imageNode, image) => (
 										<Popover.Menu

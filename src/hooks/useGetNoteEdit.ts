@@ -9,8 +9,8 @@ export function useGetNoteEdit() {
 	const store = useStore()
 
 	const request = useRequest(
-		async (note: Note) => {
-			if (!note.sha) return
+		async (note: Note): Promise<NoteEdit | undefined> => {
+			if (note.sha === undefined) return
 
 			const rest = getOctokit(store.token)
 
