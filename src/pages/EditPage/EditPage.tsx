@@ -69,7 +69,6 @@ export function EditPage(): ReactNode {
 	const usedPhotoKeys = useRef<string[]>([])
 	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
-	const [editor, setEditor] = useState<Monaco.editor.IStandaloneCodeEditor>()
 	const editorDisposer = useRef<Monaco.IDisposable>()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
@@ -133,8 +132,6 @@ export function EditPage(): ReactNode {
 		editor: Monaco.editor.IStandaloneCodeEditor,
 		monaco: typeof Monaco
 	): void => {
-		setEditor(editor)
-
 		const model = editor.getModel()
 		if (!model) return
 
@@ -308,11 +305,6 @@ export function EditPage(): ReactNode {
 	}, [store.entities])
 
 	useEffect(() => {
-		if (!editor) return
-		editor.updateOptions({ fontSize: store.fontSize })
-	}, [store.fontSize, editor])
-
-	useEffect(() => {
 		if (!save.data) return
 		setNoteEdit(save.data)
 	}, [save.data])
@@ -405,6 +397,7 @@ export function EditPage(): ReactNode {
 								]}
 							>
 								<Input
+									autoComplete="off"
 									placeholder={
 										noteEdit && noteEdit.title && !noteEdit.isTitled
 											? noteEdit.title
@@ -428,7 +421,7 @@ export function EditPage(): ReactNode {
 									language="diori"
 									options={{
 										fontFamily: store.fontFamily,
-										fontSize: 16,
+										fontSize: store.fontSize,
 										wordWrap: store.isMd ? 'wordWrapColumn' : 'on',
 										wordWrapColumn: 160,
 										wrappingStrategy: 'advanced',
@@ -438,6 +431,7 @@ export function EditPage(): ReactNode {
 										smoothScrolling: true,
 										automaticLayout: true,
 										renderLineHighlightOnlyWhenFocus: true,
+										rulers: store.isMd ? [164] : undefined,
 										padding: {
 											top: 12
 										},
