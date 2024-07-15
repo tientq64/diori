@@ -77,7 +77,7 @@ export function Login(): ReactNode {
 					Đăng nhập
 				</NavBar>
 
-				<div className="flex-1 flex flex-col items-center border-t border-zinc-800">
+				<div className="flex-1 flex flex-col items-center">
 					<div className="basis-7/12 flex items-center">
 						<img src={logoImage} />
 					</div>
@@ -85,6 +85,7 @@ export function Login(): ReactNode {
 					<Form
 						className="w-full"
 						form={form}
+						mode="card"
 						layout="horizontal"
 						disabled={login.loading || login.data}
 						validateMessages={formValidateMessages}

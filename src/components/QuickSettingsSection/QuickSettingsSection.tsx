@@ -1,5 +1,4 @@
-import { Button, Form, Input, Slider, Space, Switch } from 'antd-mobile'
-import { confirm } from 'antd-mobile/es/components/dialog/confirm'
+import { Button, Dialog, Form, Input, Slider, Switch } from 'antd-mobile'
 import { SliderValue } from 'antd-mobile/es/components/slider'
 import { range } from 'lodash'
 import { useNavigate } from 'react-router-dom'
@@ -28,7 +27,7 @@ export function QuickSettingsSection() {
 	}
 
 	const handleSyncSettingsFromGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await confirm({
+		const confirmed: boolean = await Dialog.confirm({
 			content: 'Bạn chắc chắn muốn đồng bộ cài đặt từ GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
@@ -39,7 +38,7 @@ export function QuickSettingsSection() {
 	}
 
 	const handleSaveSettingsToGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await confirm({
+		const confirmed: boolean = await Dialog.confirm({
 			content: 'Bạn chắc chắn muốn lưu cài đặt lên GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
@@ -52,6 +51,7 @@ export function QuickSettingsSection() {
 	return (
 		<div>
 			<Form
+				className="xs:adm-form-card-m0"
 				form={form}
 				mode="card"
 				layout={store.isMd ? 'horizontal' : 'vertical'}
@@ -104,29 +104,29 @@ export function QuickSettingsSection() {
 						trường văn bản.
 					</div>
 
-					<Space>
+					<div className="flex xs:flex-wrap justify-center gap-2">
 						<Button type="submit" color="primary" disabled={store.isXs}>
-							Áp dụng cài đặt
+							{store.isMd ? 'Áp dụng cài đặt' : 'Áp dụng c.đặt'}
 						</Button>
 
 						<Button disabled onClick={() => navigate('/settings')}>
-							Cài đặt khác
+							{store.isMd ? 'Cài đặt khác' : 'C.đặt khác'}
 						</Button>
 
 						<Button
 							disabled={syncSettings.loading || saveSettings.loading}
 							onClick={handleSyncSettingsFromGitHub}
 						>
-							Đồng bộ cài đặt từ GitHub
+							{store.isMd ? 'Đồng bộ cài đặt từ GitHub' : 'Đ.bộ c.đặt từ Git'}
 						</Button>
 
 						<Button
 							disabled={syncSettings.loading || saveSettings.loading}
 							onClick={handleSaveSettingsToGitHub}
 						>
-							Lưu cài đặt lên GitHub
+							{store.isMd ? 'Lưu cài đặt lên GitHub' : 'Lưu c.đặt lên Git'}
 						</Button>
-					</Space>
+					</div>
 				</Form.Item>
 			</Form>
 		</div>

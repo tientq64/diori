@@ -16,6 +16,13 @@ export function App() {
 	}
 
 	useEffect(() => {
+		if (store.isDarkMode) {
+			document.documentElement.classList.add('dark')
+			document.documentElement.classList.remove('light')
+		} else {
+			document.documentElement.classList.add('light')
+			document.documentElement.classList.remove('dark')
+		}
 		document.documentElement.setAttribute(
 			'data-prefers-color-scheme',
 			store.isDarkMode ? 'dark' : 'light'

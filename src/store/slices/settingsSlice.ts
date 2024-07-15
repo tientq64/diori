@@ -41,10 +41,16 @@ export type Settings = SettingsProps & {
 	setFontSize: (fontSize: number) => void
 	setIsDarkMode: (isDarkMode: boolean) => void
 	setEntities: (entities: Entity[]) => void
+	/**
+	 * Thêm mới hoặc cập nhật đối tượng.
+	 */
 	addOrUpdateEntity: (entity: Entity) => void
 	removeEntity: (entity?: Entity) => void
-	getSettingProps: () => SettingsProps
-	setSettingProps: (settingProps: SettingsProps) => void
+	/**
+	 * Trả về các thuộc tính của cài đặt.
+	 */
+	getSettingsProps: () => SettingsProps
+	setSettingsProps: (settingsProps: SettingsProps) => void
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
@@ -87,7 +93,7 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		})
 	},
 
-	getSettingProps: (): SettingsProps => {
+	getSettingsProps: (): SettingsProps => {
 		const state = get()
 		return {
 			fontFamily: state.fontFamily,
@@ -97,12 +103,12 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		}
 	},
 
-	setSettingProps: (settingProps) => {
+	setSettingsProps: (settingsProps) => {
 		set({
-			fontFamily: settingProps.fontFamily,
-			fontSize: settingProps.fontSize,
-			isDarkMode: settingProps.isDarkMode,
-			entities: settingProps.entities
+			fontFamily: settingsProps.fontFamily,
+			fontSize: settingsProps.fontSize,
+			isDarkMode: settingsProps.isDarkMode,
+			entities: settingsProps.entities
 		})
 	}
 })

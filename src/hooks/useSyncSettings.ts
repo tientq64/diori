@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequest } from 'ahooks'
-import { Dialog, Toast } from 'antd-mobile'
+import { Dialog } from 'antd-mobile'
 import { SettingsProps } from '../store/slices/settingsSlice'
 import { useStore } from '../store/useStore'
 import { base64ToText } from '../utils/base64ToText'
@@ -24,15 +24,24 @@ export function useSyncSettings() {
 					path: 'settings.json'
 				})
 				const json: string = base64ToText(res.data.content)
-				const settingProps: SettingsProps = JSON.parse(json)
-				store.setSettingProps(settingProps)
+				const settingsProps: SettingsProps = JSON.parse(json)
+				store.setSettingsProps(settingsProps)
 
-				Toast.show('Đã đồng bộ cài đặt thành công.')
+				Dialog.alert({
+					content: 'Đã đồng bộ cài từ GitHub.',
+					confirmText: 'OK'
+				})
 			} catch (error: any) {
 				if (error.status === 404) {
-					Dialog.alert({ content: 'Không có cài đặt trên GitHub.' })
+					Dialog.alert({
+						content: 'Không có cài đặt trên GitHub.',
+						confirmText: 'OK'
+					})
 				} else {
-					Dialog.alert({ content: `Đồng bộ cài đặt thất bại: ${String(error)}` })
+					Dialog.alert({
+						content: `Đồng bộ cài đặt từ GitHub thất bại: ${String(error)}`,
+						confirmText: 'OK'
+					})
 				}
 				throw error
 			}

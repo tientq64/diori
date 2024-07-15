@@ -1,5 +1,5 @@
 import { DatePickerView, Dropdown, NavBar } from 'antd-mobile'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { upperFirst } from 'lodash'
 import { ReactNode, WheelEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -35,11 +35,12 @@ export function NotesPage(): ReactNode {
 	const handleScroll = (event: WheelEvent<HTMLDivElement>): void => {
 		const scrollEl = event.currentTarget
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
-		const offset = 200
-		if (scrollTop <= offset) {
-			setCurrentTime(currentTime.subtract(4, 'week'))
-		} else if (scrollTop >= scrollHeight - clientHeight - offset) {
-			setCurrentTime(currentTime.add(4, 'week'))
+		const offsetScroll: number = store.isMd ? 200 : 1000
+		const offsetWeek: number = store.isMd ? 4 : 2
+		if (scrollTop <= offsetScroll) {
+			setCurrentTime(currentTime.subtract(offsetWeek, 'week'))
+		} else if (scrollTop >= scrollHeight - clientHeight - offsetScroll) {
+			setCurrentTime(currentTime.add(offsetWeek, 'week'))
 		}
 		currentScrollTop = scrollTop
 		if (scrollTop === 0 && store.isMd) {
@@ -53,14 +54,16 @@ export function NotesPage(): ReactNode {
 
 	const handleNoteClick = (note: Note): void => {
 		store.setEditingNote(note)
-		navigate('/edit')
+		navigate(`/edit/${note.date}`)
 	}
 
 	useEffect(() => {
-		const notes = []
+		const notes: Note[] = []
 		const years = new Set<number>()
-		let time = currentTime.startOf('week').subtract(7, 'week')
-		for (let i = 0; i < 15 * 7; i++) {
+		const numberWeek: number = store.isMd ? 15 : 7
+		const firstOffsetWeek: number = store.isMd ? 7 : 3
+		let time: Dayjs = currentTime.startOf('week').subtract(firstOffsetWeek, 'week')
+		for (let i = 0; i < numberWeek * 7; i++) {
 			const year = time.year()
 			const note: Note = store.getNote(time) ?? store.makeNote(time)
 			notes.push(note)
@@ -79,12 +82,29 @@ export function NotesPage(): ReactNode {
 		scrollTo(currentScrollTop)
 	}, [currentNotes.length])
 
+	const renderYearDropdown = (): ReactNode => {
+		return (
+			<Dropdown closeOnClickAway>
+				<Dropdown.Item key="year" title={currentTime.year()} destroyOnClose>
+					<DatePickerView
+						min={dayjs().subtract(100, 'year').toDate()}
+						max={dayjs().add(100, 'year').toDate()}
+						precision="year"
+						value={currentTime.toDate()}
+						onChange={handleYearChange}
+					/>
+				</Dropdown.Item>
+			</Dropdown>
+		)
+	}
+
 	return (
 		<Page>
 			<div className="flex flex-col h-full">
 				<NavBar
 					className="md:pl-4 md:pr-8"
 					backIcon={null}
+					left={store.isXs && renderYearDropdown()}
 					right={
 						<div className="flex justify-end items-center md:gap-4">
 							{store.isMd && <SearchInput />}
@@ -93,33 +113,30 @@ export function NotesPage(): ReactNode {
 						</div>
 					}
 				>
-					<Dropdown closeOnClickAway arrow={store.isMd ? undefined : false}>
-						<Dropdown.Item key="year" title={currentTime.year()} destroyOnClose>
-							<DatePickerView
-								min={dayjs().subtract(100, 'year').toDate()}
-								max={dayjs().add(100, 'year').toDate()}
-								precision="year"
-								value={currentTime.toDate()}
-								onChange={handleYearChange}
-							/>
-						</Dropdown.Item>
-					</Dropdown>
+					{store.isMd && renderYearDropdown()}
 				</NavBar>
 
-				<div className="flex justify-around md:gap-4 border-b dark:border-zinc-700 md:pl-4 md:pr-8 text-center">
-					{dayjs[store.isMd ? 'weekdays' : 'weekdaysMin'](true).map((weekday) => (
-						<div key={weekday} className="flex-1">
-							{upperFirst(weekday)}
-						</div>
-					))}
-				</div>
+				{store.isMd && (
+					<div className="flex justify-around md:gap-4 md:pl-4 md:pr-8 text-center">
+						{dayjs[store.isMd ? 'weekdays' : 'weekdaysMin'](true).map((weekday) => (
+							<div key={weekday} className="flex-1">
+								{upperFirst(weekday)}
+							</div>
+						))}
+					</div>
+				)}
+				{store.isXs && (
+					<div className="px-2 pb-2">
+						<SearchInput />
+					</div>
+				)}
 
 				<div
 					ref={scrollRef}
-					className="flex-1 md:px-4 overflow-auto bg-zinc-50 dark:bg-zinc-900"
+					className="flex-1 px-4 xs:px-2 overflow-auto bg-zinc-900 light:bg-zinc-100"
 					onScroll={handleScroll}
 				>
-					<div className="grid grid-cols-7 auto-rows-[16vh] md:gap-4">
+					<div className="grid md:grid-cols-7 md:auto-rows-[17vh] gap-3 xs:gap-2">
 						{currentNotes.map((note) => (
 							<NoteCard
 								key={note.date}

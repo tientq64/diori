@@ -21,7 +21,7 @@ export function SearchPage(): ReactNode {
 
 	const handleNoteClick = (note: Note): void => {
 		store.setEditingNote(note)
-		navigate('/edit', {
+		navigate(`/edit/${note.date}`, {
 			state: {
 				findText: store.searchText
 			}
@@ -51,37 +51,46 @@ export function SearchPage(): ReactNode {
 	return (
 		<Page>
 			<div className="flex flex-col h-full">
-				<div className="border-b dark:border-zinc-700">
+				<div>
 					<NavBar
 						className="md:pl-4 md:pr-8"
 						backIcon={<SearchOutline />}
 						left={
 							<div className="flex items-center gap-2">
-								Kết quả tìm kiếm cho:
-								<span className="text-lime-200">{store.searchText}</span>
+								{store.isMd ? 'Kết quả tìm kiếm cho:' : 'Kết quả:'}
+								<span className="text-lime-200 light:text-lime-600">
+									{store.searchText}
+								</span>
 								<span className="text-zinc-500">
 									- {store.searchNotesTotal} mục
 								</span>
 							</div>
 						}
 						right={
-							<div className="flex justify-end items-center md:gap-4">
-								{store.isMd && <SearchInput />}
-								<EntitiesManagerDropdown />
-								<QuickSettingsDropdown />
-							</div>
+							store.isMd && (
+								<div className="flex justify-end items-center md:gap-4">
+									<SearchInput />
+									<EntitiesManagerDropdown />
+									<QuickSettingsDropdown />
+								</div>
+							)
 						}
 					/>
+					{store.isXs && (
+						<div className="px-2 pb-2">
+							<SearchInput />
+						</div>
+					)}
 				</div>
 
 				<div
 					ref={scrollRef}
-					className="flex-1 py-4 md:px-4 overflow-auto bg-zinc-50 dark:bg-zinc-900"
+					className="flex-1 px-4 xs:px-2 overflow-auto bg-zinc-900 light:bg-zinc-100"
 					onScroll={handleScroll}
 				>
 					{store.searchNotes.length > 0 && (
 						<>
-							<div className="grid grid-cols-7 auto-rows-[16vh] md:gap-4">
+							<div className="grid md:grid-cols-7 md:auto-rows-[17vh] gap-3 xs:gap-2">
 								{store.searchNotes.map((note) => (
 									<NoteCard
 										key={note.date}

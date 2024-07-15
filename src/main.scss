@@ -1,9 +1,15 @@
+@tailwind components;
 @tailwind utilities;
 
-[data-prefers-color-scheme='dark'] {
+:root {
+	scrollbar-color: #a1a1aa transparent;
+}
+
+.dark {
 	color-scheme: dark;
 
 	&:root {
+		scrollbar-color: #3f3f46 transparent;
 		--adm-color-border: #27272a;
 		--adm-color-background: #18181b;
 		--adm-color-box: #09090b;
@@ -15,8 +21,16 @@
 	height: 100%;
 }
 
-.adm-nav-bar-left {
-	font-size: 16px;
+.adm-nav-bar-back {
+	margin-right: 12px;
+
+	&:not(:has(> .adm-nav-bar-back-arrow)) {
+		display: none;
+	}
+
+	> span[aria-hidden='true'] {
+		margin-top: 4px;
+	}
 }
 
 .adm-nav-bar-right {
@@ -44,9 +58,32 @@
 	height: 100%;
 }
 
+.adm-form-item.adm-form-item-vertical .adm-form-item-label {
+	font-size: var(--adm-font-size-8);
+}
+
 .adm-form-item-child {
 	min-height: 0;
 	flex: 1;
+}
+
+.adm-list-item-content-main,
+.adm-form-item-child-inner {
+	width: 100%;
+}
+
+@layer components {
+	.adm-form-card-m0 {
+		> .adm-list-card {
+			margin: 0;
+		}
+	}
+
+	.adm-form-card-m2 {
+		> .adm-list-card {
+			margin: 0.5rem;
+		}
+	}
 }
 
 .adm-list-item-no-padding {
@@ -84,13 +121,20 @@
 	background: transparent;
 
 	.adm-dropdown-nav {
-		border-bottom-width: 3px;
+		border: 0;
+	}
+}
+
+.adm-dropdown-open {
+	.adm-dropdown-nav {
+		box-shadow: inset 0 -3px var(--adm-color-border);
 	}
 }
 
 .adm-dropdown-item {
 	.adm-dropdown-item-title {
-		padding-bottom: 6px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
 
 	.adm-dropdown-item-title-text {
@@ -101,6 +145,16 @@
 		margin-top: -4px;
 		margin-left: 4px;
 		font-size: 12px;
+	}
+
+	@media (max-width: 767px) {
+		.adm-dropdown-item-title-text {
+			margin-right: 0;
+		}
+
+		.adm-dropdown-item-title-arrow {
+			display: none;
+		}
 	}
 }
 
@@ -121,12 +175,12 @@
 		background-color: #404040;
 	}
 
-	.adm-popover-menu-item-text {
-		border-top-color: #404040;
-	}
-
 	.adm-popover-menu-item:active:not(.adm-popover-menu-item-disabled)::after {
 		border-bottom-color: #404040;
+	}
+
+	.adm-popover-menu-item-text {
+		border-top-color: #404040;
 	}
 }
 
@@ -146,6 +200,15 @@
 
 .monaco-editor {
 	position: absolute;
+
+	.view-ruler {
+		border-right: 1px dashed #3f3f46;
+		box-shadow: none !important;
+
+		@at-root .light & {
+			border-right-color: #d4d4d8;
+		}
+	}
 }
 
 .rti--container {
@@ -153,4 +216,14 @@
 	border: 0 !important;
 	background: transparent !important;
 	box-shadow: none !important;
+}
+
+.fancybox__slide {
+	padding: 0;
+}
+
+@layer utilities {
+	.image-contrast {
+		image-rendering: -webkit-optimize-contrast;
+	}
 }

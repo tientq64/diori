@@ -27,7 +27,7 @@ import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Blocker, useBlocker, useLocation } from 'react-router-dom'
+import { Blocker, useBlocker, useLocation, useNavigate } from 'react-router-dom'
 import spinnerImage from '../../assets/images/spinner.svg'
 import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
 import { Page } from '../../components/Page/Page'
@@ -179,7 +179,8 @@ export function EditPage(): ReactNode {
 			key = nanoid(6)
 		} while (usedPhotoKeys.current.includes(key))
 		usedPhotoKeys.current.push(key)
-		return { key, thumbnailUrl, url }
+		const image: ImageUploadItem = { key, thumbnailUrl, url }
+		return image
 	}
 
 	/**
@@ -362,9 +363,13 @@ export function EditPage(): ReactNode {
 						</div>
 					}
 				>
-					{upperFirst(
-						editingNote.time.format(store.isMd ? 'dddd, D MMMM, YYYY' : 'DD-MM-YYYY')
-					)}
+					<div className="xs:text-base">
+						{upperFirst(
+							editingNote.time.format(
+								store.isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY'
+							)
+						)}
+					</div>
 				</NavBar>
 
 				<div className="flex-1 min-h-0">
@@ -381,8 +386,9 @@ export function EditPage(): ReactNode {
 
 					{!getNoteEdit.loading && (
 						<Form
-							className="h-full"
+							className="h-full adm-form-card-m0"
 							form={form}
+							mode="card"
 							validateMessages={formValidateMessages}
 							onFinish={handleSave}
 						>
@@ -422,7 +428,7 @@ export function EditPage(): ReactNode {
 									options={{
 										fontFamily: store.fontFamily,
 										fontSize: store.fontSize,
-										wordWrap: store.isMd ? 'wordWrapColumn' : 'on',
+										wordWrap: store.isMd ? 'bounded' : 'on',
 										wordWrapColumn: 160,
 										wrappingStrategy: 'advanced',
 										lineNumbers: 'off',
@@ -437,7 +443,8 @@ export function EditPage(): ReactNode {
 										},
 										minimap: {
 											renderCharacters: false,
-											enabled: store.isMd
+											enabled: store.isMd,
+											maxColumn: 400
 										},
 										stickyScroll: {
 											enabled: false
@@ -513,7 +520,10 @@ export function EditPage(): ReactNode {
 												}
 											]}
 										>
-											<div onDoubleClick={() => showPreviewImage(image)}>
+											<div
+												className="image-contrast"
+												onDoubleClick={() => showPreviewImage(image)}
+											>
 												{imageNode}
 											</div>
 										</Popover.Menu>

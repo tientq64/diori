@@ -10,6 +10,7 @@ type NoteCardProps = {
 
 export function NoteCard({ note, onClick }: NoteCardProps) {
 	const years = useStore((state) => state.years)
+	const isMd = useStore<boolean>((state) => state.isMd)
 
 	const status = useMemo<Status>(() => {
 		return years[note.year]
@@ -24,44 +25,52 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 	return (
 		<div
 			className={`
-				flex flex-col gap-2 xs:gap-1 md:p-2 md:rounded border dark:border-zinc-800
-				xs:text-center bg-white dark:bg-zinc-800 cursor-pointer group
+				flex md:flex-col xs:items-start gap-3 xs:gap-6 p-2 rounded-md
+				bg-white dark:bg-zinc-800 cursor-pointer group
 				${isLoadedStatus(status) ? '' : 'opacity-50 pointer-events-none'}
 			`}
 			onClick={handleClick}
 		>
-			<div className="flex xs:flex-col-reverse xs:items-center">
-				<div className="flex-1 flex xs:justify-center">
+			<div className="flex gap-3">
+				<div className="flex xs:justify-center">
 					{note.thumbnailUrl && (
 						<img
-							className="w-20 md:min-w-20 xs:w-10 rounded"
+							className="w-20 md:min-w-20 xs:w-16 rounded image-contrast"
 							src={note.thumbnailUrl}
 							alt="Thumbnail"
 						/>
 					)}
-					{!note.thumbnailUrl && note.sha && (
-						<div className="w-20 md:min-w-20 xs:w-10 aspect-square rounded bg-zinc-100 dark:bg-zinc-700" />
+					{!note.thumbnailUrl && (
+						<div
+							className={`
+								w-20 md:min-w-20 xs:w-16 aspect-square rounded bg-zinc-700 light:bg-zinc-100
+								${note.sha ? 'visible' : 'invisible'}
+							`}
+						/>
 					)}
 				</div>
 
-				<div className="md:text-right text-sm">
-					<div>
-						{note.time.format('DD-MM')}
-						<span className="hidden md:group-hover:inline">-{note.year}</span>
-					</div>
-					<div className="xs:hidden text-zinc-400 dark:text-zinc-500">
+				<div className="flex-1 text-right xs:text-left text-sm">
+					{isMd && (
+						<div>
+							{note.time.format('DD-MM')}
+							<span className="hidden md:group-hover:inline">-{note.year}</span>
+						</div>
+					)}
+					{!isMd && note.time.format('dd, DD-MM-YYYY')}
+					<div className="text-zinc-400 dark:text-zinc-500">
 						{note.lunar.day}-{note.lunar.month}
 					</div>
 				</div>
 			</div>
 
-			<div className="xs:text-xs text-sm xs:leading-3 line-clamp-2 break-words dark:text-zinc-400">
+			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words dark:text-zinc-400">
 				{note.title}
 			</div>
 
 			{note.time.isToday() && (
-				<div className="flex-1 flex items-end justify-center">
-					<div className="w-12 h-1 rounded-full bg-blue-500"></div>
+				<div className="md:flex-1 flex justify-center items-end xs:items-center xs:h-full">
+					<div className="md:w-12 md:h-1 xs:w-1 xs:h-12 rounded-full bg-blue-500"></div>
 				</div>
 			)}
 		</div>

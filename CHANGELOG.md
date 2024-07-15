@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.4.0 (15-07-2024)
+
+* Giao diện mới cho điện thoại. Cải thiện nhiều thứ và đẹp hơn rất nhiều.
+
 ## 1.3.1 (15-07-2024)
 
 * Lọc file khi tải lên, chỉ lấy file hình ảnh.

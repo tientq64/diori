@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
 						element: <NotesPage />
 					},
 					{
-						path: 'edit',
+						path: 'edit/:date',
 						element: <EditPage />
 					},
 					{

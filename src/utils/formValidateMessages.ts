@@ -1,5 +1,8 @@
 const typeTemplate = "'${label}' không phải là một ${type} hợp lệ"
 
+/**
+ * Bản dịch tiếng Việt các thông báo xác thực form cho Antd-mobile.
+ */
 export const formValidateMessages = {
 	default: "Lỗi xác thực trên trường '${label}",
 	required: "'${label}' là bắt buộc",

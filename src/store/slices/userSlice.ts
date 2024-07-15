@@ -1,6 +1,7 @@
+import { Octokit } from '@octokit/rest'
 import dayjs, { Dayjs } from 'dayjs'
-import { SliceCreator } from '../useStore'
 import { getOctokit } from '../../utils/getOctokit'
+import { SliceCreator } from '../useStore'
 
 export type User = {
 	/** Tên tổ chức GitHub mà người dùng dùng để lưu dữ liệu nhật ký. */
@@ -51,7 +52,7 @@ export type User = {
 	fetchUserData: (token: string) => void
 }
 
-export const userSlice: SliceCreator<User> = (set) => ({
+export const userSlice: SliceCreator<User> = (set, get) => ({
 	orgName: '',
 	userName: '',
 	userAvatar: '',
@@ -95,11 +96,13 @@ export const userSlice: SliceCreator<User> = (set) => ({
 
 	updateResponsive: () => {
 		const isMd: boolean = window.innerWidth >= 768
-		set({ isMd, isXs: !isMd })
+		if (isMd !== get().isMd) {
+			set({ isMd, isXs: !isMd })
+		}
 	},
 
 	fetchUserData: async (token) => {
-		const rest = getOctokit(token)
+		const rest: Octokit = getOctokit(token)
 		const res = await rest.users.getAuthenticated()
 		set({
 			userName: res.data.login,

@@ -17,13 +17,6 @@ import { TagsInput } from 'react-tag-input-component'
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
 import { removeToneMarks } from '../../utils/removeToneMarks'
-import {
-	BusinessRounded,
-	FaceRounded,
-	GiteRounded,
-	HomeWorkRounded,
-	SentimentSatisfiedRounded
-} from '@mui/icons-material'
 
 export function EntitiesManager() {
 	const store = useStore()
@@ -123,7 +116,7 @@ export function EntitiesManager() {
 	}
 
 	return (
-		<div className="flex flex-col h-[80vh]">
+		<div className="flex flex-col h-[82vh]">
 			<CapsuleTabs activeKey={filteredEntityType} onChange={handleFilteredEntityTypeChange}>
 				<CapsuleTabs.Tab title="Tất cả" key="" />
 				<CapsuleTabs.Tab title="Mọi người" key={EntityTypes.PERSON} />

@@ -67,6 +67,7 @@ export function Register(): ReactNode {
 
 				<Form
 					form={form}
+					mode="card"
 					layout={store.isMd ? 'horizontal' : 'vertical'}
 					disabled={register.loading || register.data}
 					validateMessages={formValidateMessages}
