@@ -4,9 +4,7 @@
 	"description": "App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
 	"theme_color": "#18181b",
 	"background_color": "#18181b",
-	"categories": [
-		"lifestyle"
-	],
+	"categories": ["lifestyle"],
 	"icons": [
 		{
 			"src": "/assets/images/book.png",

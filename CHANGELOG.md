@@ -1,5 +1,10 @@
 # Nhật ký thay đổi
 
+## 1.5.0 (18-07-2024)
+
+- Loại bỏ cú pháp tham chiếu link trong tiêu đề.
+- Trình soạn thảo trên mobile sử dụng `TextArea` thay cho `monaco` editor.
+
 ## 1.4.0 (15-07-2024)
 
 * Giao diện mới cho điện thoại. Cải thiện nhiều thứ và đẹp hơn rất nhiều.

@@ -26,7 +26,7 @@ export function useSave() {
 			removedImages: Photo[],
 			defaultPhotoKey: string,
 			noteEdit: NoteEdit
-		): Promise<NoteEdit | void> => {
+		): Promise<NoteEdit | undefined> => {
 			if (editingNote === null) return
 
 			const { time, sha, year } = editingNote
@@ -39,7 +39,8 @@ export function useSave() {
 					.map((line) => line.replace(/ +/g, ' ').trim())
 					.filter((line) => !/^\[.+?\]: *[^"\n]+?(?: *".+?")?$/.test(line[0]))
 					.sort((a, b) => b.length - a.length)[0]
-				newTitle = truncate(longestLine, {
+				const rawNewTitle: string = longestLine.replace(/\[(.+?)\]\[\d+\]/g, '$1')
+				newTitle = truncate(rawNewTitle, {
 					length: 60,
 					separator: /\s+/,
 					omission: ''

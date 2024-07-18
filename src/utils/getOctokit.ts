@@ -33,6 +33,13 @@ export function getOctokit(token?: string): Octokit {
 	}
 
 	rest.hook.before('request', (options) => {
+		const repo = options.repo as string | undefined
+		const url: string = options.url
+		if (
+			repo?.startsWith('diori-photos-') &&
+			url === '/repos/{owner}/{repo}/git/blobs/{file_sha}'
+		)
+			return
 		options.headers['if-none-match'] = ''
 	})
 

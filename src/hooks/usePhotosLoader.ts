@@ -1,4 +1,4 @@
-import { Octokit } from '@octokit/rest'
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { ImageUploadItem } from 'antd-mobile'
 import { Dayjs } from 'dayjs'
@@ -12,6 +12,11 @@ export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 export function usePhotosLoader() {
 	const store = useStore()
 	const createdBlobUrls = useRef<string[]>([])
+	const promiseA = useRef<Promise<RestEndpointMethodTypes['repos']['getCommit']['response']>>()
+	const promiseB = useRef<Promise<RestEndpointMethodTypes['git']['getTree']['response']>>()
+	const promiseC = useRef<Promise<RestEndpointMethodTypes['git']['getTree']['response']>>()
+	const promiseD = useRef<Promise<RestEndpointMethodTypes['git']['getTree']['response']>>()
+	const promiseE = useRef<Promise<RestEndpointMethodTypes['git']['getBlob']['response']>>()
 
 	const request = useRequest(
 		async (time: Dayjs, image: ImageUploadItem): Promise<string> => {
@@ -19,41 +24,46 @@ export function usePhotosLoader() {
 			const repoName: string = `diori-photos-${time.year()}`
 			let res, node
 
-			res = await rest.repos.getCommit({
+			promiseA.current ??= rest.repos.getCommit({
 				owner: store.orgName,
 				repo: repoName,
 				ref: 'heads/main'
 			})
+			res = await promiseA.current
 
-			res = await rest.git.getTree({
+			promiseB.current ??= rest.git.getTree({
 				owner: store.orgName,
 				repo: repoName,
 				tree_sha: res.data.sha
 			})
+			res = await promiseB.current
 			node = find(res.data.tree, { path: time.format('MM') })
 			if (!node) throw Error('Không tìm thấy thư mục ảnh')
 
-			res = await rest.git.getTree({
+			promiseC.current ??= rest.git.getTree({
 				owner: store.orgName,
 				repo: repoName,
 				tree_sha: node.sha!
 			})
+			res = await promiseC.current
 			node = find(res.data.tree, { path: time.format('DD') })
 			if (!node) throw Error('Không tìm thấy thư mục ảnh')
 
-			res = await rest.git.getTree({
+			promiseD.current ??= rest.git.getTree({
 				owner: store.orgName,
 				repo: repoName,
 				tree_sha: node.sha!
 			})
+			res = await promiseD.current
 			node = find(res.data.tree, { path: `${time.format('YYYYMMDD')}-${image.key}.webp` })
 			if (!node) throw Error('Không tìm thấy tập tin ảnh')
 
-			res = await rest.git.getBlob({
+			promiseE.current ??= rest.git.getBlob({
 				owner: store.orgName,
 				repo: repoName,
 				file_sha: node.sha!
 			})
+			res = await promiseE.current
 			const buf: Uint8ClampedArray = Uint8ClampedArray.from(atob(res.data.content), (ch) =>
 				ch.charCodeAt(0)
 			)

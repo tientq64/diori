@@ -15,6 +15,7 @@ import {
 	Popover,
 	Skeleton,
 	Space,
+	TextArea,
 	Toast
 } from 'antd-mobile'
 import {
@@ -422,38 +423,42 @@ export function EditPage(): ReactNode {
 									}
 								]}
 							>
-								<Editor
-									theme={store.isDarkMode ? 'diori-dark' : 'vs'}
-									language="diori"
-									options={{
-										fontFamily: store.fontFamily,
-										fontSize: store.fontSize,
-										wordWrap: store.isMd ? 'bounded' : 'on',
-										wordWrapColumn: 160,
-										wrappingStrategy: 'advanced',
-										lineNumbers: 'off',
-										lineDecorationsWidth: 0,
-										insertSpaces: false,
-										smoothScrolling: true,
-										automaticLayout: true,
-										renderLineHighlightOnlyWhenFocus: true,
-										rulers: store.isMd ? [164] : undefined,
-										padding: {
-											top: 12
-										},
-										minimap: {
-											renderCharacters: false,
-											enabled: store.isMd,
-											maxColumn: 400
-										},
-										stickyScroll: {
-											enabled: false
-										}
-									}}
-									defaultValue={content}
-									beforeMount={beforeEditorMount}
-									onMount={handleEditorMount}
-								/>
+								{store.isMd ? (
+									<Editor
+										theme={store.isDarkMode ? 'diori-dark' : 'vs'}
+										language="diori"
+										options={{
+											fontFamily: store.fontFamily,
+											fontSize: store.fontSize,
+											wordWrap: store.isMd ? 'bounded' : 'on',
+											wordWrapColumn: 160,
+											wrappingStrategy: 'advanced',
+											lineNumbers: 'off',
+											lineDecorationsWidth: 0,
+											insertSpaces: false,
+											smoothScrolling: true,
+											automaticLayout: true,
+											renderLineHighlightOnlyWhenFocus: true,
+											rulers: store.isMd ? [164] : undefined,
+											padding: {
+												top: 12
+											},
+											minimap: {
+												enabled: store.isMd,
+												renderCharacters: false,
+												maxColumn: 400
+											},
+											stickyScroll: {
+												enabled: false
+											}
+										}}
+										defaultValue={content}
+										beforeMount={beforeEditorMount}
+										onMount={handleEditorMount}
+									/>
+								) : (
+									<TextArea className="px-4 py-3" />
+								)}
 							</Form.Item>
 
 							<Form.Item
