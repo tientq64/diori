@@ -1,5 +1,5 @@
 import type * as Monaco from 'monaco-editor'
-import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
+import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 
 type SetupEditorOptions = {
 	entities: Entity[]

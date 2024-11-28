@@ -1,7 +1,7 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "1.5.0",
+	"version": "1.5.1",
 	"type": "module",
 	"description": "📒 App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
 	"keywords": [
@@ -32,7 +32,7 @@
 		"antd-mobile": "^5.37.1",
 		"antd-mobile-icons": "^0.3.0",
 		"crypto-js": "^4.2.0",
-		"dayjs": "^1.11.11",
+		"dayjs": "^1.11.12",
 		"immer": "^10.1.1",
 		"lodash": "^4.17.21",
 		"monaco-editor": "^0.47.0",
@@ -55,8 +55,7 @@
 		"@types/react-dom": "^18.3.0",
 		"@typescript-eslint/eslint-plugin": "^7.16.1",
 		"@typescript-eslint/parser": "^7.16.1",
-		"@vitejs/plugin-react-swc": "^3.7.0",
-		"autoprefixer": "^10.4.19",
+		"@vitejs/plugin-react": "4.3.4",
 		"eslint": "^8.57.0",
 		"eslint-plugin-react-hooks": "^4.6.2",
 		"eslint-plugin-react-refresh": "^0.4.8",
@@ -66,7 +65,6 @@
 		"sass": "^1.77.8",
 		"simple-zustand-devtools": "^1.1.0",
 		"tailwindcss": "^3.4.6",
-		"terser": "^5.31.3",
 		"typescript": "^5.5.3",
 		"vite": "^5.3.4",
 		"vitest": "^1.6.0"

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { ReactNode } from 'react'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../store/useStore'
 
 type PageProps = {
 	children: ReactNode

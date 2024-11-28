@@ -2,7 +2,7 @@ import { useRequest } from 'ahooks'
 import { useStore } from '../store/useStore'
 import { decryptText } from '../utils/decryptText'
 import { slowHashText } from '../utils/slowHashText'
-import { LoginValues } from '../pages/Login/Login'
+import { LoginValues } from '../pages/Login'
 import { getOctokit } from '../utils/getOctokit'
 
 export function useLogin() {

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../store/useStore'
 
 export function Logged(): ReactNode {
 	const token = useStore<string>((state) => state.token)

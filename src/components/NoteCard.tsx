@@ -1,7 +1,7 @@
 import { MouseEvent, useMemo } from 'react'
-import { Note, Status } from '../../store/slices/diarySlice'
-import { useStore } from '../../store/useStore'
-import { isLoadedStatus } from '../../utils/isLoadedStatus'
+import { Note, Status } from '../store/slices/diarySlice'
+import { useStore } from '../store/useStore'
+import { isLoadedStatus } from '../utils/isLoadedStatus'
 
 type NoteCardProps = {
 	note: Note

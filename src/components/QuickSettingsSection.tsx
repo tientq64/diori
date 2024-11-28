@@ -2,11 +2,11 @@ import { Button, Dialog, Form, Input, Slider, Switch } from 'antd-mobile'
 import { SliderValue } from 'antd-mobile/es/components/slider'
 import { range } from 'lodash'
 import { useNavigate } from 'react-router-dom'
-import { useSaveSettings } from '../../hooks/useSaveSettings'
-import { useSyncSettings } from '../../hooks/useSyncSettings'
-import { useStore } from '../../store/useStore'
-import { formValidateMessages } from '../../utils/formValidateMessages'
-import { Kbd } from '../Kbd/Kbd'
+import { useSaveSettings } from '../hooks/useSaveSettings'
+import { useSyncSettings } from '../hooks/useSyncSettings'
+import { useStore } from '../store/useStore'
+import { formValidateMessages } from '../utils/formValidateMessages'
+import { Kbd } from './Kbd'
 
 export function QuickSettingsSection() {
 	const navigate = useNavigate()

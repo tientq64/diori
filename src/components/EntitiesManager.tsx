@@ -14,9 +14,9 @@ import { confirm } from 'antd-mobile/es/components/dialog/confirm'
 import { filter, groupBy, isEqual, some, toPairs } from 'lodash'
 import { useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
-import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
-import { useStore } from '../../store/useStore'
-import { removeToneMarks } from '../../utils/removeToneMarks'
+import { Entity, EntityTypes } from '../store/slices/settingsSlice'
+import { useStore } from '../store/useStore'
+import { removeToneMarks } from '../utils/removeToneMarks'
 
 export function EntitiesManager() {
 	const store = useStore()

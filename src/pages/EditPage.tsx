@@ -28,21 +28,21 @@ import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Blocker, useBlocker, useLocation, useNavigate } from 'react-router-dom'
-import spinnerImage from '../../assets/images/spinner.svg'
-import { EntitiesManagerDropdown } from '../../components/EntitiesManagerDropdown/EntitiesManagerDropdown'
-import { Page } from '../../components/Page/Page'
-import { QuickSettingsDropdown } from '../../components/QuickSettingsDropdown/QuickSettingsDropdown'
-import { useGetNoteEdit } from '../../hooks/useGetNoteEdit'
-import { usePhotosLoader } from '../../hooks/usePhotosLoader'
-import { useSave } from '../../hooks/useSave'
-import { Note } from '../../store/slices/diarySlice'
-import { NoteEdit, Photo } from '../../store/slices/editingSlice'
-import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
-import { useStore } from '../../store/useStore'
-import { formValidateMessages } from '../../utils/formValidateMessages'
-import { makeThumbnailUrl } from '../../utils/makeThumbnailUrl'
-import { setupEditor } from './setupEditor'
+import { Blocker, useBlocker, useLocation } from 'react-router-dom'
+import spinnerImage from '../assets/images/spinner.svg'
+import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
+import { Page } from '../components/Page'
+import { QuickSettingsDropdown } from '../components/QuickSettingsDropdown'
+import { useGetNoteEdit } from '../hooks/useGetNoteEdit'
+import { usePhotosLoader } from '../hooks/usePhotosLoader'
+import { useSave } from '../hooks/useSave'
+import { Note } from '../store/slices/diarySlice'
+import { NoteEdit, Photo } from '../store/slices/editingSlice'
+import { Entity, EntityTypes } from '../store/slices/settingsSlice'
+import { useStore } from '../store/useStore'
+import { formValidateMessages } from '../utils/formValidateMessages'
+import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
+import { setupEditor } from '../utils/setupEditor'
 
 export type ImageUploadItem = {
 	key?: string | number
@@ -457,7 +457,12 @@ export function EditPage(): ReactNode {
 										onMount={handleEditorMount}
 									/>
 								) : (
-									<TextArea className="px-4 py-3" />
+									<TextArea
+										className="px-4 py-3"
+										style={{
+											'--font-size': store.fontSize + 'px'
+										}}
+									/>
 								)}
 							</Form.Item>
 

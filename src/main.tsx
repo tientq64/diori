@@ -1,6 +1,7 @@
-import './base.scss'
 import { createRoot } from 'react-dom/client'
 import { App } from './App.tsx'
+import './base.scss'
 import './main.scss'
 
-createRoot(document.getElementById('root')!).render(<App />)
+const root = createRoot(document.getElementById('root')!)
+root.render(<App />)

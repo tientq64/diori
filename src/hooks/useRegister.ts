@@ -4,7 +4,7 @@ import { getOctokit } from '../utils/getOctokit'
 import { useStore } from '../store/useStore'
 import { encryptText } from '../utils/encryptText'
 import { slowHashText } from '../utils/slowHashText'
-import { RegisterValues } from '../pages/Register/Register'
+import { RegisterValues } from '../pages/Register'
 
 export function useRegister() {
 	const store = useStore()

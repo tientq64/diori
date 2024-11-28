@@ -1,6 +1,6 @@
 import { Dropdown } from 'antd-mobile'
-import { useStore } from '../../store/useStore'
-import { QuickSettingsSection } from '../QuickSettingsSection/QuickSettingsSection'
+import { useStore } from '../store/useStore'
+import { QuickSettingsSection } from './QuickSettingsSection'
 
 export function QuickSettingsDropdown() {
 	const store = useStore()

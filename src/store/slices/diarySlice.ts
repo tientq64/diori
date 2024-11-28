@@ -51,26 +51,62 @@ export type NoteData = Required<
 	>
 >
 
-/** Trạng thái tải của năm. */
+/**
+ * Trạng thái tải của năm.
+ *
+ * - `undefined`: Chưa tải.
+ * - `loading`: Đang tải.
+ * - `loaded`: Đã tải thành công.
+ * - `loaded-404`: Đã tải thành công nhưng năm đã tải không tồn tại.
+ * - `failed`: Tải thất bại.
+ */
 export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
 
 export type Statuses = Record<string, Status>
 
 export type Diary = {
-	/** Danh sách các mục nhật ký. Các mục này đã được lưu trên GitHub. */
+	/**
+	 * Danh sách các mục nhật ký. Các mục này đã được lưu trên GitHub.
+	 */
 	notes: Notes
-
-	/** Danh sách trạng thái tải của năm. */
+	/**
+	 * Danh sách trạng thái tải của năm.
+	 */
 	years: Statuses
-
-	/** Ngày đang xem trong trang `/notes`. */
+	/**
+	 * Ngày đang xem trong trang `/notes`.
+	 */
 	currentTime: Dayjs
-
+	/**
+	 * Trả về một mục nhật ký trong danh sách.
+	 * @param date Ngày cần lấy.
+	 * @returns Mục nhật ký cần lấy.
+	 */
 	getNote: (date: string | Dayjs) => Note
+	/**
+	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách.
+	 * Nếu cần thêm vào danh sách, hãy thêm nó vào bằng hàm `updateOrAddNote`.
+	 * @param time Ngày của mục nhật ký cần tạo.
+	 * @returns Mục nhật ký đã tạo.
+	 */
 	makeNote: (time: Dayjs) => Note
+	/**
+	 * Cập nhật hoặc thêm mục nhật ký vào danh sách nếu chưa tồn tại.
+	 */
 	updateOrAddNote: (note: Note) => void
+	/**
+	 * Loại bỏ một mục nhật ký trong danh sách.
+	 */
 	removeNote: (note: Note) => void
+	/**
+	 * Cập nhật trạng thái tải của năm.
+	 * @param year Năm cần cập nhật.
+	 * @param status Trạng thái tải của năm.
+	 */
 	setYear: (year: number, status: Status) => void
+	/**
+	 * Cập nhật ngày đang xem trong trang `/notes`.
+	 */
 	setCurrentTime: (time: Dayjs) => void
 }
 

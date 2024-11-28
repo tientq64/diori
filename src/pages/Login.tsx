@@ -2,11 +2,11 @@ import { useAsyncEffect } from 'ahooks'
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import logoImage from '../../assets/images/book.png'
-import { Page } from '../../components/Page/Page'
-import { useLogin } from '../../hooks/useLogin'
-import { useStore } from '../../store/useStore'
-import { formValidateMessages } from '../../utils/formValidateMessages'
+import logoImage from '../assets/images/book.png'
+import { Page } from '../components/Page'
+import { useLogin } from '../hooks/useLogin'
+import { useStore } from '../store/useStore'
+import { formValidateMessages } from '../utils/formValidateMessages'
 
 export type LoginValues = {
 	pass: string
@@ -14,7 +14,6 @@ export type LoginValues = {
 
 /**
  * Trang đăng nhập.
- * @returns React node.
  */
 export function Login(): ReactNode {
 	const store = useStore()

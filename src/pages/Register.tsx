@@ -1,10 +1,10 @@
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Page } from '../../components/Page/Page'
-import { useRegister } from '../../hooks/useRegister'
-import { Store, useStore } from '../../store/useStore'
-import { formValidateMessages } from '../../utils/formValidateMessages'
+import { Page } from '../components/Page'
+import { useRegister } from '../hooks/useRegister'
+import { Store, useStore } from '../store/useStore'
+import { formValidateMessages } from '../utils/formValidateMessages'
 
 export type RegisterValues = {
 	token: Store['token']
