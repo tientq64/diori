@@ -11,11 +11,16 @@ import { makeCompressImageBase64 } from '../utils/makeCompressImageBase64'
 import { makePhotoPath } from '../utils/makePhotoPath'
 import { parseNoteFromNoteData, parseNoteFromPathAndSha } from '../utils/parseNote'
 import { textToBase64 } from '../utils/textToBase64'
-import { textToCompressedBase64 } from '../utils/textToCompressedBase64'
+import { textToMinBase64 } from '../utils/textToMinBase64'
 
+/**
+ * Hook để lưu nhật ký đang viết.
+ */
 export function useSave() {
-	const editingNote = useStore<Note | null>((state) => state.editingNote)
-	const store = useStore()
+	const editingNote = useStore((state) => state.editingNote)
+	const orgName = useStore((state) => state.orgName)
+	const updateOrAddNote = useStore((state) => state.updateOrAddNote)
+	const removeNote = useStore((state) => state.removeNote)
 
 	const request = useRequest(
 		async (
@@ -31,28 +36,37 @@ export function useSave() {
 
 			const { time, sha, year } = editingNote
 
-			/** Tiêu đề mới, hoặc tiêu đề cũ nếu có. */
+			// Tạo tiêu đề mới dựa trên nội dung đã viết nếu người dùng không đặt tiêu đề.
 			let newTitle: string = title
-			if (!title && content.length) {
+			if (!title && content.length > 0) {
+				// Lấy dòng dài nhất.
 				const longestLine: string = content
 					.split(/\n+/)
 					.map((line) => line.replace(/ +/g, ' ').trim())
 					.filter((line) => !/^\[.+?\]: *[^"\n]+?(?: *".+?")?$/.test(line[0]))
 					.sort((a, b) => b.length - a.length)[0]
-				const rawNewTitle: string = longestLine.replace(/\[(.+?)\]\[\d+\]/g, '$1')
-				newTitle = truncate(rawNewTitle, {
+				// Tạo tiêu đề dựa trên dòng dài nhất.
+				// Xóa bỏ cú pháp link, chỉ bao gồm văn bản thuần.
+				const untruncatedTitle: string = longestLine.replace(/\[(.+?)\]\[\d+\]/g, '$1')
+				// Cắt ngắn tiêu đề.
+				newTitle = truncate(untruncatedTitle, {
 					length: 60,
 					separator: /\s+/,
 					omission: ''
 				})
 			}
 
-			/** Ảnh mặc định. */
+			/**
+			 * Ảnh mặc định.
+			 */
 			const defaultPhoto: ImageUploadItem | undefined = find(images, { key: defaultPhotoKey })
 
+			/**
+			 * Các phần của đường dẫn tập tin GitHub.
+			 */
 			const chunks = [
 				time.format('MMDD'),
-				textToCompressedBase64(newTitle),
+				textToMinBase64(newTitle),
 				title ? 'T' : '',
 				defaultPhoto
 					? compressBase64(
@@ -62,16 +76,35 @@ export function useSave() {
 				defaultPhotoKey.substring(2),
 				images.length >= 2 ? images.length : ''
 			]
+			/**
+			 * Đường dẫn mới cho tập tin GitHub.
+			 * Đường dẫn mới không nhất thiết phải khác đường dẫn cũ.
+			 */
 			const path = `days/${year}/${chunks.join(';').replace(/;+$/, '')}.json`
 			const hasSha = sha !== undefined
 
+			/**
+			 * Chỉ xóa tập tin.
+			 */
 			const isDeleteOnly: boolean = hasSha && !newTitle && !content && images.length === 0
+			/**
+			 * Chỉ tạo mới tập tin.
+			 */
 			const isCreateNewOnly: boolean = !isDeleteOnly && !hasSha && path !== editingNote.path
+			/**
+			 * Chỉ tạo mới và xóa tập tin cũ.
+			 */
 			const isCreateNewAndDeleteOldOnly: boolean =
 				!isDeleteOnly && hasSha && path !== editingNote.path
+			/**
+			 * Chỉ cập nhật tập tin.
+			 */
 			const isUpdateOnly: boolean =
 				!isDeleteOnly && !isCreateNewOnly && !isCreateNewAndDeleteOldOnly
 
+			/**
+			 * Nội dung nhật ký mới.
+			 */
 			const newNoteEdit: NoteEdit = {
 				date: noteEdit.date,
 				title: newTitle,
@@ -83,6 +116,9 @@ export function useSave() {
 				})),
 				defaultPhotoKey
 			}
+			/**
+			 * Nội dung nhật ký được tối ưu hóa.
+			 */
 			const newNoteEditData: NoteEditJSON = {
 				date: newNoteEdit.date,
 				title: newNoteEdit.title || undefined,
@@ -92,14 +128,22 @@ export function useSave() {
 				defaultPhotoKey:
 					newNoteEdit.photos.length >= 2 ? newNoteEdit.defaultPhotoKey : undefined
 			}
+			/**
+			 * Chuỗi JSON nội dung nhật ký.
+			 */
 			const newNoteEditJson: string = JSON.stringify(newNoteEditData)
+			/**
+			 * Chuỗi base64 nội dung nhật ký.
+			 * Dùng để truyền dữ liệu vào các hàm GitHub API,
+			 * vì API chỉ chấp nhận dữ liệu dạng base64.
+			 */
 			const newNoteEditBase64: string = textToBase64(newNoteEditJson)
 
 			const rest = getOctokit()
 
 			if (isCreateNewOnly || isUpdateOnly) {
 				const res = await rest.repos.createOrUpdateFileContents({
-					owner: store.orgName,
+					owner: orgName,
 					repo: 'diori-main',
 					path: path,
 					content: newNoteEditBase64,
@@ -107,23 +151,23 @@ export function useSave() {
 					sha: isCreateNewOnly ? undefined : sha
 				})
 				const newNote: Note = parseNoteFromNoteData(res.data.content as NoteData)
-				store.updateOrAddNote(newNote)
+				updateOrAddNote(newNote)
 			}
 
 			if (isDeleteOnly) {
 				await rest.repos.deleteFile({
-					owner: store.orgName,
+					owner: orgName,
 					repo: 'diori-main',
 					path: editingNote.path!,
 					message: `Xóa ngày ${time.format('DD-MM-YYYY')}`,
 					sha: sha!
 				})
-				store.removeNote(editingNote)
+				removeNote(editingNote)
 			}
 
 			if (isCreateNewAndDeleteOldOnly) {
 				const [newNoteSHA] = await commitFiles(rest, {
-					orgName: store.orgName,
+					orgName: orgName,
 					repoName: 'diori-main',
 					message: `Tạo lại ngày ${time.format('DD-MM-YYYY')}`,
 					addedFiles: [
@@ -135,7 +179,7 @@ export function useSave() {
 					deletedPaths: editingNote.path ? [editingNote.path] : []
 				})
 				const newNote: Note = parseNoteFromPathAndSha(path, newNoteSHA)
-				store.updateOrAddNote(newNote)
+				updateOrAddNote(newNote)
 			}
 
 			const isCreateNewPhotosOnly: boolean =
@@ -159,14 +203,14 @@ export function useSave() {
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly) {
 				try {
 					await rest.repos.get({
-						owner: store.orgName,
+						owner: orgName,
 						repo: photosRepoName
 					})
 				} catch (error: any) {
 					if (error.status !== 404) throw error
 
 					await rest.repos.createInOrg({
-						org: store.orgName,
+						org: orgName,
 						name: photosRepoName,
 						private: true,
 						description: `Ảnh năm ${year}.`,
@@ -189,7 +233,7 @@ export function useSave() {
 
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
 				await commitFiles(rest, {
-					orgName: store.orgName,
+					orgName: orgName,
 					repoName: photosRepoName,
 					message: photosCommitMessage,
 					addedFiles,

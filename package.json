@@ -1,7 +1,7 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "1.5.1",
+	"version": "1.6.0",
 	"type": "module",
 	"description": "📒 App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
 	"keywords": [
@@ -42,6 +42,7 @@
 		"react-dom": "^18.3.1",
 		"react-router-dom": "^6.25.1",
 		"react-tag-input-component": "^2.0.2",
+		"react-use-pwa-install": "1.0.2",
 		"vietnamese-date": "^1.0.0",
 		"zustand": "^4.5.4"
 	},

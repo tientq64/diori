@@ -53,11 +53,20 @@ export type ImageUploadItem = {
 }
 
 export function EditPage(): ReactNode {
-	const editingNote = useStore<Note | null>((state) => state.editingNote)
+	const editingNote = useStore((state) => state.editingNote)
 
 	if (!editingNote) return
 
-	const store = useStore()
+	const entities = useStore((state) => state.entities)
+	const notes = useStore((state) => state.notes)
+	const isMd = useStore((state) => state.isMd)
+	const isDarkMode = useStore((state) => state.isDarkMode)
+	const fontFamily = useStore((state) => state.fontFamily)
+	const fontSize = useStore((state) => state.fontSize)
+	const getNote = useStore((state) => state.getNote)
+	const makeNote = useStore((state) => state.makeNote)
+	const setEditingNote = useStore((state) => state.setEditingNote)
+
 	const location = useLocation()
 	const getNoteEdit = useGetNoteEdit()
 	const save = useSave()
@@ -90,12 +99,12 @@ export function EditPage(): ReactNode {
 	}, [images, noteEdit.photos])
 
 	const persons = useMemo<Entity[]>(() => {
-		return filter(store.entities, { type: EntityTypes.PERSON })
-	}, [store.entities])
+		return filter(entities, { type: EntityTypes.PERSON })
+	}, [entities])
 
 	const properNouns = useMemo<Entity[]>(() => {
-		return filter(store.entities, { type: EntityTypes.PROPER_NOUN })
-	}, [store.entities])
+		return filter(entities, { type: EntityTypes.PROPER_NOUN })
+	}, [entities])
 
 	const unsaved = useMemo<boolean>(() => {
 		if (getNoteEdit.loading) return false
@@ -119,11 +128,40 @@ export function EditPage(): ReactNode {
 		return true
 	}, [save.loading, unsaved])
 
+	const editorOptions = useMemo<Monaco.editor.IStandaloneEditorConstructionOptions>(
+		() => ({
+			fontFamily: fontFamily,
+			fontSize: fontSize,
+			wordWrap: isMd ? 'bounded' : 'on',
+			wordWrapColumn: 160,
+			wrappingStrategy: 'advanced',
+			lineNumbers: 'off',
+			lineDecorationsWidth: 0,
+			insertSpaces: false,
+			smoothScrolling: true,
+			automaticLayout: true,
+			renderLineHighlightOnlyWhenFocus: true,
+			rulers: isMd ? [164] : undefined,
+			padding: {
+				top: 12
+			},
+			minimap: {
+				enabled: isMd,
+				renderCharacters: false,
+				maxColumn: 400
+			},
+			stickyScroll: {
+				enabled: false
+			}
+		}),
+		[fontFamily, fontSize, isMd]
+	)
+
 	const beforeEditorMount = (monaco: typeof Monaco): void => {
 		monacoRef.current ??= monaco
 		editorDisposer.current?.dispose()
 		editorDisposer.current = setupEditor(monaco, {
-			entities: store.entities,
+			entities: entities,
 			persons,
 			properNouns
 		})
@@ -296,15 +334,14 @@ export function EditPage(): ReactNode {
 	}, [blocker.state])
 
 	useUpdateEffect(() => {
-		const newEditingNote: Note =
-			store.getNote(editingNote.time) ?? store.makeNote(editingNote.time)
-		store.setEditingNote(newEditingNote)
-	}, [store.notes[editingNote.date]])
+		const newEditingNote: Note = getNote(editingNote.time) ?? makeNote(editingNote.time)
+		setEditingNote(newEditingNote)
+	}, [notes[editingNote.date]])
 
 	useEffect(() => {
 		if (!monacoRef.current) return
 		beforeEditorMount(monacoRef.current)
-	}, [store.entities])
+	}, [entities])
 
 	useEffect(() => {
 		if (!save.data) return
@@ -346,7 +383,7 @@ export function EditPage(): ReactNode {
 
 	useEffect(() => {
 		return () => {
-			// store.setEditingNote(null)
+			// setEditingNote(null)
 			editorDisposer.current?.dispose()
 		}
 	}, [])
@@ -356,7 +393,7 @@ export function EditPage(): ReactNode {
 			<div className="flex flex-col h-full">
 				<NavBar
 					onBack={() => history.back()}
-					back={store.isMd ? 'Trở về' : ''}
+					back={isMd ? 'Trở về' : ''}
 					right={
 						<div className="flex justify-end items-center gap-4">
 							<EntitiesManagerDropdown />
@@ -366,9 +403,15 @@ export function EditPage(): ReactNode {
 				>
 					<div className="xs:text-base">
 						{upperFirst(
-							editingNote.time.format(
-								store.isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY'
-							)
+							editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
+						)}
+						{isMd && (
+							<span className="text-gray-500 ml-2">
+								<>
+									({editingNote.lunar.day} tháng {editingNote.lunar.month} âm
+									lịch)
+								</>
+							</span>
 						)}
 					</div>
 				</NavBar>
@@ -404,6 +447,7 @@ export function EditPage(): ReactNode {
 								]}
 							>
 								<Input
+									className="[&>input]:placeholder:text-gray-500"
 									autoComplete="off"
 									placeholder={
 										noteEdit && noteEdit.title && !noteEdit.isTitled
@@ -423,35 +467,11 @@ export function EditPage(): ReactNode {
 									}
 								]}
 							>
-								{store.isMd ? (
+								{isMd ? (
 									<Editor
-										theme={store.isDarkMode ? 'diori-dark' : 'vs'}
+										theme={isDarkMode ? 'diori-dark' : 'vs'}
 										language="diori"
-										options={{
-											fontFamily: store.fontFamily,
-											fontSize: store.fontSize,
-											wordWrap: store.isMd ? 'bounded' : 'on',
-											wordWrapColumn: 160,
-											wrappingStrategy: 'advanced',
-											lineNumbers: 'off',
-											lineDecorationsWidth: 0,
-											insertSpaces: false,
-											smoothScrolling: true,
-											automaticLayout: true,
-											renderLineHighlightOnlyWhenFocus: true,
-											rulers: store.isMd ? [164] : undefined,
-											padding: {
-												top: 12
-											},
-											minimap: {
-												enabled: store.isMd,
-												renderCharacters: false,
-												maxColumn: 400
-											},
-											stickyScroll: {
-												enabled: false
-											}
-										}}
+										options={editorOptions}
 										defaultValue={content}
 										beforeMount={beforeEditorMount}
 										onMount={handleEditorMount}
@@ -460,7 +480,7 @@ export function EditPage(): ReactNode {
 									<TextArea
 										className="px-4 py-3"
 										style={{
-											'--font-size': store.fontSize + 'px'
+											'--font-size': fontSize + 'px'
 										}}
 									/>
 								)}

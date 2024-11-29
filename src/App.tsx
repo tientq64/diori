@@ -1,5 +1,3 @@
-import './utils/globalConfigs'
-
 import { ConfigProvider } from 'antd-mobile'
 import antdLocaleEnUS from 'antd-mobile/cjs/locales/en-US'
 import dayjs from 'dayjs'
@@ -9,14 +7,18 @@ import { router } from './router'
 import { useStore } from './store/useStore'
 
 export function App() {
-	const store = useStore()
+	const isDarkMode = useStore((state) => state.isDarkMode)
+	const fontFamily = useStore((state) => state.fontFamily)
+	const fontSize = useStore((state) => state.fontSize)
+	const updateResponsive = useStore((state) => state.updateResponsive)
+	const setNowPerMinute = useStore((state) => state.setNowPerMinute)
 
 	const resizeHandle = (): void => {
-		store.updateResponsive()
+		updateResponsive()
 	}
 
 	useEffect(() => {
-		if (store.isDarkMode) {
+		if (isDarkMode) {
 			document.documentElement.classList.add('dark')
 			document.documentElement.classList.remove('light')
 		} else {
@@ -25,13 +27,13 @@ export function App() {
 		}
 		document.documentElement.setAttribute(
 			'data-prefers-color-scheme',
-			store.isDarkMode ? 'dark' : 'light'
+			isDarkMode ? 'dark' : 'light'
 		)
-	}, [store.isDarkMode])
+	}, [isDarkMode])
 
 	useEffect(() => {
 		const intervalId: number = setInterval(() => {
-			store.setNowPerMinute(dayjs())
+			setNowPerMinute(dayjs())
 		}, 1000 * 60)
 
 		window.addEventListener('resize', resizeHandle)
@@ -47,8 +49,8 @@ export function App() {
 		<div
 			className="h-full"
 			style={{
-				fontFamily: store.fontFamily,
-				fontSize: store.fontSize
+				fontFamily: fontFamily,
+				fontSize: fontSize
 			}}
 		>
 			<ConfigProvider locale={antdLocaleEnUS}>

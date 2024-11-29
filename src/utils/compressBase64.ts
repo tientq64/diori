@@ -1,7 +1,12 @@
 import { intToRadix62 } from './intToRadix62'
 
+/**
+ * Nén chuỗi base64.
+ * @param base64 Chuỗi base64 cần nén.
+ * @returns Chuỗi base64 đã được nén.
+ */
 export function compressBase64(base64: string): string {
-	const compressedBase64 = base64
+	const minBase64 = base64
 		.replace(/\//g, '_')
 		.replace(/\+/g, '-')
 
@@ -16,5 +21,5 @@ export function compressBase64(base64: string): string {
 		.replace('XRUJQ', ')')
 		.replace(/==$/, '~')
 
-	return compressedBase64
+	return minBase64
 }

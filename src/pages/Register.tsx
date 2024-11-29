@@ -6,9 +6,21 @@ import { useRegister } from '../hooks/useRegister'
 import { Store, useStore } from '../store/useStore'
 import { formValidateMessages } from '../utils/formValidateMessages'
 
-export type RegisterValues = {
+/**
+ * Thông tin đăng ký đã nhập trong phần đăng ký.
+ */
+export interface RegisterValues {
+	/**
+	 * Personal access token đã nhập trong phần đăng ký.
+	 */
 	token: Store['token']
+	/**
+	 * Tên tổ chức GitHub đã nhập trong phần đăng ký.
+	 */
 	orgName: Store['orgName']
+	/**
+	 * Mật khẩu đã nhập trong phần đăng ký.
+	 */
 	pass: string
 }
 
@@ -17,7 +29,8 @@ export type RegisterValues = {
  * @returns React node.
  */
 export function Register(): ReactNode {
-	const store = useStore()
+	const isMd = useStore((state) => state.isMd)
+
 	const [form] = Form.useForm()
 	const register = useRegister()
 	const navigate = useNavigate()
@@ -68,7 +81,7 @@ export function Register(): ReactNode {
 				<Form
 					form={form}
 					mode="card"
-					layout={store.isMd ? 'horizontal' : 'vertical'}
+					layout={isMd ? 'horizontal' : 'vertical'}
 					disabled={register.loading || register.data}
 					validateMessages={formValidateMessages}
 					onFinish={register.run}

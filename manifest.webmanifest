@@ -4,11 +4,10 @@
 	"description": "App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
 	"theme_color": "#18181b",
 	"background_color": "#18181b",
-	"categories": ["lifestyle"],
 	"icons": [
 		{
 			"src": "/assets/images/book.png",
-			"sizes": "128x128",
+			"sizes": "256x256",
 			"type": "image/png"
 		}
 	],

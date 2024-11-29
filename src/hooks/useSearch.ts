@@ -5,77 +5,83 @@ import { useStore } from '../store/useStore'
 import { getOctokit } from '../utils/getOctokit'
 import { parseNoteFromNoteData } from '../utils/parseNote'
 import { useLoadYear } from './useLoadYear'
-import { useEffect } from 'react'
 
 export function useSearch() {
-	const store = useStore()
+	const searchLoading = useStore((state) => state.searchLoading)
+	const searchPageTotal = useStore((state) => state.searchPageTotal)
+	const searchNotes = useStore((state) => state.searchNotes)
+	const notes = useStore((state) => state.notes)
+	const orgName = useStore((state) => state.orgName)
+	const setSearchText = useStore((state) => state.setSearchText)
+	const setSearchNotes = useStore((state) => state.setSearchNotes)
+	const setSearchNotesTotal = useStore((state) => state.setSearchNotesTotal)
+	const setSearchPage = useStore((state) => state.setSearchPage)
+	const setSearchPageTotal = useStore((state) => state.setSearchPageTotal)
+	const setSearchLoading = useStore((state) => state.setSearchLoading)
+	const setSearchError = useStore((state) => state.setSearchError)
+
 	const loadYear = useLoadYear()
 
 	const request = useRequest(
 		async (searchText: string, searchPage: number = 1) => {
-			if (store.searchLoading) return
-			if (searchPage > 1 && searchPage > store.searchPageTotal) return
+			if (searchLoading) return
+			if (searchPage > 1 && searchPage > searchPageTotal) return
 
 			const rest = getOctokit()
 
 			if (searchPage === 1) {
-				store.setSearchText(searchText)
-				store.setSearchNotes([])
-				store.setSearchNotesTotal(0)
-				store.setSearchPage(0)
-				store.setSearchPageTotal(0)
+				setSearchText(searchText)
+				setSearchNotes([])
+				setSearchNotesTotal(0)
+				setSearchPage(0)
+				setSearchPageTotal(0)
 			}
-			store.setSearchLoading(true)
-			store.setSearchError(undefined)
+			setSearchLoading(true)
+			setSearchError(undefined)
 
-			const q: string = `"${searchText}"+in:file+repo:${store.orgName}/diori-main+path:days`
+			const q: string = `"${searchText}"+in:file+repo:${orgName}/diori-main+path:days`
 			try {
 				const res: any = await rest.search.code({
 					q,
 					page: searchPage,
 					per_page: 98
 				})
-				const searchNotes: Note[] = searchPage === 1 ? [] : [...store.searchNotes]
+				const newSearchNotes: Note[] = searchPage === 1 ? [] : [...searchNotes]
 				const searchNotesTotal: number = res.data.total_count
 				const years = new Set<number>()
 				for (const data of res.data.items) {
-					const searchNote: Note = parseNoteFromNoteData(data)
-					searchNotes.push(searchNote)
-					years.add(searchNote.year)
+					let searchNote: Note = parseNoteFromNoteData(data)
+					if (notes[searchNote.date] === undefined) {
+						years.add(searchNote.year)
+					} else {
+						searchNote = notes[searchNote.date]
+					}
+					newSearchNotes.push(searchNote)
 				}
 				for (const year of years) {
 					loadYear.run(year)
 				}
 
-				store.setSearchNotes(searchNotes)
-				store.setSearchNotesTotal(searchNotesTotal)
-				store.setSearchPage(searchPage)
-				store.setSearchPageTotal(Math.ceil(searchNotesTotal / 98))
+				setSearchNotes(newSearchNotes)
+				setSearchNotesTotal(searchNotesTotal)
+				setSearchPage(searchPage)
+				setSearchPageTotal(Math.ceil(searchNotesTotal / 98))
 			} catch (error: any) {
 				if (error.status === 403) {
 					const limitError = Error(
 						'Đã vượt quá giới hạn tìm kiếm, vui lòng đợi vài giây rồi thử lại.'
 					)
-					store.setSearchError(limitError)
+					setSearchError(limitError)
 				} else {
-					store.setSearchError(error)
+					setSearchError(error)
 				}
 				throw error
 			} finally {
-				store.setSearchLoading(false)
+				setSearchLoading(false)
 			}
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
-
-	useEffect(() => {
-		const searchNotes: Note[] = store.searchNotes.map(
-			(searchNote: Note): Note => store.notes[searchNote.date] ?? searchNote
-		)
-		store.setSearchNotes(searchNotes)
-	}, [store.notes])
 
 	return request
 }

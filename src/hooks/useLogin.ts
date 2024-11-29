@@ -1,17 +1,19 @@
 import { useRequest } from 'ahooks'
+import { LoginValues } from '../pages/Login'
 import { useStore } from '../store/useStore'
 import { decryptText } from '../utils/decryptText'
-import { slowHashText } from '../utils/slowHashText'
-import { LoginValues } from '../pages/Login'
 import { getOctokit } from '../utils/getOctokit'
+import { slowHashText } from '../utils/slowHashText'
 
 export function useLogin() {
-	const store = useStore()
+	const encryptedToken = useStore((state) => state.encryptedToken)
+	const setToken = useStore((state) => state.setToken)
+	const fetchUserData = useStore((state) => state.fetchUserData)
 
 	const request = useRequest(
 		async ({ pass }: LoginValues) => {
 			const key = await slowHashText(pass)
-			const token = decryptText(store.encryptedToken, key)
+			const token = decryptText(encryptedToken, key)
 
 			if (token === '') {
 				throw Error('Mật khẩu không đúng')
@@ -20,14 +22,11 @@ export function useLogin() {
 			const rest = getOctokit(token)
 			await rest.rateLimit.get()
 
-			store.setToken(token)
-			store.fetchUserData(token)
-
+			setToken(token)
+			fetchUserData(token)
 			return true
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
 
 	return request

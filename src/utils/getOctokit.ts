@@ -7,7 +7,7 @@ export function getOctokit(token?: string): Octokit {
 
 	const rest = new Octokit({ auth: token || store.token })
 
-	const handleResponse = (res: OctokitResponse<unknown>) => {
+	const handleResponse = (res: OctokitResponse<unknown>): void => {
 		if (res.headers['x-ratelimit-resource'] === 'core') {
 			const store = useStore.getState()
 

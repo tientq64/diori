@@ -1,21 +1,22 @@
 import { useRequest } from 'ahooks'
-import { getOctokit } from '../utils/getOctokit'
 import { Note } from '../store/slices/diarySlice'
+import { NoteEdit, NoteEditJSON } from '../store/slices/editingSlice'
 import { useStore } from '../store/useStore'
 import { base64ToText } from '../utils/base64ToText'
-import { NoteEdit, NoteEditJSON } from '../store/slices/editingSlice'
+import { getOctokit } from '../utils/getOctokit'
 
 export function useGetNoteEdit() {
-	const store = useStore()
+	const token = useStore((state) => state.token)
+	const orgName = useStore((state) => state.orgName)
 
 	const request = useRequest(
 		async (note: Note): Promise<NoteEdit | undefined> => {
 			if (note.sha === undefined) return
 
-			const rest = getOctokit(store.token)
+			const rest = getOctokit(token)
 
 			const res: any = await rest.git.getBlob({
-				owner: store.orgName,
+				owner: orgName,
 				repo: 'diori-main',
 				file_sha: note.sha
 			})
@@ -32,9 +33,7 @@ export function useGetNoteEdit() {
 
 			return noteEdit
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
 
 	return request

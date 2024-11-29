@@ -12,7 +12,7 @@ export type SliceCreator<T> = StateCreator<Store, [['zustand/immer', never]], []
 
 export type Store = User & Settings & Diary & Editing & Search
 
-const store: StateCreator<Store> = (...args) => ({
+const store: StateCreator<Store, [['zustand/immer', never]]> = (...args) => ({
 	...userSlice(...args),
 	...settingsSlice(...args),
 	...diarySlice(...args),

@@ -1,5 +1,11 @@
 # Nhật ký thay đổi
 
+## 1.6.0 (29-11-2024)
+
+- Đổi icon app.
+- Cải thiện khả năng hiển thị âm lịch.
+- Dùng `pnpm` thay `bun`, vì `bun` ngốn nhiều RAM.
+
 ## 1.5.0 (18-07-2024)
 
 - Loại bỏ cú pháp tham chiếu link trong tiêu đề.

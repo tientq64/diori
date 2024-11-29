@@ -28,31 +28,11 @@ export const searchSlice: SliceCreator<Search> = (set) => ({
 	searchLoading: false,
 	searchError: undefined,
 
-	setSearchText: (searchText) => {
-		set({ searchText })
-	},
-
-	setSearchNotes: (searchNotes) => {
-		set({ searchNotes })
-	},
-
-	setSearchNotesTotal: (searchNotesTotal) => {
-		set({ searchNotesTotal })
-	},
-
-	setSearchPage: (searchPage) => {
-		set({ searchPage })
-	},
-
-	setSearchPageTotal: (searchPageTotal) => {
-		set({ searchPageTotal })
-	},
-
-	setSearchLoading: (searchLoading) => {
-		set({ searchLoading })
-	},
-
-	setSearchError: (searchError) => {
-		set({ searchError })
-	}
+	setSearchText: (searchText) => set({ searchText }),
+	setSearchNotes: (searchNotes) => set({ searchNotes }),
+	setSearchNotesTotal: (searchNotesTotal) => set({ searchNotesTotal }),
+	setSearchPage: (searchPage) => set({ searchPage }),
+	setSearchPageTotal: (searchPageTotal) => set({ searchPageTotal }),
+	setSearchLoading: (searchLoading) => set({ searchLoading }),
+	setSearchError: (searchError) => set({ searchError })
 })

@@ -10,7 +10,8 @@ import { getOctokit } from '../utils/getOctokit'
  * Hook đồng bộ hóa cài đặt từ GitHub.
  */
 export function useSyncSettings() {
-	const store = useStore()
+	const orgName = useStore((state) => state.orgName)
+	const setSettingsProps = useStore((state) => state.setSettingsProps)
 
 	const request = useRequest(
 		async (): Promise<void> => {
@@ -19,13 +20,13 @@ export function useSyncSettings() {
 
 			try {
 				res = await rest.repos.getContent({
-					owner: store.orgName,
+					owner: orgName,
 					repo: 'diori-main',
 					path: 'settings.json'
 				})
 				const json: string = base64ToText(res.data.content)
 				const settingsProps: SettingsProps = JSON.parse(json)
-				store.setSettingsProps(settingsProps)
+				setSettingsProps(settingsProps)
 
 				Dialog.alert({
 					content: 'Đã đồng bộ cài từ GitHub.',

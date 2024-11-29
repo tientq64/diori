@@ -1,34 +1,46 @@
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
 
-type CommitFilesOptions = {
-	/** Tên tổ chức GitHub. */
-	orgName: string
-
-	/** Tên repo. */
-	repoName: string
-
-	/** Mô tả của commit. */
-	message: string
-
-	/** Các tập tin thêm vào commit. */
-	addedFiles?: AddedCommitFile[]
-
-	/** Các đường dẫn tập tin xóa khi commit. */
-	deletedPaths?: string[]
-}
+type Tree = RestEndpointMethodTypes['git']['createTree']['parameters']['tree']
 
 /**
  * Tập tin thêm vào commit.
  */
-export type AddedCommitFile = {
-	/** Đường dẫn tập tin trên GitHub. */
+export interface AddedCommitFile {
+	/**
+	 * Đường dẫn tập tin trên GitHub.
+	 */
 	path: string
-
-	/** Nội dung tập tin, dạng base64. */
+	/**
+	 * Nội dung tập tin, dạng base64.
+	 */
 	content: string
 }
 
-type Tree = RestEndpointMethodTypes['git']['createTree']['parameters']['tree']
+/**
+ * Các tham số truyền vào hàm commit.
+ */
+interface CommitFilesOptions {
+	/**
+	 * Tên tổ chức GitHub.
+	 */
+	orgName: string
+	/**
+	 * Tên repo.
+	 */
+	repoName: string
+	/**
+	 * Mô tả của commit.
+	 */
+	message: string
+	/**
+	 * Các tập tin thêm vào commit.
+	 */
+	addedFiles?: AddedCommitFile[]
+	/**
+	 * Các đường dẫn tập tin cần xóa khi commit.
+	 */
+	deletedPaths?: string[]
+}
 
 /**
  * Commit thêm, xóa các tập tin và đẩy lên GitHub.
@@ -39,10 +51,12 @@ export async function commitFiles(
 	rest: Octokit,
 	{ orgName, repoName, message, addedFiles = [], deletedPaths = [] }: CommitFilesOptions
 ): Promise<string[]> {
-	let res
+	let res: any
 
+	// Dừng lại nếu không có gì thay đổi.
 	if (addedFiles.length === 0 && deletedPaths.length === 0) return []
 
+	// Lấy SHA commit mới nhất trên GitHub.
 	res = await rest.repos.getCommit({
 		owner: orgName,
 		repo: repoName,
@@ -50,6 +64,7 @@ export async function commitFiles(
 	})
 	const commitSHA = res.data.sha
 
+	// Tạo mảng SHA các tập tin cần thêm vào.
 	const addedFileSHAs: string[] = []
 	for (const file of addedFiles) {
 		res = await rest.git.createBlob({
@@ -62,6 +77,7 @@ export async function commitFiles(
 		addedFileSHAs.push(blobSHA)
 	}
 
+	// Tạo một tree gồm các thay đổi và lấy tree SHA.
 	res = await rest.git.createTree({
 		owner: orgName,
 		repo: repoName,
@@ -73,7 +89,6 @@ export async function commitFiles(
 				type: 'commit',
 				sha: addedFileSHAs[i]
 			})) as Tree),
-
 			...(deletedPaths.map((path) => ({
 				path,
 				mode: '100644',
@@ -84,6 +99,7 @@ export async function commitFiles(
 	})
 	const treeSHA = res.data.sha
 
+	// Tạo một commit và lấy commit SHA.
 	res = await rest.git.createCommit({
 		owner: orgName,
 		repo: repoName,
@@ -93,6 +109,7 @@ export async function commitFiles(
 	})
 	const newCommitSHA = res.data.sha
 
+	// Đẩy commit lên GitHub.
 	res = await rest.git.updateRef({
 		owner: orgName,
 		repo: repoName,

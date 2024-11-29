@@ -5,20 +5,40 @@ import { SliceCreator } from '../useStore'
  * Kiểu của đối tượng.
  */
 export enum EntityTypes {
-	/** Tên người. */
+	/**
+	 * Tên người.
+	 */
 	PERSON = 'person',
-	/** Danh từ riêng. */
+	/**
+	 * Danh từ riêng.
+	 */
 	PROPER_NOUN = 'properNoun'
 }
 
 /**
- * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng. Dùng trong tô sáng cú pháp khi viết nhật ký.
+ * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng.
+ * Dùng trong tô sáng cú pháp khi viết nhật ký.
  */
 export type Entity = {
+	/**
+	 * ID của đối tượng.
+	 */
 	id: number
+	/**
+	 * Kiểu của đối tượng.
+	 */
 	type: EntityTypes
+	/**
+	 * Tên đối tượng.
+	 */
 	name: string
+	/**
+	 * Các tên tương tự khác.
+	 */
 	aliasNames: string[]
+	/**
+	 * Mô tả đối tượng.
+	 */
 	description: string
 }
 
@@ -26,13 +46,21 @@ export type Entity = {
  * Các thuộc tính của cài đặt.
  */
 export type SettingsProps = {
-	/** Phông chữ. */
+	/**
+	 * Phông chữ.
+	 */
 	fontFamily: string
-	/** Cỡ chữ. */
+	/**
+	 * Cỡ chữ.
+	 */
 	fontSize: number
-	/** Chế độ tối. */
+	/**
+	 * Chế độ tối.
+	 */
 	isDarkMode: boolean
-	/** Các đối tượng. */
+	/**
+	 * Các đối tượng.
+	 */
 	entities: Entity[]
 }
 
@@ -45,11 +73,19 @@ export type Settings = SettingsProps & {
 	 * Thêm mới hoặc cập nhật đối tượng.
 	 */
 	addOrUpdateEntity: (entity: Entity) => void
+	/**
+	 * Loại bỏ một đối tượng.
+	 * @param entity Đối tượng cần loại bỏ.
+	 */
 	removeEntity: (entity?: Entity) => void
 	/**
-	 * Trả về các thuộc tính của cài đặt.
+	 * Trả về tất cả cài đặt hiện tại.
 	 */
 	getSettingsProps: () => SettingsProps
+	/**
+	 * Cập nhật tất cả cài đặt.
+	 * @param settingsProps Tất cả các thuộc tính của cài đặt.
+	 */
 	setSettingsProps: (settingsProps: SettingsProps) => void
 }
 
@@ -59,21 +95,10 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 	isDarkMode: true,
 	entities: [],
 
-	setFontFamily: (fontFamily) => {
-		set({ fontFamily })
-	},
-
-	setFontSize: (fontSize) => {
-		set({ fontSize })
-	},
-
-	setIsDarkMode: (isDarkMode) => {
-		set({ isDarkMode })
-	},
-
-	setEntities: (entities) => {
-		set({ entities })
-	},
+	setFontFamily: (fontFamily) => set({ fontFamily }),
+	setFontSize: (fontSize) => set({ fontSize }),
+	setIsDarkMode: (isDarkMode) => set({ isDarkMode }),
+	setEntities: (entities) => set({ entities }),
 
 	addOrUpdateEntity: (entity) => {
 		set((state) => {
@@ -87,13 +112,13 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 	},
 
 	removeEntity: (entity) => {
-		if (!entity) return
+		if (entity === undefined) return
 		set((state) => {
 			remove(state.entities, { id: entity.id })
 		})
 	},
 
-	getSettingsProps: (): SettingsProps => {
+	getSettingsProps: () => {
 		const state = get()
 		return {
 			fontFamily: state.fontFamily,

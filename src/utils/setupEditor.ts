@@ -80,7 +80,7 @@ export const setupEditor = (
 					},
 					{
 						// Đơn vị, số.
-						regex: /(\d+(tr|[kpt%])|\d+)(?=[\s.,:;!?)\]}]|$)/,
+						regex: /(\d+(\.\d+)?(tr|[klpt%])?)(?=[\s.,:;!?)\]}]|$)/,
 						action: 'orange-italic'
 					},
 					{
@@ -129,7 +129,7 @@ export const setupEditor = (
 				],
 				emotions: [
 					{
-						regex: /:["']?[()]+|:["']?>|:[D3v]|[;=]\)+/,
+						regex: /:["']?[()]+|:["']?>|:[D30v]|[;=]\)+|'v'/,
 						action: 'yellow'
 					},
 					{
