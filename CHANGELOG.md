@@ -2,6 +2,7 @@
 
 ## 1.7.0 (06-12-2024)
 
+- Danh sách xem thiết kế lại chiếm toàn chiều cao, phần topbar và statusbar thành lớp phủ.
 - Thêm tính năng hiện thông tin đối tượng khi di chuột vào, trong trình soạn thảo.
 
 ## 1.6.0 (29-11-2024)

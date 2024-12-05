@@ -221,7 +221,7 @@ export function EntitiesManager() {
 					</Form.Item>
 
 					<Form.Item
-						label="Các tên tương tự"
+						label="Các tên khác"
 						name="aliasNames"
 						rules={[
 							{

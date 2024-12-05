@@ -293,7 +293,11 @@ export const setupEditor = (
 					const subFlatEntities: FlatEntity[] = [
 						entity,
 						...entity.aliasNames.map<Entity>((aliasName) => {
-							return { ...entity, name: aliasName }
+							return {
+								...entity,
+								name: aliasName,
+								nameWithNote: entity.name
+							}
 						})
 					]
 					if (nameWithoutNote !== entity.name) {
