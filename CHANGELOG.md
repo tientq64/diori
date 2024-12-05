@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.7.0 (06-12-2024)
+
+- Thêm tính năng hiện thông tin đối tượng khi di chuột vào, trong trình soạn thảo.
+
 ## 1.6.0 (29-11-2024)
 
 - Đổi icon app.

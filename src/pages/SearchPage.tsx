@@ -14,16 +14,26 @@ import { useStore } from '../store/useStore'
 let currentScrollTop: number = 0
 
 export function SearchPage(): ReactNode {
-	const store = useStore()
+	const isMd = useStore((state) => state.isMd)
+	const isXs = useStore((state) => state.isXs)
+	const searchText = useStore((state) => state.searchText)
+	const searchPage = useStore((state) => state.searchPage)
+	const searchPageTotal = useStore((state) => state.searchPageTotal)
+	const searchNotes = useStore((state) => state.searchNotes)
+	const searchNotesTotal = useStore((state) => state.searchNotesTotal)
+	const searchLoading = useStore((state) => state.searchLoading)
+	const searchError = useStore((state) => state.searchError)
+	const setEditingNote = useStore((state) => state.setEditingNote)
+
 	const search = useSearch()
 	const navigate = useNavigate()
-	const scrollRef = useRef<HTMLDivElement>(null)
+	const scrollRef = useRef<HTMLDivElement | null>(null)
 
 	const handleNoteClick = (note: Note): void => {
-		store.setEditingNote(note)
+		setEditingNote(note)
 		navigate(`/edit/${note.date}`, {
 			state: {
-				findText: store.searchText
+				findText: searchText
 			}
 		})
 	}
@@ -33,15 +43,15 @@ export function SearchPage(): ReactNode {
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
 		currentScrollTop = scrollTop
 		if (scrollTop >= scrollHeight - clientHeight) {
-			search.run(store.searchText, store.searchPage + 1)
+			search.run(searchText, searchPage + 1)
 		}
 	}
 
 	useEffect(() => {
-		if (store.searchPage === 1) {
+		if (searchPage === 1) {
 			currentScrollTop = 0
 		}
-	}, [store.searchPage])
+	}, [searchPage])
 
 	useEffect(() => {
 		if (!scrollRef.current) return
@@ -57,17 +67,15 @@ export function SearchPage(): ReactNode {
 						backIcon={<SearchOutline />}
 						left={
 							<div className="flex items-center gap-2">
-								{store.isMd ? 'Kết quả tìm kiếm cho:' : 'Kết quả:'}
+								{isMd ? 'Kết quả tìm kiếm cho:' : 'Kết quả:'}
 								<span className="text-lime-200 light:text-lime-600">
-									{store.searchText}
+									{searchText}
 								</span>
-								<span className="text-zinc-500">
-									- {store.searchNotesTotal} mục
-								</span>
+								<span className="text-zinc-500">- {searchNotesTotal} mục</span>
 							</div>
 						}
 						right={
-							store.isMd && (
+							isMd && (
 								<div className="flex justify-end items-center md:gap-4">
 									<SearchInput />
 									<EntitiesManagerDropdown />
@@ -76,7 +84,7 @@ export function SearchPage(): ReactNode {
 							)
 						}
 					/>
-					{store.isXs && (
+					{isXs && (
 						<div className="px-2 pb-2">
 							<SearchInput />
 						</div>
@@ -88,10 +96,10 @@ export function SearchPage(): ReactNode {
 					className="flex-1 px-4 xs:px-2 overflow-auto bg-zinc-900 light:bg-zinc-100"
 					onScroll={handleScroll}
 				>
-					{store.searchNotes.length > 0 && (
+					{searchNotes.length > 0 && (
 						<>
 							<div className="grid md:grid-cols-7 md:auto-rows-[17vh] gap-3 xs:gap-2">
-								{store.searchNotes.map((note) => (
+								{searchNotes.map((note) => (
 									<NoteCard
 										key={note.date}
 										note={note}
@@ -100,29 +108,27 @@ export function SearchPage(): ReactNode {
 								))}
 							</div>
 
-							{!store.searchError && store.searchPage < store.searchPageTotal && (
+							{!searchError && searchPage < searchPageTotal && (
 								<div className="mt-4 text-center">Đang tải thêm...</div>
 							)}
 
-							{store.searchError && (
+							{searchError && (
 								<div className="mt-4 text-center text-rose-400">Đã xảy ra lỗi</div>
 							)}
 						</>
 					)}
 
-					{store.searchNotes.length === 0 && (
+					{searchNotes.length === 0 && (
 						<div className="flex justify-center items-center h-full">
-							{store.searchLoading && 'Đang tìm kiếm...'}
+							{searchLoading && 'Đang tìm kiếm...'}
 
-							{store.searchError && (
+							{searchError && (
 								<Result
 									className="w-full"
 									status="error"
 									title="Đã xảy ra lỗi"
 									description={
-										<div className="md:w-2/5 m-auto">
-											{String(store.searchError)}
-										</div>
+										<div className="md:w-2/5 m-auto">{String(searchError)}</div>
 									}
 								/>
 							)}

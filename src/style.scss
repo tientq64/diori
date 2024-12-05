@@ -1,16 +1,19 @@
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
 	scrollbar-color: #a1a1aa transparent;
+
+	--adm-color-border: #e4e4e7;
 }
 
 .dark {
 	color-scheme: dark;
+	scrollbar-color: #3f3f46 transparent;
 
 	&:root {
-		scrollbar-color: #3f3f46 transparent;
-		--adm-color-border: #27272a;
+		--adm-color-border: #3f3f46;
 		--adm-color-background: #18181b;
 		--adm-color-box: #09090b;
 	}
@@ -72,17 +75,15 @@
 	width: 100%;
 }
 
-@layer components {
-	.adm-form-card-m0 {
-		> .adm-list-card {
-			margin: 0;
-		}
+.adm-form-card-m0 {
+	> .adm-list-card {
+		margin: 0;
 	}
+}
 
-	.adm-form-card-m2 {
-		> .adm-list-card {
-			margin: 0.5rem;
-		}
+.adm-form-card-m2 {
+	> .adm-list-card {
+		margin: 0.5rem;
 	}
 }
 
@@ -203,14 +204,28 @@
 }
 
 .monaco-editor {
-	position: absolute;
+	// position: absolute;
 
 	.view-ruler {
 		border-right: 1px dashed #3f3f46;
 		box-shadow: none !important;
 
-		@at-root .light & {
+		.light & {
 			border-right-color: #d4d4d8;
+		}
+	}
+
+	.suggest-widget {
+		.contents {
+			display: unset;
+		}
+		.details-label {
+			@apply text-zinc-400;
+			opacity: 1 !important;
+
+			.light & {
+				@apply text-zinc-300;
+			}
 		}
 	}
 }
@@ -229,5 +244,10 @@
 @layer utilities {
 	.image-contrast {
 		image-rendering: -webkit-optimize-contrast;
+	}
+
+	.text-security {
+		-webkit-text-security: square;
+		text-security: square;
 	}
 }

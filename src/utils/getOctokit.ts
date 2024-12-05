@@ -11,9 +11,9 @@ export function getOctokit(token?: string): Octokit {
 		if (res.headers['x-ratelimit-resource'] === 'core') {
 			const store = useStore.getState()
 
-			const limit = Number(res.headers['x-ratelimit-limit'])
-			const remaining = Number(res.headers['x-ratelimit-remaining'])
-			const reset = Number(res.headers['x-ratelimit-reset'])
+			const limit: number = Number(res.headers['x-ratelimit-limit'])
+			const reset: number = Number(res.headers['x-ratelimit-reset'])
+			const remaining: number = Number(res.headers['x-ratelimit-remaining'])
 			if (limit) {
 				store.setRateLimit(limit)
 			}

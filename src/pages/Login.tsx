@@ -1,10 +1,11 @@
 import { useAsyncEffect } from 'ahooks'
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { usePWAInstall } from 'react-use-pwa-install'
-import pkg from '../../package.json'
 import logoImage from '../assets/images/book.png'
+import { Brand } from '../components/Brand'
+import { Link2 } from '../components/Link2'
 import { Page } from '../components/Page'
 import { useLogin } from '../hooks/useLogin'
 import { useStore } from '../store/useStore'
@@ -65,7 +66,7 @@ export function Login(): ReactNode {
 	useEffect(() => {
 		if (import.meta.env.DEV) {
 			form.setFieldValue('pass', 'test')
-			// form.submit()
+			form.submit()
 		}
 	}, [])
 
@@ -90,7 +91,7 @@ export function Login(): ReactNode {
 				<div className="flex-1 flex flex-col items-center">
 					<div className="basis-7/12 flex flex-col justify-center items-center gap-2">
 						<img className="w-32" src={logoImage} />
-						<div className="text-gray-400">Diori {pkg.version}</div>
+						<Brand />
 					</div>
 
 					<Form
@@ -111,7 +112,11 @@ export function Login(): ReactNode {
 								}
 							]}
 						>
-							<Input type="password" autoFocus />
+							<Input
+								className="text-security"
+								autoComplete="current-password"
+								autoFocus
+							/>
 						</Form.Item>
 
 						<Form.Item>
@@ -128,24 +133,17 @@ export function Login(): ReactNode {
 					</Form>
 
 					<div className="basis-5/12 flex flex-wrap justify-center items-end gap-6 xs:gap-4 py-2">
-						<Link to="/register">Đăng ký</Link>
-						<a href="https://github.com/tientq64/diori" target="_blank">
-							GitHub
-						</a>
+						<Link2 to="/register">Đăng ký</Link2>
+						<Link2 href="https://github.com/tientq64/diori">GitHub</Link2>
 						{installPWA && (
-							<span onClick={() => installPWA()}>
+							<Link2 onClick={() => installPWA()}>
 								{isMd ? 'Cài như ứng dụng' : 'Cài app'}
-							</span>
+							</Link2>
 						)}
-						<a
-							href="https://github.com/tientq64/diori/blob/main/CHANGELOG.md"
-							target="_blank"
-						>
+						<Link2 href="https://github.com/tientq64/diori/blob/main/CHANGELOG.md">
 							Có gì mới?
-						</a>
-						<a href="https://github.com/tientq64/diori/issues/new" target="_blank">
-							Báo lỗi
-						</a>
+						</Link2>
+						<Link2 href="https://github.com/tientq64/diori/issues/new">Báo lỗi</Link2>
 					</div>
 				</div>
 			</div>

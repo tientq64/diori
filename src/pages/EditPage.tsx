@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Fancybox } from '@fancyapps/ui'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
@@ -7,10 +6,10 @@ import { Editor } from '@monaco-editor/react'
 import { useUpdateEffect } from 'ahooks'
 import {
 	Button,
-	Dialog,
 	Form,
 	ImageUploader,
 	Input,
+	Modal,
 	NavBar,
 	Popover,
 	Skeleton,
@@ -28,6 +27,7 @@ import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { Blocker, useBlocker, useLocation } from 'react-router-dom'
 import spinnerImage from '../assets/images/spinner.svg'
 import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
@@ -40,6 +40,7 @@ import { Note } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
 import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 import { useStore } from '../store/useStore'
+import { emptyArray } from '../utils/constants'
 import { formValidateMessages } from '../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
 import { setupEditor } from '../utils/setupEditor'
@@ -73,13 +74,15 @@ export function EditPage(): ReactNode {
 	const [form] = Form.useForm()
 	const title = Form.useWatch<string>('title', form) ?? ''
 	const content = Form.useWatch<string>('content', form) ?? ''
-	const images = Form.useWatch<ImageUploadItem[]>('images', form) ?? []
+	const images = Form.useWatch<ImageUploadItem[]>('images', form) ?? emptyArray
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
 	const photosLoader = usePhotosLoader()
 	const monacoRef = useRef<typeof Monaco>()
+	const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
 	const editorDisposer = useRef<Monaco.IDisposable>()
+	const [previewImageVisible, setPreviewImageVisible] = useState<boolean>(false)
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
@@ -124,9 +127,10 @@ export function EditPage(): ReactNode {
 	const canSave = useMemo<boolean>(() => {
 		if (save.loading) return false
 		if (!unsaved) return false
+		if (previewImageVisible) return false
 
 		return true
-	}, [save.loading, unsaved])
+	}, [save.loading, unsaved, previewImageVisible])
 
 	const editorOptions = useMemo<Monaco.editor.IStandaloneEditorConstructionOptions>(
 		() => ({
@@ -171,17 +175,17 @@ export function EditPage(): ReactNode {
 		editor: Monaco.editor.IStandaloneCodeEditor,
 		monaco: typeof Monaco
 	): void => {
+		editorRef.current = editor
+
 		const model = editor.getModel()
 		if (!model) return
 
 		model.setEOL(monaco.editor.EndOfLineSequence.LF)
 
-		const { CtrlCmd } = monaco.KeyMod
-		const { KeyCode } = monaco
+		// const { CtrlCmd } = monaco.KeyMod
+		// const { KeyCode } = monaco
 
-		editor.addCommand(CtrlCmd | KeyCode.KeyS, () => {
-			form.submit()
-		})
+		// editor.addCommand(CtrlCmd | KeyCode.Period, (): void => {})
 
 		if (location.state?.findText) {
 			const matched = model
@@ -228,6 +232,7 @@ export function EditPage(): ReactNode {
 	 */
 	const showPreviewImage = (image: ImageUploadItem): void => {
 		const startIndex: number = findIndex(images, { key: image.key })
+		setPreviewImageVisible(true)
 
 		const fancybox: Fancybox = new Fancybox(
 			images.map((image2) => ({
@@ -248,6 +253,7 @@ export function EditPage(): ReactNode {
 						imageEl.src = url
 					},
 					close: (): void => {
+						setPreviewImageVisible(false)
 						fancybox.destroy()
 					}
 				}
@@ -293,44 +299,58 @@ export function EditPage(): ReactNode {
 		save.run(title, content, images, addedImages, removedImages, defaultPhotoKey, noteEdit)
 	}
 
+	useHotkeys(
+		'ctrl+s',
+		() => {
+			form.submit()
+		},
+		{
+			preventDefault: true,
+			enableOnFormTags: true,
+			enabled: () => {
+				return canSave
+			}
+		}
+	)
+
 	useEffect(() => {
 		if (blocker.state !== 'blocked') return
 		if (save.loading) {
 			Toast.show('Không thể trở về trong khi đang lưu')
-		} else {
-			Dialog.show({
-				title: 'Dữ liệu chưa được lưu',
-				content: 'Dữ liệu chưa được lưu sẽ bị mất, bạn vẫn muốn trở về?',
-				closeOnMaskClick: true,
-				closeOnAction: true,
-				actions: [
-					{
-						key: 'save',
-						text: 'Lưu',
-						bold: true,
-						onClick: () => {
-							form.submit()
-						}
-					},
-					{
-						key: 'back',
-						text: 'Trở về',
-						danger: true,
-						onClick: () => {
-							blocker.proceed()
-						}
-					},
-					{
-						key: 'cancel',
-						text: 'Đóng',
-						className: 'text-zinc-400'
-					}
-				],
-				afterClose: () => {
-					blocker.reset()
-				}
-			})
+			return
 		}
+		Modal.show({
+			title: 'Dữ liệu chưa được lưu',
+			content: 'Dữ liệu chưa được lưu sẽ bị mất, bạn vẫn muốn trở về?',
+			closeOnMaskClick: true,
+			closeOnAction: true,
+			actions: [
+				{
+					key: 'save',
+					text: 'Lưu',
+					primary: true,
+					onClick: () => {
+						form.submit()
+					}
+				},
+				{
+					key: 'back',
+					text: 'Trở về',
+					danger: true,
+					onClick: () => {
+						blocker.proceed()
+					}
+				},
+				{
+					key: 'cancel',
+					text: 'Đóng',
+					className: 'text-zinc-400'
+				}
+			],
+			afterClose: () => {
+				blocker.reset()
+			}
+		})
 	}, [blocker.state])
 
 	useUpdateEffect(() => {
@@ -406,7 +426,7 @@ export function EditPage(): ReactNode {
 							editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
 						)}
 						{isMd && (
-							<span className="text-gray-500 ml-2">
+							<span className="text-zinc-500 ml-2">
 								<>
 									({editingNote.lunar.day} tháng {editingNote.lunar.month} âm
 									lịch)
@@ -447,7 +467,7 @@ export function EditPage(): ReactNode {
 								]}
 							>
 								<Input
-									className="[&>input]:placeholder:text-gray-500"
+									className="[&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#697098]"
 									autoComplete="off"
 									placeholder={
 										noteEdit && noteEdit.title && !noteEdit.isTitled

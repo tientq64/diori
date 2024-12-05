@@ -7,7 +7,9 @@ import { slowHashText } from '../utils/slowHashText'
 import { RegisterValues } from '../pages/Register'
 
 export function useRegister() {
-	const store = useStore()
+	const setOrgName = useStore((state) => state.setOrgName)
+	const setEncryptedToken = useStore((state) => state.setEncryptedToken)
+	const setToken = useStore((state) => state.setToken)
 
 	const request = useRequest(
 		async ({ token, orgName, pass }: RegisterValues) => {
@@ -26,7 +28,7 @@ export function useRegister() {
 				const isInitRepo = await Modal.confirm({
 					title: 'Khởi tạo repo chính',
 					content:
-						'Tài khoản Github chưa có repo với tên "diori-main". Đây là repo dùng để lưu dữ liệu dạng văn bản, còn hình ảnh được lưu vào các repo khác, sẽ được tạo sau khi cần thiết. Bạn có muốn tạo repo "diori-main" không?',
+						'Tài khoản GitHub chưa có repo với tên "diori-main". Đây là repo dùng để lưu dữ liệu dạng văn bản, còn hình ảnh được lưu vào các repo khác, sẽ được tạo sau khi cần thiết. Bạn có muốn tạo repo "diori-main" không?',
 					confirmText: 'Có và tiếp tục',
 					cancelText: 'Không, dừng lại'
 				})
@@ -48,9 +50,9 @@ export function useRegister() {
 			const key = await slowHashText(pass)
 			const encryptToken = encryptText(token, key)
 
-			store.setOrgName(orgName)
-			store.setEncryptedToken(encryptToken)
-			store.setToken(token)
+			setOrgName(orgName)
+			setEncryptedToken(encryptToken)
+			setToken(token)
 
 			return true
 		},

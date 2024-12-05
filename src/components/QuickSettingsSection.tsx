@@ -1,4 +1,4 @@
-import { Button, Dialog, Form, Input, Slider, Switch } from 'antd-mobile'
+import { Button, Form, Input, Modal, Slider, Switch } from 'antd-mobile'
 import { SliderValue } from 'antd-mobile/es/components/slider'
 import { range } from 'lodash'
 import { useNavigate } from 'react-router-dom'
@@ -27,25 +27,23 @@ export function QuickSettingsSection() {
 	}
 
 	const handleSyncSettingsFromGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await Dialog.confirm({
+		const confirmed: boolean = await Modal.confirm({
 			content: 'Bạn chắc chắn muốn đồng bộ cài đặt từ GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
 		})
-		if (confirmed) {
-			syncSettings.run()
-		}
+		if (!confirmed) return
+		syncSettings.run()
 	}
 
 	const handleSaveSettingsToGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await Dialog.confirm({
+		const confirmed: boolean = await Modal.confirm({
 			content: 'Bạn chắc chắn muốn lưu cài đặt lên GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
 		})
-		if (confirmed) {
-			saveSettings.run()
-		}
+		if (!confirmed) return
+		saveSettings.run()
 	}
 
 	return (

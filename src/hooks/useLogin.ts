@@ -11,9 +11,9 @@ export function useLogin() {
 	const fetchUserData = useStore((state) => state.fetchUserData)
 
 	const request = useRequest(
-		async ({ pass }: LoginValues) => {
-			const key = await slowHashText(pass)
-			const token = decryptText(encryptedToken, key)
+		async ({ pass }: LoginValues): Promise<boolean> => {
+			const key: string = await slowHashText(pass)
+			const token: string = decryptText(encryptedToken, key)
 
 			if (token === '') {
 				throw Error('Mật khẩu không đúng')
@@ -28,6 +28,5 @@ export function useLogin() {
 		},
 		{ manual: true }
 	)
-
 	return request
 }

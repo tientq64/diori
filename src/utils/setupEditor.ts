@@ -1,11 +1,47 @@
-import type * as Monaco from 'monaco-editor'
+import { findIndex, findLast, some } from 'lodash'
+import * as Monaco from 'monaco-editor'
 import { Entity, EntityTypes } from '../store/slices/settingsSlice'
+import { useStore } from '../store/useStore'
+import { getEntityNameWithoutNote } from './getEntityNameWithoutNote'
 
 type SetupEditorOptions = {
 	entities: Entity[]
 	persons: Entity[]
 	properNouns: Entity[]
 }
+
+const emojis: [string, string[]][] = [
+	[':)', ['🙂', '😌']],
+	[':D', ['😄', '😅', '😁', '😬', '😀']],
+	['xD', ['😆', '😂']],
+	[':(', ['☹️', '😟', '😞']],
+	[":'(", ['😢', '🥹', '🥺']],
+	['TT', ['😭']],
+	['>:(', ['😠', '😡']],
+	['D:', ['😨', '😧']],
+	['Dx', ['😫', '😩']],
+	['^^', ['😚', '🤭']],
+	[':*', ['😘']],
+	[';)', ['😉']],
+	[':p', ['😛']],
+	[':/', ['😕']],
+	[':?', ['🤔', '🤨']],
+	[':M', ['😗']],
+	[':l', ['😐', '😑', '😳', '😶']],
+	[':o', ['😮', '😯', '😱']],
+	[':x', ['🤢']],
+	['0:)', ['😇']],
+	['3:)', ['😈']],
+	[':J', ['😏']],
+	['B)', ['😎']],
+	['xx', ['😵']],
+	['@@', ['😵‍💫']],
+	['><', ['😣', '😖']],
+	['>>', ['🙄', '😒']],
+	['zzz', ['😴', '😪', '🥱']],
+	['<3', ['❤️']],
+	['</3', ['💔']]
+]
 
 export const setupEditor = (
 	monaco: typeof Monaco,
@@ -54,11 +90,6 @@ export const setupEditor = (
 						action: ['gray', 'gray', 'aqua-italic', 'green-italic']
 					},
 					{
-						// Link.
-						regex: /(\[)(.+?)(\])(\[.+?\])/,
-						action: ['aqua', 'aqua-italic', 'aqua', 'gray']
-					},
-					{
 						// Giờ phút.
 						regex: /(([01]\d|2[0-3]):[0-5]\d|24:00|\d+h([0-5]\d)?)(?=[\s.,:;!?)\]}]|$)/,
 						action: 'red-italic'
@@ -97,10 +128,22 @@ export const setupEditor = (
 						include: '@emotions'
 					},
 					{
+						include: '@link'
+					},
+					{
 						regex: /[\p{L}\d]+/u
 					}
 				],
+				link: [
+					{
+						regex: /(\[)(.+?)(\])(\[.+?\])/,
+						action: ['aqua', 'aqua-italic', 'aqua', 'gray']
+					}
+				],
 				note: [
+					{
+						include: '@link'
+					},
 					{
 						include: '@emotions'
 					},
@@ -121,6 +164,9 @@ export const setupEditor = (
 					{
 						regex: /"/,
 						action: { token: 'green-italic', next: '@pop' }
+					},
+					{
+						include: '@link'
 					},
 					{
 						regex: /.+?/,
@@ -162,23 +208,39 @@ export const setupEditor = (
 					position.lineNumber,
 					wordPosition.endColumn
 				)
+				const range2 = range.setEndPosition(range.endLineNumber, range.endColumn - 1)
 				const suggestions = entities.map<Monaco.languages.CompletionItem>((entity) => {
+					const isPerson: boolean = entity.type === EntityTypes.PERSON
 					return {
 						label: entity.name,
 						insertText: entity.name,
-						kind: monaco.languages.CompletionItemKind.User,
-						documentation: entity.description,
+						kind: isPerson
+							? monaco.languages.CompletionItemKind.Enum
+							: monaco.languages.CompletionItemKind.Method,
+						detail: entity.description,
 						range
 					}
 				})
+				for (const emoji of emojis) {
+					for (const insertText of emoji[1]) {
+						suggestions.push({
+							label: emoji[0],
+							insertText,
+							kind: monaco.languages.CompletionItemKind.Variable,
+							detail: insertText,
+							range: range2
+						})
+					}
+				}
 				return { suggestions }
-			}
+			},
+			triggerCharacters: [':']
 		})
 
 	const linkDisposer: Monaco.IDisposable = monaco.languages.registerLinkProvider('diori', {
 		provideLinks(model) {
-			const value = model.getValue()
-			let iterator
+			const value: string = model.getValue()
+			let iterator: RegExpStringIterator<RegExpExecArray>
 
 			const links: Record<string, string[]> = {}
 			iterator = value.matchAll(/^\[(.+?)\]: *([^"\n]+?)(?: *"(.+?)")?$/gm)
@@ -208,6 +270,98 @@ export const setupEditor = (
 			}
 			return {
 				links: editorLinks
+			}
+		}
+	})
+
+	interface FlatEntity extends Entity {
+		nameWithNote?: string
+		isUnknown?: boolean
+	}
+
+	const hoverDisposer: Monaco.IDisposable = monaco.languages.registerHoverProvider('diori', {
+		provideHover(model, position) {
+			const lineContent: string = model.getLineContent(position.lineNumber)
+			if (lineContent.trim().length === 0) return null
+
+			const entities: Entity[] = useStore.getState().entities
+			const nameWithoutNotesExisted: Record<string, true | undefined> = {}
+
+			let flatEntities: FlatEntity[] = structuredClone(entities)
+				.flatMap((entity) => {
+					const nameWithoutNote: string = getEntityNameWithoutNote(entity.name)
+					const subFlatEntities: FlatEntity[] = [
+						entity,
+						...entity.aliasNames.map<Entity>((aliasName) => {
+							return { ...entity, name: aliasName }
+						})
+					]
+					if (nameWithoutNote !== entity.name) {
+						const nameWithoutNoteExisted: boolean =
+							some(entities, { name: nameWithoutNote }) ||
+							nameWithoutNotesExisted[nameWithoutNote] === true
+						if (!nameWithoutNoteExisted) {
+							const subFlatEntity: FlatEntity = {
+								...entity,
+								name: nameWithoutNote,
+								isUnknown: true
+							}
+							subFlatEntities.push(subFlatEntity)
+							nameWithoutNotesExisted[nameWithoutNote] = true
+						}
+					}
+					return subFlatEntities
+				})
+				.toSorted((entityA, entityB) => {
+					return entityB.name.length - entityA.name.length
+				})
+
+			let currentIndex: number = 0
+			eating: while (true) {
+				for (const entity of flatEntities) {
+					if (lineContent.startsWith(entity.name, currentIndex)) {
+						if (!entity.isUnknown) {
+							const nameWithoutNote: string = getEntityNameWithoutNote(entity.name)
+							if (entity.name !== nameWithoutNote) {
+								const index: number = findIndex(flatEntities, {
+									name: nameWithoutNote
+								})
+								flatEntities[index] = {
+									...entity,
+									name: nameWithoutNote,
+									nameWithNote: entity.name
+								}
+							}
+						}
+						const start: Monaco.Position = new Monaco.Position(
+							position.lineNumber,
+							currentIndex + 1
+						)
+						if (position.isBefore(start)) {
+							break eating
+						}
+						const end: Monaco.Position = start.delta(0, entity.name.length)
+						const range: Monaco.Range = Monaco.Range.fromPositions(start, end)
+						if (range.containsPosition(position)) {
+							return {
+								contents: [
+									{
+										value: entity.nameWithNote ?? entity.name
+									},
+									{
+										value: entity.description
+									}
+								],
+								range
+							}
+						}
+						currentIndex += entity.name.length
+						break
+					}
+				}
+				currentIndex = lineContent.indexOf(' ', currentIndex)
+				if (currentIndex === -1) break
+				currentIndex += 1
 			}
 		}
 	})
@@ -303,6 +457,7 @@ export const setupEditor = (
 			languageConfigurationDisposer.dispose()
 			completionItemDisposer.dispose()
 			linkDisposer.dispose()
+			hoverDisposer.dispose()
 		}
 	}
 }

@@ -54,7 +54,7 @@ export type User = {
 	setToken: (token: string) => void
 	setRateLimit: (rateLimit: number) => void
 	setRateLimitRemaining: (rateLimitRemaining: number) => void
-	setRateLimitTimeReset: (rateLimitReset: number) => void
+	setRateLimitTimeReset: (timestamp: number) => void
 	setNowPerMinute: (time: Dayjs) => void
 	/**
 	 * Cập nhật giá trị responsive. Gồm 2 giá trị `isMd` và `isXs`.
@@ -76,40 +76,22 @@ export const userSlice: SliceCreator<User> = (set, get) => ({
 	isMd: true,
 	isXs: false,
 
-	setOrgName: (orgName) => {
-		set({ orgName })
-	},
+	setOrgName: (orgName) => set({ orgName }),
+	setEncryptedToken: (encryptedToken) => set({ encryptedToken }),
+	setToken: (token) => set({ token }),
+	setRateLimit: (rateLimit) => set({ rateLimit }),
+	setRateLimitRemaining: (rateLimitRemaining) => set({ rateLimitRemaining }),
 
-	setEncryptedToken: (encryptedToken) => {
-		set({ encryptedToken })
-	},
-
-	setToken: (token) => {
-		set({ token })
-	},
-
-	setRateLimit: (rateLimit) => {
-		set({ rateLimit })
-	},
-
-	setRateLimitRemaining: (rateLimitRemaining) => {
-		set({ rateLimitRemaining })
-	},
-
-	setRateLimitTimeReset: (rateLimitReset) => {
-		const rateLimitTimeReset = dayjs(rateLimitReset)
+	setRateLimitTimeReset: (timestamp) => {
+		const rateLimitTimeReset = dayjs(timestamp)
 		set({ rateLimitTimeReset })
 	},
 
-	setNowPerMinute: (time) => {
-		set({ nowPerMinute: time })
-	},
+	setNowPerMinute: (time) => set({ nowPerMinute: time }),
 
 	updateResponsive: () => {
 		const isMd: boolean = window.innerWidth >= 768
-		if (isMd !== get().isMd) {
-			set({ isMd, isXs: !isMd })
-		}
+		set({ isMd, isXs: !isMd })
 	},
 
 	fetchUserData: async (token) => {

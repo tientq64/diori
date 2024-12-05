@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequest } from 'ahooks'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequest } from 'ahooks'
 import { Dialog } from 'antd-mobile'
 import { SettingsProps } from '../store/slices/settingsSlice'

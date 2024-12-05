@@ -16,15 +16,19 @@ import { useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
 import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 import { useStore } from '../store/useStore'
+import { emptyArray } from '../utils/constants'
 import { removeToneMarks } from '../utils/removeToneMarks'
 
 export function EntitiesManager() {
-	const store = useStore()
+	const entities = useStore((state) => state.entities)
+	const removeEntity = useStore((state) => state.removeEntity)
+	const addOrUpdateEntity = useStore((state) => state.addOrUpdateEntity)
+
 	const [form] = Form.useForm()
 	const [editingEntity, setEditingEntity] = useState<Entity | undefined>()
 	const editingEntityName = Form.useWatch<string>('name', form) ?? ''
 	const editingEntityType = Form.useWatch<EntityTypes>('type', form) ?? 'person'
-	const editingEntityAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? []
+	const editingEntityAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? emptyArray
 	const editingEntityDescription = Form.useWatch<string>('description', form) ?? ''
 	const [filteredEntityType, setFilteredEntityType] = useState<EntityTypes | ''>('')
 
@@ -34,16 +38,16 @@ export function EntitiesManager() {
 
 	const isEditingNewEntity = useMemo<boolean>(() => {
 		if (!editingEntity) return true
-		if (some(store.entities, { id: editingEntity.id })) return false
+		if (some(entities, { id: editingEntity.id })) return false
 		return true
-	}, [editingEntity, store.entities])
+	}, [editingEntity, entities])
 
 	const filteredEntities = useMemo<Entity[]>(() => {
 		if (filteredEntityType === '') {
-			return store.entities
+			return entities
 		}
-		return filter(store.entities, { type: filteredEntityType })
-	}, [store.entities, filteredEntityType])
+		return filter(entities, { type: filteredEntityType })
+	}, [entities, filteredEntityType])
 
 	const groups = useMemo<[string, Entity[]][]>(() => {
 		const sortedEntities = filteredEntities.toSorted((entityA, entityB) => {
@@ -69,7 +73,7 @@ export function EntitiesManager() {
 
 	const handleEntityClick = (entity?: Entity): void => {
 		let id = 1
-		while (some(store.entities, { id })) {
+		while (some(entities, { id })) {
 			id++
 		}
 		entity ??= {
@@ -85,16 +89,15 @@ export function EntitiesManager() {
 
 	const handleRemoveEntity = async (entity?: Entity): Promise<void> => {
 		if (!entity) return
-		const isConfirmedRemove: boolean = await confirm({
+		const isRemoveConfirmed: boolean = await confirm({
 			title: 'Xác nhận xóa',
 			content: `Bạn chắc chắn muốn xóa "${entity.name}"?`,
 			confirmText: 'Xóa',
 			cancelText: 'Không'
 		})
-		if (isConfirmedRemove) {
-			store.removeEntity(editingEntity)
-			setEditingEntity(undefined)
-		}
+		if (!isRemoveConfirmed) return
+		removeEntity(editingEntity)
+		setEditingEntity(undefined)
 	}
 
 	const handleFilteredEntityTypeChange = (key: string): void => {
@@ -111,7 +114,7 @@ export function EntitiesManager() {
 			aliasNames: editingEntityAliasNames,
 			description: editingEntityDescription
 		}
-		store.addOrUpdateEntity(newEntity)
+		addOrUpdateEntity(newEntity)
 		setEditingEntity(undefined)
 	}
 
@@ -218,7 +221,7 @@ export function EntitiesManager() {
 					</Form.Item>
 
 					<Form.Item
-						label="Các tên khác"
+						label="Các tên tương tự"
 						name="aliasNames"
 						rules={[
 							{
@@ -233,6 +236,7 @@ export function EntitiesManager() {
 								tag: '!whitespace-pre-wrap dark:!bg-zinc-700'
 							}}
 							isEditOnRemove
+							separators={[',']}
 							beforeAddValidate={(tag) => tag.trim() !== ''}
 							placeHolder="Nhập vào đây, nhấn Enter để thêm"
 						/>

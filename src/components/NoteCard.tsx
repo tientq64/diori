@@ -1,11 +1,12 @@
-import { MouseEvent, useMemo } from 'react'
+import clsx from 'clsx'
+import { FocusEvent, KeyboardEvent, MouseEvent, useMemo } from 'react'
 import { Note, Status } from '../store/slices/diarySlice'
 import { useStore } from '../store/useStore'
-import { isLoadedStatus } from '../utils/isLoadedStatus'
+import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
-type NoteCardProps = {
+interface NoteCardProps {
 	note: Note
-	onClick?: (event: MouseEvent<HTMLDivElement>) => void
+	onClick?: () => void
 }
 
 export function NoteCard({ note, onClick }: NoteCardProps) {
@@ -16,19 +17,23 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 		return years[note.year]
 	}, [years, note.year])
 
-	const handleClick = (event: MouseEvent<HTMLDivElement>) => {
-		if (isLoadedStatus(status)) {
-			onClick?.(event)
-		}
+	const loaded = useMemo<boolean>(() => {
+		return checkIsLoadedStatus(status)
+	}, [status])
+
+	const handleClick = (): void => {
+		if (!loaded) return
+		if (onClick === undefined) return
+		onClick()
 	}
 
 	return (
 		<div
-			className={`
-				flex md:flex-col xs:items-start gap-3 xs:gap-6 p-2 rounded-md
-				bg-white dark:bg-zinc-800 cursor-pointer group
-				${isLoadedStatus(status) ? '' : 'opacity-50 pointer-events-none'}
-			`}
+			className={clsx(
+				'flex md:flex-col xs:items-start gap-3 xs:gap-6 p-2 rounded-md',
+				'bg-zinc-800 light:bg-white cursor-pointer group',
+				!loaded && 'opacity-50 pointer-events-none'
+			)}
 			onClick={handleClick}
 		>
 			<div className="flex gap-3">
@@ -42,10 +47,11 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 					)}
 					{!note.thumbnailUrl && (
 						<div
-							className={`
-								w-20 md:min-w-20 xs:w-16 aspect-square rounded bg-zinc-700 light:bg-zinc-100
-								${note.sha ? 'visible' : 'invisible'}
-							`}
+							className={clsx(
+								'w-20 md:min-w-20 xs:w-16 aspect-square rounded',
+								'bg-zinc-700 light:bg-zinc-100',
+								note.sha ? 'visible' : 'invisible'
+							)}
 						/>
 					)}
 				</div>
@@ -70,7 +76,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 
 			{note.time.isToday() && (
 				<div className="md:flex-1 flex justify-center items-end xs:items-center xs:h-full">
-					<div className="md:w-12 md:h-1 xs:w-1 xs:h-12 rounded-full bg-blue-500"></div>
+					<div className="md:w-12 md:h-1 xs:w-1 xs:h-12 rounded-full bg-blue-500" />
 				</div>
 			)}
 		</div>

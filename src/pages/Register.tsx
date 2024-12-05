@@ -95,21 +95,24 @@ export function Register(): ReactNode {
 							}
 						]}
 					>
-						<Input />
+						<Input className="text-security" autoComplete="off" />
 					</Form.Item>
 
 					<Form.Item
-						label="Tên tổ chức Github"
+						label="Tên tổ chức GitHub"
 						name="orgName"
-						description="Tài khoản tổ chức Github sẽ dùng để lưu các repo"
+						description="Tài khoản tổ chức GitHub sẽ dùng để lưu các repo"
 						rules={[
 							{
-								pattern: /^[\w.-]+$/,
 								required: true
+							},
+							{
+								pattern: /^[\w.-]+$/,
+								message: '${label} không hợp lệ'
 							}
 						]}
 					>
-						<Input />
+						<Input autoComplete="organization" />
 					</Form.Item>
 
 					<Form.Item
@@ -123,7 +126,7 @@ export function Register(): ReactNode {
 							}
 						]}
 					>
-						<Input type="password" />
+						<Input className="text-security" autoComplete="current-password" />
 					</Form.Item>
 
 					<Form.Item>

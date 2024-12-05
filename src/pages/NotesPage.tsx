@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { upperFirst } from 'lodash'
 import { ReactNode, WheelEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import pkg from '../../package.json'
+import { Brand } from '../components/Brand'
 import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
 import { NoteCard } from '../components/NoteCard'
 import { Page } from '../components/Page'
@@ -120,45 +120,46 @@ export function NotesPage(): ReactNode {
 
 	return (
 		<Page>
-			<div className="flex flex-col h-full">
-				<NavBar
-					className="md:pl-4 md:pr-8"
-					backIcon={null}
-					left={
-						<>
-							{isMd && <div className="text-base">Diori {pkg.version}</div>}
-							{isXs && renderYearDropdown()}
-						</>
-					}
-					right={
-						<div className="flex justify-end items-center md:gap-4">
-							{isMd && <SearchInput />}
-							<EntitiesManagerDropdown />
-							<QuickSettingsDropdown />
-						</div>
-					}
-				>
-					{isMd && renderYearDropdown()}
-				</NavBar>
-
-				{isMd && (
-					<div className="flex justify-around md:gap-4 md:pl-4 md:pr-8 text-center">
-						{dayjs[isMd ? 'weekdays' : 'weekdaysMin'](true).map((weekday) => (
-							<div key={weekday} className="flex-1">
-								{upperFirst(weekday)}
+			<div className="flex flex-col absolute left-0 top-0 size-full">
+				<div className="absolute left-0 top-0 w-full bg-zinc-900/90 z-10">
+					<NavBar
+						className="md:pl-4 md:pr-8"
+						backIcon={null}
+						left={
+							<>
+								{isMd && <Brand />}
+								{isXs && renderYearDropdown()}
+							</>
+						}
+						right={
+							<div className="flex justify-end items-center md:gap-4">
+								{isMd && <SearchInput />}
+								<EntitiesManagerDropdown />
+								<QuickSettingsDropdown />
 							</div>
-						))}
-					</div>
-				)}
-				{isXs && (
-					<div className="px-2 pb-2">
-						<SearchInput />
-					</div>
-				)}
+						}
+					>
+						{isMd && renderYearDropdown()}
+					</NavBar>
+					{isMd && (
+						<div className="flex justify-around md:gap-4 md:pl-4 md:pr-8 text-center">
+							{dayjs[isMd ? 'weekdays' : 'weekdaysMin'](true).map((weekday) => (
+								<div key={weekday} className="flex-1">
+									{upperFirst(weekday)}
+								</div>
+							))}
+						</div>
+					)}
+					{isXs && (
+						<div className="px-2 pb-2">
+							<SearchInput />
+						</div>
+					)}
+				</div>
 
 				<div
 					ref={scrollRef}
-					className="flex-1 px-4 xs:px-2 overflow-auto bg-zinc-900 light:bg-zinc-100"
+					className="flex-1 px-4 xs:px-2 overflow-auto"
 					onScroll={handleScroll}
 				>
 					<div className="grid md:grid-cols-7 md:auto-rows-[17vh] gap-3 xs:gap-2">

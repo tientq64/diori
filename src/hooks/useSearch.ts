@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { useStore } from '../store/useStore'
