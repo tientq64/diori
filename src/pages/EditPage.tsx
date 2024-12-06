@@ -43,7 +43,7 @@ import { useStore } from '../store/useStore'
 import { emptyArray } from '../utils/constants'
 import { formValidateMessages } from '../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
-import { setupEditor } from '../utils/setupEditor'
+import { setupEditor } from '../utils/editor/setupEditor'
 
 export type ImageUploadItem = {
 	key?: string | number
@@ -64,6 +64,7 @@ export function EditPage(): ReactNode {
 	const isDarkMode = useStore((state) => state.isDarkMode)
 	const fontFamily = useStore((state) => state.fontFamily)
 	const fontSize = useStore((state) => state.fontSize)
+	const monaco = useStore((state) => state.monaco)
 	const getNote = useStore((state) => state.getNote)
 	const makeNote = useStore((state) => state.makeNote)
 	const setEditingNote = useStore((state) => state.setEditingNote)
@@ -79,7 +80,6 @@ export function EditPage(): ReactNode {
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
 	const photosLoader = usePhotosLoader()
-	const monacoRef = useRef<typeof Monaco>()
 	const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
 	const editorDisposer = useRef<Monaco.IDisposable>()
 	const [previewImageVisible, setPreviewImageVisible] = useState<boolean>(false)
@@ -162,13 +162,9 @@ export function EditPage(): ReactNode {
 	)
 
 	const beforeEditorMount = (monaco: typeof Monaco): void => {
-		monacoRef.current ??= monaco
+		useStore.getState().setMonaco(monaco)
 		editorDisposer.current?.dispose()
-		editorDisposer.current = setupEditor(monaco, {
-			entities: entities,
-			persons,
-			properNouns
-		})
+		editorDisposer.current = setupEditor()
 	}
 
 	const handleEditorMount = (
@@ -359,8 +355,8 @@ export function EditPage(): ReactNode {
 	}, [notes[editingNote.date]])
 
 	useEffect(() => {
-		if (!monacoRef.current) return
-		beforeEditorMount(monacoRef.current)
+		if (monaco === null) return
+		beforeEditorMount(monaco)
 	}, [entities])
 
 	useEffect(() => {
@@ -405,6 +401,7 @@ export function EditPage(): ReactNode {
 		return () => {
 			// setEditingNote(null)
 			editorDisposer.current?.dispose()
+			useStore.getState().setMonaco(null)
 		}
 	}, [])
 
@@ -497,12 +494,7 @@ export function EditPage(): ReactNode {
 										onMount={handleEditorMount}
 									/>
 								) : (
-									<TextArea
-										className="px-4 py-3"
-										style={{
-											'--font-size': fontSize + 'px'
-										}}
-									/>
+									<textarea className="size-full px-4 py-2 resize-none bg-zinc-900 outline-0" />
 								)}
 							</Form.Item>
 

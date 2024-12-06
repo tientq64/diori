@@ -1,4 +1,5 @@
-import { SliceCreator } from '../useStore'
+import { Monaco } from '../../utils/editor/types'
+import { SliceCreator, useStore } from '../useStore'
 import { Note } from './diarySlice'
 
 export interface NoteEdit {
@@ -19,12 +20,16 @@ export interface Photo {
 
 export type Editing = {
 	editingNote: Note | null
+	monaco: typeof Monaco | null
 
 	setEditingNote: (note: Note | null) => void
+	setMonaco: (monaco: typeof Monaco | null) => void
 }
 
 export const editingSlice: SliceCreator<Editing> = (set) => ({
 	editingNote: null,
+	monaco: null,
 
-	setEditingNote: (note) => set({ editingNote: note })
+	setEditingNote: (note) => set({ editingNote: note }),
+	setMonaco: (monaco) => useStore.setState({ monaco })
 })

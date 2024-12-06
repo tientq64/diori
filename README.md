@@ -13,15 +13,19 @@
 </p>
 
 <p align="center">
-	App viết nhật ký và lưu lên GitHub, dùng GitHub API.
+	Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.
 </p>
 
 ## 📰 Giới thiệu
 
-## ✏️ Ghi chú
+Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.
 
-Ngày tạo: 26 tháng 3, 2024.
+## ✨ Các tính năng chính
 
-<p align="center">
-	<a href="https://www.flaticon.com/free-icons/book" title="book icons" target="_blank">Book icons created by Smashicons - Flaticon</a>
-</p>
+- Thêm, sửa, xóa, quản lý các ngày trong nhật ký.
+- Có thể tải lên ảnh. Ảnh được lưu trữ trên nhiều repo khác nhau, nhóm theo năm.
+- Dữ liệu được lưu trữ trên các repo GitHub riêng tư của bạn, vì vậy đảm bảo an toàn và không lo mất dữ liệu.
+
+## ✍️ Ghi công
+
+<a href="https://www.flaticon.com/free-icons/book" title="book icons" target="_blank">Book icons created by Smashicons - Flaticon</a>

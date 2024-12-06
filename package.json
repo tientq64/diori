@@ -1,9 +1,9 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"type": "module",
-	"description": "📒 App viết nhật ký và lưu lên GitHub, dùng GitHub API.",
+	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [
 		"diary",
 		"journal",

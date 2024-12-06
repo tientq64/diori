@@ -58,19 +58,21 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 
 				<div className="flex-1 text-right xs:text-left text-sm">
 					{isMd && (
-						<div>
+						<div className="font-semibold">
 							{note.time.format('DD-MM')}
 							<span className="hidden md:group-hover:inline">-{note.year}</span>
 						</div>
 					)}
-					{!isMd && note.time.format('dd, DD-MM-YYYY')}
+					{!isMd && (
+						<div className="font-semibold">{note.time.format('dd, DD-MM-YYYY')}</div>
+					)}
 					<div className="text-zinc-400 dark:text-zinc-500">
 						{note.lunar.day}-{note.lunar.month}
 					</div>
 				</div>
 			</div>
 
-			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words dark:text-zinc-400">
+			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words text-zinc-400">
 				{note.title}
 			</div>
 

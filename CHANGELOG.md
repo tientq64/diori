@@ -1,5 +1,10 @@
 # Nhật ký thay đổi
 
+## 1.7.1 (07-12-2024)
+
+- Cải thiện giao diện ứng dụng.
+- Tách nhỏ code trong `EditPage` ra thành các hàm con.
+
 ## 1.7.0 (06-12-2024)
 
 - Danh sách xem thiết kế lại chiếm toàn chiều cao, phần topbar và statusbar thành lớp phủ.

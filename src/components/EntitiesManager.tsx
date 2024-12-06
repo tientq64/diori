@@ -187,8 +187,8 @@ export function EntitiesManager() {
 			<Popup
 				visible={isFormVisible}
 				showCloseButton
-				closeOnMaskClick={!unsaved}
 				destroyOnClose
+				closeOnMaskClick={!unsaved}
 				onClose={() => setEditingEntity(undefined)}
 			>
 				<Form
@@ -236,7 +236,6 @@ export function EntitiesManager() {
 								tag: '!whitespace-pre-wrap dark:!bg-zinc-700'
 							}}
 							isEditOnRemove
-							separators={[',']}
 							beforeAddValidate={(tag) => tag.trim() !== ''}
 							placeHolder="Nhập vào đây, nhấn Enter để thêm"
 						/>
@@ -263,12 +262,24 @@ export function EntitiesManager() {
 
 							{!isEditingNewEntity && (
 								<Button
+									type="button"
 									color="danger"
-									onClick={() => handleRemoveEntity(editingEntity)}
+									onClick={() => {
+										handleRemoveEntity(editingEntity)
+									}}
 								>
 									Xóa
 								</Button>
 							)}
+
+							<Button
+								type="button"
+								onClick={() => {
+									setEditingEntity(undefined)
+								}}
+							>
+								Đóng
+							</Button>
 						</div>
 					</Form.Item>
 				</Form>
