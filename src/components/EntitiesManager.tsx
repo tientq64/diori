@@ -12,14 +12,14 @@ import {
 } from 'antd-mobile'
 import { confirm } from 'antd-mobile/es/components/dialog/confirm'
 import { filter, groupBy, isEqual, some, toPairs } from 'lodash'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
 import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 import { useStore } from '../store/useStore'
 import { emptyArray } from '../utils/constants'
 import { removeToneMarks } from '../utils/removeToneMarks'
 
-export function EntitiesManager() {
+export function EntitiesManager(): ReactNode {
 	const entities = useStore((state) => state.entities)
 	const removeEntity = useStore((state) => state.removeEntity)
 	const addOrUpdateEntity = useStore((state) => state.addOrUpdateEntity)
@@ -72,7 +72,7 @@ export function EntitiesManager() {
 	])
 
 	const handleEntityClick = (entity?: Entity): void => {
-		let id = 1
+		let id: number = 1
 		while (some(entities, { id })) {
 			id++
 		}

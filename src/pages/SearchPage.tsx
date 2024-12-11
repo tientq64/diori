@@ -1,11 +1,11 @@
 import { NavBar, Result } from 'antd-mobile'
 import { SearchOutline } from 'antd-mobile-icons'
 import { ReactNode, useEffect, useRef, WheelEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
+import { useNavigate } from 'react-router'
+import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
 import { NoteCard } from '../components/NoteCard'
 import { Page } from '../components/Page'
-import { QuickSettingsDropdown } from '../components/QuickSettingsDropdown'
+import { QuickSettingsButton } from '../components/QuickSettingsButton'
 import { SearchInput } from '../components/SearchInput'
 import { useSearch } from '../hooks/useSearch'
 import { Note } from '../store/slices/diarySlice'
@@ -66,7 +66,7 @@ export function SearchPage(): ReactNode {
 						className="md:pl-4 md:pr-8"
 						backIcon={<SearchOutline />}
 						left={
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 text-base">
 								{isMd ? 'Kết quả tìm kiếm cho:' : 'Kết quả:'}
 								<span className="text-lime-200 light:text-lime-600">
 									{searchText}
@@ -78,8 +78,8 @@ export function SearchPage(): ReactNode {
 							isMd && (
 								<div className="flex justify-end items-center md:gap-4">
 									<SearchInput />
-									<EntitiesManagerDropdown />
-									<QuickSettingsDropdown />
+									<EntitiesManagerButton />
+									<QuickSettingsButton />
 								</div>
 							)
 						}
@@ -103,7 +103,7 @@ export function SearchPage(): ReactNode {
 									<NoteCard
 										key={note.date}
 										note={note}
-										onClick={() => handleNoteClick(note)}
+										onNoteClick={handleNoteClick}
 									/>
 								))}
 							</div>

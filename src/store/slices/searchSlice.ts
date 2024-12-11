@@ -1,7 +1,7 @@
 import { SliceCreator } from '../useStore'
 import { Note } from './diarySlice'
 
-export type Search = {
+export interface Search {
 	searchText: string
 	searchNotes: Note[]
 	searchNotesTotal: number

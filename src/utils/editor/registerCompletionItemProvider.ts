@@ -1,6 +1,6 @@
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { useStore } from '../../store/useStore'
-import { Monaco } from './types'
+import { Monaco } from '../../types/monaco'
 
 const emojis: [string, string[]][] = [
 	[':)', ['🙂', '😌']],

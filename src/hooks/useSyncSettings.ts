@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Dialog } from 'antd-mobile'
 import { SettingsProps } from '../store/slices/settingsSlice'
@@ -14,7 +15,7 @@ export function useSyncSettings() {
 
 	const request = useRequest(
 		async (): Promise<void> => {
-			const rest = getOctokit()
+			const rest: Octokit = getOctokit()
 			let res: any
 
 			try {

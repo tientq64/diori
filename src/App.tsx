@@ -1,12 +1,12 @@
 import { ConfigProvider } from 'antd-mobile'
 import antdLocaleEnUS from 'antd-mobile/cjs/locales/en-US'
 import dayjs from 'dayjs'
-import { useEffect } from 'react'
-import { RouterProvider } from 'react-router-dom'
+import { ReactNode, useEffect } from 'react'
+import { RouterProvider } from 'react-router'
 import { router } from './router'
 import { useStore } from './store/useStore'
 
-export function App() {
+export function App(): ReactNode {
 	const isDarkMode = useStore((state) => state.isDarkMode)
 	const fontFamily = useStore((state) => state.fontFamily)
 	const fontSize = useStore((state) => state.fontSize)

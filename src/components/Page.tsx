@@ -24,13 +24,13 @@ export function Page({ children }: PageProps): ReactNode {
 		<div className="flex flex-col h-full">
 			<div className="flex-1 min-h-0">{children}</div>
 
-			<div className="flex justify-between align-middle px-4 py-1 text-sm bg-zinc-900/90 z-10">
+			<div className="flex justify-between align-middle px-4 py-1 text-sm bg-zinc-900/90 light:bg-zinc-200/90 z-10">
 				<div className="flex align-middle gap-4">
 					{userName && (
 						<div className="flex xs:hidden gap-3">
 							<img className="w-5 h-5 rounded" src={userAvatar} alt="Ảnh đại diện" />
 							<div className="flex gap-1">
-								Tài khoản:
+								Người dùng:
 								<Link2 href="https://github.com/settings/tokens?type=beta">
 									{userName}
 								</Link2>

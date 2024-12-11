@@ -19,7 +19,7 @@ export enum EntityTypes {
  * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng.
  * Dùng trong tô sáng cú pháp khi viết nhật ký.
  */
-export type Entity = {
+export interface Entity {
 	/**
 	 * ID của đối tượng.
 	 */
@@ -45,7 +45,7 @@ export type Entity = {
 /**
  * Các thuộc tính của cài đặt.
  */
-export type SettingsProps = {
+export interface SettingsProps {
 	/**
 	 * Phông chữ.
 	 */
@@ -64,7 +64,7 @@ export type SettingsProps = {
 	entities: Entity[]
 }
 
-export type Settings = SettingsProps & {
+export interface Settings extends SettingsProps {
 	setFontFamily: (fontFamily: string) => void
 	setFontSize: (fontSize: number) => void
 	setIsDarkMode: (isDarkMode: boolean) => void

@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter } from 'react-router'
 import { Auth } from './pages/Auth'
 import { EditPage } from './pages/EditPage'
 import { Layout } from './pages/Layout'

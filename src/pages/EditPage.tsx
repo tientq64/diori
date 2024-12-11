@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { Fancybox } from '@fancyapps/ui'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 import { slideType } from '@fancyapps/ui/types/Carousel/types'
@@ -14,7 +13,6 @@ import {
 	Popover,
 	Skeleton,
 	Space,
-	TextArea,
 	Toast
 } from 'antd-mobile'
 import {
@@ -23,29 +21,29 @@ import {
 	InformationCircleOutline,
 	PictureOutline
 } from 'antd-mobile-icons'
-import { differenceBy, filter, find, findIndex, reject, some, upperFirst } from 'lodash'
+import { differenceBy, find, findIndex, reject, some, upperFirst } from 'lodash'
 import * as Monaco from 'monaco-editor'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { Blocker, useBlocker, useLocation } from 'react-router-dom'
+import { Blocker, Navigate, useBlocker, useLocation } from 'react-router'
 import spinnerImage from '../assets/images/spinner.svg'
-import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
+import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
 import { Page } from '../components/Page'
-import { QuickSettingsDropdown } from '../components/QuickSettingsDropdown'
+import { QuickSettingsButton } from '../components/QuickSettingsButton'
+import { useEditorOptions } from '../hooks/useEditorOptions'
 import { useGetNoteEdit } from '../hooks/useGetNoteEdit'
 import { usePhotosLoader } from '../hooks/usePhotosLoader'
 import { useSave } from '../hooks/useSave'
 import { Note } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
-import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 import { useStore } from '../store/useStore'
 import { emptyArray } from '../utils/constants'
+import { setupEditor } from '../utils/editor/setupEditor'
 import { formValidateMessages } from '../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
-import { setupEditor } from '../utils/editor/setupEditor'
 
-export type ImageUploadItem = {
+export interface ImageUploadItem {
 	key?: string | number
 	url: string
 	thumbnailUrl?: string
@@ -56,14 +54,14 @@ export type ImageUploadItem = {
 export function EditPage(): ReactNode {
 	const editingNote = useStore((state) => state.editingNote)
 
-	if (!editingNote) return
+	if (!editingNote) {
+		return <Navigate to="/login" replace />
+	}
 
 	const entities = useStore((state) => state.entities)
 	const notes = useStore((state) => state.notes)
 	const isMd = useStore((state) => state.isMd)
 	const isDarkMode = useStore((state) => state.isDarkMode)
-	const fontFamily = useStore((state) => state.fontFamily)
-	const fontSize = useStore((state) => state.fontSize)
 	const monaco = useStore((state) => state.monaco)
 	const getNote = useStore((state) => state.getNote)
 	const makeNote = useStore((state) => state.makeNote)
@@ -84,6 +82,8 @@ export function EditPage(): ReactNode {
 	const editorDisposer = useRef<Monaco.IDisposable>()
 	const [previewImageVisible, setPreviewImageVisible] = useState<boolean>(false)
 
+	const editorOptions: Monaco.editor.IStandaloneEditorConstructionOptions = useEditorOptions()
+
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
 		title: '',
@@ -100,14 +100,6 @@ export function EditPage(): ReactNode {
 	const removedImages = useMemo<Photo[]>(() => {
 		return differenceBy(noteEdit.photos, images, 'key')
 	}, [images, noteEdit.photos])
-
-	const persons = useMemo<Entity[]>(() => {
-		return filter(entities, { type: EntityTypes.PERSON })
-	}, [entities])
-
-	const properNouns = useMemo<Entity[]>(() => {
-		return filter(entities, { type: EntityTypes.PROPER_NOUN })
-	}, [entities])
 
 	const unsaved = useMemo<boolean>(() => {
 		if (getNoteEdit.loading) return false
@@ -132,37 +124,8 @@ export function EditPage(): ReactNode {
 		return true
 	}, [save.loading, unsaved, previewImageVisible])
 
-	const editorOptions = useMemo<Monaco.editor.IStandaloneEditorConstructionOptions>(
-		() => ({
-			fontFamily: fontFamily,
-			fontSize: fontSize,
-			wordWrap: isMd ? 'bounded' : 'on',
-			wordWrapColumn: 160,
-			wrappingStrategy: 'advanced',
-			lineNumbers: 'off',
-			lineDecorationsWidth: 0,
-			insertSpaces: false,
-			smoothScrolling: true,
-			automaticLayout: true,
-			renderLineHighlightOnlyWhenFocus: true,
-			rulers: isMd ? [164] : undefined,
-			padding: {
-				top: 12
-			},
-			minimap: {
-				enabled: isMd,
-				renderCharacters: false,
-				maxColumn: 400
-			},
-			stickyScroll: {
-				enabled: false
-			}
-		}),
-		[fontFamily, fontSize, isMd]
-	)
-
 	const beforeEditorMount = (monaco: typeof Monaco): void => {
-		useStore.getState().setMonaco(monaco)
+		useStore.setState({ monaco })
 		editorDisposer.current?.dispose()
 		editorDisposer.current = setupEditor()
 	}
@@ -198,7 +161,7 @@ export function EditPage(): ReactNode {
 		}
 	}
 
-	const localImageBeforeUpload = async (file: File): Promise<File | null> => {
+	const filterValidImageFile = async (file: File): Promise<File | null> => {
 		if (!/^image\/(jpeg|webp|png)$/.test(file.type)) {
 			return null
 		}
@@ -210,7 +173,7 @@ export function EditPage(): ReactNode {
 	 * @param file Tập tin ảnh.
 	 * @returns Đối tượng ảnh.
 	 */
-	const localImageUpload = async (file: File): Promise<ImageUploadItem> => {
+	const makeImageFromFile = async (file: File): Promise<ImageUploadItem> => {
 		const url = URL.createObjectURL(file)
 		const thumbnailUrl = await makeThumbnailUrl(url)
 		let key: string
@@ -259,13 +222,14 @@ export function EditPage(): ReactNode {
 
 	/**
 	 * Lấy data URL của ảnh.
-	 * @param image Ảnh cần tải, có thể là ảnh chuẩn bị tải lên hoặc ảnh đã tải lên rồi.
+	 * @param image Ảnh chuẩn bị tải lên hoặc ảnh đã tải lên rồi.
 	 * @returns Data URL của ảnh.
 	 */
 	const loadImagePhotoUrl = async (image: ImageUploadItem): Promise<string | undefined> => {
 		if (image.url) {
 			return image.url
-		} else if (image.loadUrlPromise) {
+		}
+		if (image.loadUrlPromise) {
 			return image.loadUrlPromise
 		}
 		const loadUrlPromise: Promise<string> = photosLoader.runAsync(editingNote.time, image)
@@ -387,7 +351,7 @@ export function EditPage(): ReactNode {
 		form.setFieldsValue({
 			title: isTitled ? title : '',
 			content,
-			images: photos.map((photo) => ({ ...photo }))
+			images: structuredClone(photos)
 		})
 		setDefaultPhotoKey(defaultPhotoKey)
 		usedPhotoKeys.current = photos.map((photo) => photo.key)
@@ -399,9 +363,9 @@ export function EditPage(): ReactNode {
 
 	useEffect(() => {
 		return () => {
-			// setEditingNote(null)
 			editorDisposer.current?.dispose()
-			useStore.getState().setMonaco(null)
+			useStore.setState({ monaco: null })
+			// setEditingNote(null)
 		}
 	}, [])
 
@@ -413,12 +377,12 @@ export function EditPage(): ReactNode {
 					back={isMd ? 'Trở về' : ''}
 					right={
 						<div className="flex justify-end items-center gap-4">
-							<EntitiesManagerDropdown />
-							<QuickSettingsDropdown />
+							<EntitiesManagerButton />
+							<QuickSettingsButton />
 						</div>
 					}
 				>
-					<div className="xs:text-base">
+					<div className="font-semibold xs:text-base">
 						{upperFirst(
 							editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
 						)}
@@ -464,7 +428,7 @@ export function EditPage(): ReactNode {
 								]}
 							>
 								<Input
-									className="[&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#697098]"
+									className="font-semibold [&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#697098]"
 									autoComplete="off"
 									placeholder={
 										noteEdit && noteEdit.title && !noteEdit.isTitled
@@ -519,8 +483,8 @@ export function EditPage(): ReactNode {
 									maxCount={maxImagesCount}
 									multiple
 									preview={false}
-									beforeUpload={localImageBeforeUpload}
-									upload={localImageUpload}
+									beforeUpload={filterValidImageFile}
+									upload={makeImageFromFile}
 									renderItem={(imageNode, image) => (
 										<Popover.Menu
 											key={image.key}

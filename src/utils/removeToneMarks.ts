@@ -16,10 +16,10 @@ const replacers: [RegExp, string][] = [
 /**
  * Loại bỏ dấu thanh điệu tiếng Việt trong văn bản.
  *
- * Lưu ý: Các chữ cái tiếng Việt (như ă, â, vv) vẫn được giữ nguyên.
+ * Lưu ý: Các chữ cái tiếng Việt (như ă, â, đ, vv) vẫn được giữ nguyên.
  *
  * @example
- * removeToneMarks('nhật ký') // 'nhât ky'
+ * removeToneMarks('Đêm buồn tỉnh le') // 'Đêm buôn tinh le'
  */
 export function removeToneMarks(text: string): string {
 	let newText: string = text

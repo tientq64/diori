@@ -1,15 +1,16 @@
 import clsx from 'clsx'
-import { FocusEvent, KeyboardEvent, MouseEvent, useMemo } from 'react'
+import { KeyboardEvent, ReactNode, useMemo } from 'react'
 import { Note, Status } from '../store/slices/diarySlice'
 import { useStore } from '../store/useStore'
 import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
 interface NoteCardProps {
 	note: Note
-	onClick?: () => void
+	tabIndex?: number
+	onNoteClick?: (note: Note) => void
 }
 
-export function NoteCard({ note, onClick }: NoteCardProps) {
+export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactNode {
 	const years = useStore((state) => state.years)
 	const isMd = useStore<boolean>((state) => state.isMd)
 
@@ -23,18 +24,25 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 
 	const handleClick = (): void => {
 		if (!loaded) return
-		if (onClick === undefined) return
-		onClick()
+		if (onNoteClick === undefined) return
+		onNoteClick(note)
+	}
+
+	const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+		if (event.code !== 'Enter') return
+		handleClick()
 	}
 
 	return (
 		<div
 			className={clsx(
 				'flex md:flex-col xs:items-start gap-3 xs:gap-6 p-2 rounded-md',
-				'bg-zinc-800 light:bg-white cursor-pointer group',
+				'bg-zinc-800 light:bg-zinc-50 cursor-pointer group',
 				!loaded && 'opacity-50 pointer-events-none'
 			)}
+			tabIndex={tabIndex}
 			onClick={handleClick}
+			onKeyDown={handleKeyDown}
 		>
 			<div className="flex gap-3">
 				<div className="flex xs:justify-center">
@@ -42,6 +50,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 						<img
 							className="w-20 md:min-w-20 xs:w-16 rounded image-contrast"
 							src={note.thumbnailUrl}
+							loading="lazy"
 							alt="Thumbnail"
 						/>
 					)}
@@ -49,7 +58,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 						<div
 							className={clsx(
 								'w-20 md:min-w-20 xs:w-16 aspect-square rounded',
-								'bg-zinc-700 light:bg-zinc-100',
+								'bg-zinc-700 light:bg-zinc-200',
 								note.sha ? 'visible' : 'invisible'
 							)}
 						/>
@@ -57,22 +66,27 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
 				</div>
 
 				<div className="flex-1 text-right xs:text-left text-sm">
-					{isMd && (
-						<div className="font-semibold">
-							{note.time.format('DD-MM')}
-							<span className="hidden md:group-hover:inline">-{note.year}</span>
-						</div>
-					)}
-					{!isMd && (
-						<div className="font-semibold">{note.time.format('dd, DD-MM-YYYY')}</div>
-					)}
-					<div className="text-zinc-400 dark:text-zinc-500">
+					<div
+						className={clsx(
+							'font-semibold',
+							note.time.date() === 1 && 'text-blue-400 light:text-blue-600'
+						)}
+					>
+						{isMd && (
+							<>
+								{note.time.format('DD-MM')}
+								<span className="hidden md:group-hover:inline">-{note.year}</span>
+							</>
+						)}
+						{!isMd && note.time.format('dd, DD-MM-YYYY')}
+					</div>
+					<div className="text-zinc-500">
 						{note.lunar.day}-{note.lunar.month}
 					</div>
 				</div>
 			</div>
 
-			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words text-zinc-400">
+			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words text-zinc-400 light:text-zinc-600">
 				{note.title}
 			</div>
 

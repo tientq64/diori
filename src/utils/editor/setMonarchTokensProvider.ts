@@ -1,8 +1,8 @@
 import { IDisposable } from 'monaco-editor'
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
 import { Store, useStore } from '../../store/useStore'
+import { Monaco } from '../../types/monaco'
 import { getEntityNameWithoutNote } from '../getEntityNameWithoutNote'
-import { Monaco } from './types'
 
 export function setMonarchTokensProvider(): Monaco.IDisposable {
 	const store: Store = useStore.getState()
@@ -126,13 +126,16 @@ export function setMonarchTokensProvider(): Monaco.IDisposable {
 					include: '@link'
 				},
 				{
+					include: '@emotions'
+				},
+				{
 					regex: /.+?/,
 					action: { token: 'green-italic' }
 				}
 			],
 			emotions: [
 				{
-					regex: /:["']?[()]+|:["']?>|:[D30v]|[;=]\)+|'v'/,
+					regex: /:["']?[()]+|:["']?>|:[DĐ30v]|[;=]\)+|'v'/,
 					action: 'yellow'
 				},
 				{

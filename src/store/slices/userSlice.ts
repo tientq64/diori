@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { getOctokit } from '../../utils/getOctokit'
 import { SliceCreator } from '../useStore'
 
-export type User = {
+export interface User {
 	/**
 	 * Tên tổ chức GitHub mà người dùng dùng để lưu dữ liệu nhật ký.
 	 */
@@ -63,7 +63,7 @@ export type User = {
 	fetchUserData: (token: string) => void
 }
 
-export const userSlice: SliceCreator<User> = (set, get) => ({
+export const userSlice: SliceCreator<User> = (set) => ({
 	orgName: '',
 	userName: '',
 	userAvatar: '',

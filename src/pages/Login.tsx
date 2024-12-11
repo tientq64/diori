@@ -1,7 +1,7 @@
 import { useAsyncEffect } from 'ahooks'
-import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
+import { Button, Divider, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router'
 import { usePWAInstall } from 'react-use-pwa-install'
 import logoImage from '../assets/images/book.png'
 import { Brand } from '../components/Brand'
@@ -16,7 +16,7 @@ import { formValidateMessages } from '../utils/formValidateMessages'
  */
 export interface LoginValues {
 	/**
-	 * Mật khẩu đăng nhập đã nhập trong phần đăng nhập.
+	 * Mã bảo mật đã nhập trong phần đăng nhập.
 	 */
 	pass: string
 }
@@ -95,7 +95,7 @@ export function Login(): ReactNode {
 					</div>
 
 					<Form
-						className="w-full"
+						className="w-full md:w-[800px] max-w-full"
 						form={form}
 						mode="card"
 						layout="horizontal"
@@ -104,7 +104,7 @@ export function Login(): ReactNode {
 						onFinish={login.run}
 					>
 						<Form.Item
-							label="Mật khẩu"
+							label="Mã bảo mật"
 							name="pass"
 							rules={[
 								{
@@ -130,20 +130,37 @@ export function Login(): ReactNode {
 								Đăng nhập
 							</Button>
 						</Form.Item>
+
+						<div className="px-4 mt-4 text-center text-zinc-500">
+							Nếu quên mã bảo mật, hãy vào phần đăng ký và đăng ký lại. Đừng lo lắng,
+							dữ liệu của bạn sẽ không bị mất.
+						</div>
 					</Form>
 
-					<div className="basis-5/12 flex flex-wrap justify-center items-end gap-6 xs:gap-4 py-2">
-						<Link2 to="/register">Đăng ký</Link2>
-						<Link2 href="https://github.com/tientq64/diori">GitHub</Link2>
-						{installPWA && (
-							<Link2 onClick={() => installPWA()}>
-								{isMd ? 'Cài như ứng dụng' : 'Cài app'}
+					<div className="basis-5/12 flex justify-center items-end py-2">
+						<div className="flex flex-wrap justify-center items-center px-6">
+							<Link2 to="/register">Đăng ký</Link2>
+							<Divider direction="vertical" />
+
+							<Link2 href="https://github.com/tientq64/diori">GitHub</Link2>
+							<Divider direction="vertical" />
+
+							{installPWA && (
+								<Link2 onClick={() => installPWA()}>
+									{isMd ? 'Cài như ứng dụng' : 'Cài app'}
+								</Link2>
+							)}
+							<Divider direction="vertical" />
+
+							<Link2 href="https://github.com/tientq64/diori/blob/main/CHANGELOG.md">
+								Có gì mới?
 							</Link2>
-						)}
-						<Link2 href="https://github.com/tientq64/diori/blob/main/CHANGELOG.md">
-							Có gì mới?
-						</Link2>
-						<Link2 href="https://github.com/tientq64/diori/issues/new">Báo lỗi</Link2>
+							<Divider direction="vertical" />
+
+							<Link2 href="https://github.com/tientq64/diori/issues/new">
+								Báo lỗi
+							</Link2>
+						</div>
 					</div>
 				</div>
 			</div>

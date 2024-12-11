@@ -1,8 +1,9 @@
 import { Dropdown } from 'antd-mobile'
+import { ReactNode } from 'react'
 import { useStore } from '../store/useStore'
 import { QuickSettingsSection } from './QuickSettingsSection'
 
-export function QuickSettingsDropdown() {
+export function QuickSettingsButton(): ReactNode {
 	const store = useStore()
 
 	return (

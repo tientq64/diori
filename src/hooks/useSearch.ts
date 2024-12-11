@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { useStore } from '../store/useStore'
@@ -26,7 +27,7 @@ export function useSearch() {
 			if (searchLoading) return
 			if (searchPage > 1 && searchPage > searchPageTotal) return
 
-			const rest = getOctokit()
+			const rest: Octokit = getOctokit()
 
 			if (searchPage === 1) {
 				setSearchText(searchText)

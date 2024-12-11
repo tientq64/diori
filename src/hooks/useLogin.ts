@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { LoginValues } from '../pages/Login'
 import { useStore } from '../store/useStore'
@@ -16,10 +17,10 @@ export function useLogin() {
 			const token: string = decryptText(encryptedToken, key)
 
 			if (token === '') {
-				throw Error('Mật khẩu không đúng')
+				throw Error('Mã bảo mật không đúng')
 			}
 
-			const rest = getOctokit(token)
+			const rest: Octokit = getOctokit(token)
 			await rest.rateLimit.get()
 
 			setToken(token)

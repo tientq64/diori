@@ -1,5 +1,5 @@
 import { useStore } from '../../store/useStore'
-import { Monaco } from './types'
+import { Monaco } from '../../types/monaco'
 
 export function registerLinkProvider(): Monaco.IDisposable {
 	const monaco: typeof Monaco = useStore.getState().monaco!

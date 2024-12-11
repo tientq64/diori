@@ -1,10 +1,11 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Modal } from 'antd-mobile'
-import { getOctokit } from '../utils/getOctokit'
+import { RegisterValues } from '../pages/Register'
 import { useStore } from '../store/useStore'
 import { encryptText } from '../utils/encryptText'
+import { getOctokit } from '../utils/getOctokit'
 import { slowHashText } from '../utils/slowHashText'
-import { RegisterValues } from '../pages/Register'
 
 export function useRegister() {
 	const setOrgName = useStore((state) => state.setOrgName)
@@ -13,7 +14,7 @@ export function useRegister() {
 
 	const request = useRequest(
 		async ({ token, orgName, pass }: RegisterValues) => {
-			const rest = getOctokit(token)
+			const rest: Octokit = getOctokit(token)
 
 			await rest.rateLimit.get()
 
@@ -56,10 +57,7 @@ export function useRegister() {
 
 			return true
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
-
 	return request
 }

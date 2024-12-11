@@ -65,6 +65,14 @@
 	font-size: var(--adm-font-size-8);
 }
 
+.adm-list-item {
+	padding-right: 16px;
+}
+
+.adm-list-item-content {
+	padding-right: 0 !important;
+}
+
 .adm-form-item-child {
 	min-height: 0;
 	flex: 1;

@@ -1,13 +1,13 @@
 import { useStore } from '../../store/useStore'
+import { Monaco } from '../../types/monaco'
 import { defineTheme } from './defineTheme'
 import { registerCompletionItemProvider } from './registerCompletionItemProvider'
 import { registerHoverProvider } from './registerHoverProvider'
 import { registerLinkProvider } from './registerLinkProvider'
 import { setLanguageConfiguration } from './setLanguageConfiguration'
 import { setMonarchTokensProvider } from './setMonarchTokensProvider'
-import { Monaco } from './types'
 
-export const setupEditor = (): Monaco.IDisposable => {
+export function setupEditor(): Monaco.IDisposable {
 	const monaco: typeof Monaco = useStore.getState().monaco!
 
 	monaco.languages.register({ id: 'diori' })

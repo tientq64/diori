@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { NoteEdit, NoteEditJSON } from '../store/slices/editingSlice'
@@ -13,7 +14,7 @@ export function useGetNoteEdit() {
 		async (note: Note): Promise<NoteEdit | undefined> => {
 			if (note.sha === undefined) return
 
-			const rest = getOctokit(token)
+			const rest: Octokit = getOctokit(token)
 
 			const res: any = await rest.git.getBlob({
 				owner: orgName,

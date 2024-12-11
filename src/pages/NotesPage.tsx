@@ -1,13 +1,13 @@
 import { DatePickerView, Dropdown, NavBar } from 'antd-mobile'
 import dayjs, { Dayjs } from 'dayjs'
 import { upperFirst } from 'lodash'
-import { ReactNode, WheelEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { FocusEvent, ReactNode, WheelEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { Brand } from '../components/Brand'
-import { EntitiesManagerDropdown } from '../components/EntitiesManagerDropdown'
+import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
 import { NoteCard } from '../components/NoteCard'
 import { Page } from '../components/Page'
-import { QuickSettingsDropdown } from '../components/QuickSettingsDropdown'
+import { QuickSettingsButton } from '../components/QuickSettingsButton'
 import { SearchInput } from '../components/SearchInput'
 import { useLoadYear } from '../hooks/useLoadYear'
 import { Note } from '../store/slices/diarySlice'
@@ -41,7 +41,11 @@ export function NotesPage(): ReactNode {
 	 */
 	const scrollTo = (scrollTop?: number): void => {
 		const scrollEl = scrollRef.current!
-		scrollEl.scrollTo(0, scrollTop ?? (scrollEl.scrollHeight - scrollEl.clientHeight) / 2)
+		if (scrollTop === undefined) {
+			const middleScrollTop: number = (scrollEl.scrollHeight - scrollEl.clientHeight) / 2
+			scrollTop = middleScrollTop
+		}
+		scrollEl.scrollTo(0, scrollTop)
 	}
 
 	const handleScroll = (event: WheelEvent<HTMLDivElement>): void => {
@@ -69,6 +73,14 @@ export function NotesPage(): ReactNode {
 		navigate(`/edit/${note.date}`)
 	}
 
+	const handleScrollerFocus = (event: FocusEvent<HTMLDivElement>): void => {
+		if (event.currentTarget !== event.target) return
+		const middleNoteIndex: number = Math.floor(currentNotes.length / 2)
+		const gridEl = event.target.firstElementChild as HTMLDivElement
+		const middleNoteEl = gridEl.children.item(middleNoteIndex) as HTMLDivElement
+		middleNoteEl.focus()
+	}
+
 	useEffect(() => {
 		const notes: Note[] = []
 		const years = new Set<number>()
@@ -86,7 +98,6 @@ export function NotesPage(): ReactNode {
 		for (const year of years) {
 			loadYear.run(year)
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentTime.format('YYYYMMDD'), notes])
 
 	useEffect(() => {
@@ -121,7 +132,7 @@ export function NotesPage(): ReactNode {
 	return (
 		<Page>
 			<div className="flex flex-col absolute left-0 top-0 size-full">
-				<div className="absolute left-0 top-0 w-full bg-zinc-900/90 z-10">
+				<div className="absolute left-0 top-0 w-full bg-zinc-900/90 light:bg-zinc-200/90 z-10">
 					<NavBar
 						className="md:pl-4 md:pr-8"
 						backIcon={null}
@@ -134,8 +145,8 @@ export function NotesPage(): ReactNode {
 						right={
 							<div className="flex justify-end items-center md:gap-4">
 								{isMd && <SearchInput />}
-								<EntitiesManagerDropdown />
-								<QuickSettingsDropdown />
+								<EntitiesManagerButton />
+								<QuickSettingsButton />
 							</div>
 						}
 					>
@@ -160,14 +171,17 @@ export function NotesPage(): ReactNode {
 				<div
 					ref={scrollRef}
 					className="flex-1 px-4 xs:px-2 overflow-auto"
+					tabIndex={0}
 					onScroll={handleScroll}
+					onFocus={handleScrollerFocus}
 				>
 					<div className="grid md:grid-cols-7 md:auto-rows-[17vh] gap-3 xs:gap-2">
-						{currentNotes.map((note) => (
+						{currentNotes.map((note, index) => (
 							<NoteCard
 								key={note.date}
 								note={note}
-								onClick={() => handleNoteClick(note)}
+								tabIndex={index >= 21 && index <= 83 ? 0 : undefined}
+								onNoteClick={handleNoteClick}
 							/>
 						))}
 					</div>

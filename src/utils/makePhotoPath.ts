@@ -1,5 +1,12 @@
 import { Dayjs } from 'dayjs'
+import { makePhotoFileName } from './makePhotoFileName'
 
-export function makePhotoPath(time: Dayjs, key: string): string {
-	return `${time.format('MM/DD')}/${time.format('YYYYMMDD')}-${key}.webp`
+/**
+ * Tạo đường dẫn file ảnh trên GitHub.
+ */
+export function makePhotoPath(noteTime: Dayjs, photoKey: string): string {
+	const dirName: string = noteTime.format('MM/DD')
+	const fileName: string = makePhotoFileName(noteTime, photoKey)
+
+	return `${dirName}/${fileName}.webp`
 }

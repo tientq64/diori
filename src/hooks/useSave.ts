@@ -1,3 +1,4 @@
+import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { ImageUploadItem, Toast } from 'antd-mobile'
 import { find, truncate } from 'lodash'
@@ -139,7 +140,7 @@ export function useSave() {
 			 */
 			const newNoteEditBase64: string = textToBase64(newNoteEditJson)
 
-			const rest = getOctokit()
+			const rest: Octokit = getOctokit()
 
 			if (isCreateNewOnly || isUpdateOnly) {
 				const res = await rest.repos.createOrUpdateFileContents({
@@ -198,9 +199,14 @@ export function useSave() {
 				addedFiles.push(addedFile)
 			}
 
+			/**
+			 * Tên của repo để upload ảnh lên.
+			 */
 			const photosRepoName = `diori-photos-${year}`
 
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly) {
+				// Kiểm tra xem repo để upload ảnh đã tồn tại chưa.
+				// Nếu chưa tồn tại, tạo một repo mới.
 				try {
 					await rest.repos.get({
 						owner: orgName,
@@ -249,10 +255,7 @@ export function useSave() {
 
 			return newNoteEdit
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
-
 	return request
 }

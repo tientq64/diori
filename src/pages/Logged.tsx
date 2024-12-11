@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router'
 import { useStore } from '../store/useStore'
 
 export function Logged(): ReactNode {

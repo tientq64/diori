@@ -1,8 +1,8 @@
 import { findIndex, some } from 'lodash'
 import { Entity } from '../../store/slices/settingsSlice'
 import { Store, useStore } from '../../store/useStore'
+import { Monaco } from '../../types/monaco'
 import { getEntityNameWithoutNote } from '../getEntityNameWithoutNote'
-import { Monaco } from './types'
 
 interface FlatEntity extends Entity {
 	nameWithNote?: string
@@ -60,6 +60,11 @@ export function registerHoverProvider(): Monaco.IDisposable {
 			let currentIndex: number = 0
 			eating: while (true) {
 				for (const entity of flatEntities) {
+					const behindChar: string | undefined = lineContent.at(
+						currentIndex + entity.name.length
+					)
+					if (behindChar !== undefined && /\p{L}|[^\s\.,:;!?)\]}]/u.test(behindChar))
+						continue
 					if (lineContent.startsWith(entity.name, currentIndex)) {
 						if (!entity.isUnknown) {
 							const nameWithoutNote: string = getEntityNameWithoutNote(entity.name)

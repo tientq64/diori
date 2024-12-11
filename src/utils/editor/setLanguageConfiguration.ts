@@ -1,5 +1,5 @@
 import { useStore } from '../../store/useStore'
-import { Monaco } from './types'
+import { Monaco } from '../../types/monaco'
 
 export function setLanguageConfiguration(): Monaco.IDisposable {
 	const monaco = useStore.getState().monaco!

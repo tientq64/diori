@@ -1,5 +1,5 @@
 import { useStore } from '../../store/useStore'
-import { Monaco } from './types'
+import { Monaco } from '../../types/monaco'
 
 export function defineTheme(): void {
 	const monaco: typeof Monaco = useStore.getState().monaco!
@@ -57,7 +57,7 @@ export function defineTheme(): void {
 			{
 				token: 'blue-italic',
 				foreground: '#7986e7',
-				fontStyle: 'italic'
+				fontStyle: 'italic bold'
 			},
 			{
 				token: 'purple',
@@ -66,7 +66,7 @@ export function defineTheme(): void {
 			{
 				token: 'purple-italic',
 				foreground: '#c792ea',
-				fontStyle: 'italic'
+				fontStyle: 'italic bold'
 			},
 			{
 				token: 'aqua',
