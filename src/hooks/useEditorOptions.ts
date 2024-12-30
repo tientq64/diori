@@ -1,21 +1,21 @@
 import { useMemo } from 'react'
 import { useStore } from '../store/useStore'
-import { Monaco } from '../types/monaco'
+import { EditorOptions } from '../types/monaco'
 
-export function useEditorOptions(): Monaco.editor.IStandaloneEditorConstructionOptions {
+export function useEditorOptions(): EditorOptions {
 	const isMd = useStore((state) => state.isMd)
 	const fontFamily = useStore((state) => state.fontFamily)
 	const fontSize = useStore((state) => state.fontSize)
 
-	const editorOptions = useMemo<Monaco.editor.IStandaloneEditorConstructionOptions>(
+	const editorOptions = useMemo<EditorOptions>(
 		() => ({
 			fontFamily: fontFamily,
 			fontSize: fontSize,
 			wordWrap: isMd ? 'bounded' : 'on',
 			wordWrapColumn: 160,
 			wrappingStrategy: 'advanced',
-			lineNumbers: 'off',
-			lineDecorationsWidth: 0,
+			lineNumbers: 'on',
+			lineDecorationsWidth: 16,
 			insertSpaces: false,
 			smoothScrolling: true,
 			automaticLayout: true,

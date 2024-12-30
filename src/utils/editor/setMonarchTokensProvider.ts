@@ -73,13 +73,13 @@ export function setMonarchTokensProvider(): Monaco.IDisposable {
 				},
 				{
 					// Tên riêng.
-					regex: regexes[EntityTypes.PROPER_NOUN],
+					regex: regexes[EntityTypes.ProperNoun],
 					action: 'purple-italic'
 				},
 				{
 					// Tên người.
-					regex: regexes[EntityTypes.PERSON],
-					action: 'blue-italic'
+					regex: regexes[EntityTypes.Person],
+					action: 'teal-italic'
 				},
 				{
 					include: '@emotions'

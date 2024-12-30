@@ -51,7 +51,7 @@ export function registerCompletionItemProvider(): Monaco.IDisposable {
 			)
 			const range2 = range.setEndPosition(range.endLineNumber, range.endColumn - 1)
 			const suggestions = entities.map<Monaco.languages.CompletionItem>((entity) => {
-				const isPerson: boolean = entity.type === EntityTypes.PERSON
+				const isPerson: boolean = entity.type === EntityTypes.Person
 				return {
 					label: entity.name,
 					insertText: entity.name,

@@ -38,6 +38,7 @@ import { useSave } from '../hooks/useSave'
 import { Note } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
 import { useStore } from '../store/useStore'
+import { CodeEditor, EditorOptions } from '../types/monaco'
 import { emptyArray } from '../utils/constants'
 import { setupEditor } from '../utils/editor/setupEditor'
 import { formValidateMessages } from '../utils/formValidateMessages'
@@ -62,6 +63,7 @@ export function EditPage(): ReactNode {
 	const notes = useStore((state) => state.notes)
 	const isMd = useStore((state) => state.isMd)
 	const isDarkMode = useStore((state) => state.isDarkMode)
+	const fontSize = useStore((state) => state.fontSize)
 	const monaco = useStore((state) => state.monaco)
 	const getNote = useStore((state) => state.getNote)
 	const makeNote = useStore((state) => state.makeNote)
@@ -78,11 +80,11 @@ export function EditPage(): ReactNode {
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
 	const photosLoader = usePhotosLoader()
-	const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
+	const editorRef = useRef<CodeEditor | null>(null)
 	const editorDisposer = useRef<Monaco.IDisposable>()
 	const [previewImageVisible, setPreviewImageVisible] = useState<boolean>(false)
 
-	const editorOptions: Monaco.editor.IStandaloneEditorConstructionOptions = useEditorOptions()
+	const editorOptions: EditorOptions = useEditorOptions()
 
 	const [noteEdit, setNoteEdit] = useState<NoteEdit>({
 		date: editingNote.date,
@@ -130,10 +132,7 @@ export function EditPage(): ReactNode {
 		editorDisposer.current = setupEditor()
 	}
 
-	const handleEditorMount = (
-		editor: Monaco.editor.IStandaloneCodeEditor,
-		monaco: typeof Monaco
-	): void => {
+	const handleEditorMount = (editor: CodeEditor, monaco: typeof Monaco): void => {
 		editorRef.current = editor
 
 		const model = editor.getModel()
@@ -428,7 +427,7 @@ export function EditPage(): ReactNode {
 								]}
 							>
 								<Input
-									className="font-semibold [&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#697098]"
+									className="font-semibold [&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#6a7a91]"
 									autoComplete="off"
 									placeholder={
 										noteEdit && noteEdit.title && !noteEdit.isTitled
@@ -447,6 +446,9 @@ export function EditPage(): ReactNode {
 										whitespace: true
 									}
 								]}
+								messageVariables={{
+									label: 'Nội dung'
+								}}
 							>
 								{isMd ? (
 									<Editor
@@ -458,7 +460,10 @@ export function EditPage(): ReactNode {
 										onMount={handleEditorMount}
 									/>
 								) : (
-									<textarea className="size-full px-4 py-2 resize-none bg-zinc-900 outline-0" />
+									<textarea
+										className="size-full px-4 py-2 resize-none bg-zinc-900 outline-0"
+										style={{ fontSize }}
+									/>
 								)}
 							</Form.Item>
 

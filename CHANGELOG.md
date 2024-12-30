@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.8.0 (30-12-2024)
+
+- Cải thiện giao diện nhìn đẹp hơn rất nhiều.
+
 ## 1.7.2 (12-12-2024)
 
 - Sửa xác định đối tượng không chính xác khi di chuột vào.

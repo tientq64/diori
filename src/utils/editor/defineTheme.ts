@@ -9,7 +9,7 @@ export function defineTheme(): void {
 		inherit: true,
 		colors: {
 			'editor.background': '#18181b',
-			'editor.foreground': '#e6e6e6',
+			'editor.foreground': '#fafafa',
 			'editor.findMatchBorder': '#ffcb6b',
 			'editor.findMatchHighlightBackground': '#ffcb6b66'
 		},
@@ -25,11 +25,11 @@ export function defineTheme(): void {
 			},
 			{
 				token: 'gray',
-				foreground: '#697098'
+				foreground: '#6a7a91'
 			},
 			{
 				token: 'gray-italic',
-				foreground: '#697098',
+				foreground: '#6a7a91',
 				fontStyle: 'italic'
 			},
 			{
@@ -39,24 +39,33 @@ export function defineTheme(): void {
 			{
 				token: 'red-italic',
 				foreground: '#ff5874',
-				fontStyle: 'italic'
+				fontStyle: 'italic bold'
 			},
 			{
 				token: 'orange',
-				foreground: '#f78c6c'
+				foreground: '#e78c70'
 			},
 			{
 				token: 'orange-italic',
-				foreground: '#f78c6c',
-				fontStyle: 'italic'
+				foreground: '#e78c70',
+				fontStyle: 'italic bold'
+			},
+			{
+				token: 'teal',
+				foreground: '#14b8a6'
+			},
+			{
+				token: 'teal-italic',
+				foreground: '#14b8a6',
+				fontStyle: 'italic bold'
 			},
 			{
 				token: 'blue',
-				foreground: '#7986e7'
+				foreground: '#77a6ff'
 			},
 			{
 				token: 'blue-italic',
-				foreground: '#7986e7',
+				foreground: '#77a6ff',
 				fontStyle: 'italic bold'
 			},
 			{

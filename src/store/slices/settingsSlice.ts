@@ -8,11 +8,11 @@ export enum EntityTypes {
 	/**
 	 * Tên người.
 	 */
-	PERSON = 'person',
+	Person = 'person',
 	/**
 	 * Danh từ riêng.
 	 */
-	PROPER_NOUN = 'properNoun'
+	ProperNoun = 'properNoun'
 }
 
 /**
@@ -90,7 +90,7 @@ export interface Settings extends SettingsProps {
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
-	fontFamily: 'Arial',
+	fontFamily: 'Roboto, Arial, sans-serif',
 	fontSize: 16,
 	isDarkMode: true,
 	entities: [],

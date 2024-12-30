@@ -78,7 +78,7 @@ export function EntitiesManager(): ReactNode {
 		}
 		entity ??= {
 			id,
-			type: filteredEntityType || EntityTypes.PERSON,
+			type: filteredEntityType || EntityTypes.Person,
 			name: '',
 			aliasNames: [],
 			description: ''
@@ -122,8 +122,8 @@ export function EntitiesManager(): ReactNode {
 		<div className="flex flex-col h-[82vh]">
 			<CapsuleTabs activeKey={filteredEntityType} onChange={handleFilteredEntityTypeChange}>
 				<CapsuleTabs.Tab title="Tất cả" key="" />
-				<CapsuleTabs.Tab title="Mọi người" key={EntityTypes.PERSON} />
-				<CapsuleTabs.Tab title="Danh từ riêng" key={EntityTypes.PROPER_NOUN} />
+				<CapsuleTabs.Tab title="Mọi người" key={EntityTypes.Person} />
+				<CapsuleTabs.Tab title="Danh từ riêng" key={EntityTypes.ProperNoun} />
 			</CapsuleTabs>
 
 			<div className="flex-1 overflow-hidden">
@@ -214,8 +214,8 @@ export function EntitiesManager(): ReactNode {
 					<Form.Item label="Loại" name="type" required>
 						<Radio.Group>
 							<Space>
-								<Radio value={EntityTypes.PERSON}>Tên người</Radio>
-								<Radio value={EntityTypes.PROPER_NOUN}>Danh từ riêng</Radio>
+								<Radio value={EntityTypes.Person}>Tên người</Radio>
+								<Radio value={EntityTypes.ProperNoun}>Danh từ riêng</Radio>
 							</Space>
 						</Radio.Group>
 					</Form.Item>
