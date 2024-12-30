@@ -12,7 +12,7 @@ export function useLoadYear() {
 	const updateOrAddNote = useStore((state) => state.updateOrAddNote)
 
 	const request = useRequest(
-		async (year: number): Promise<Boolean> => {
+		async (year: number): Promise<boolean> => {
 			const status: Status = years[year]
 			if (status !== undefined) return false
 

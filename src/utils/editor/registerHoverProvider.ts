@@ -21,7 +21,7 @@ export function registerHoverProvider(): Monaco.IDisposable {
 
 			const existedFlatEntities: Record<string, Entity | undefined> = {}
 
-			let flatEntities: FlatEntity[] = structuredClone(entities)
+			const flatEntities: FlatEntity[] = structuredClone(entities)
 				.flatMap((entity) => {
 					const nameWithoutNote: string = getEntityNameWithoutNote(entity.name)
 					const subFlatEntities: FlatEntity[] = [
@@ -63,7 +63,7 @@ export function registerHoverProvider(): Monaco.IDisposable {
 					const behindChar: string | undefined = lineContent.at(
 						currentIndex + entity.name.length
 					)
-					if (behindChar !== undefined && /\p{L}|[^\s\.,:;!?)\]}]/u.test(behindChar))
+					if (behindChar !== undefined && /\p{L}|[^\s.,:;!?)\]}]/u.test(behindChar))
 						continue
 					if (lineContent.startsWith(entity.name, currentIndex)) {
 						if (!entity.isUnknown) {
