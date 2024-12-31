@@ -8,5 +8,5 @@ export function makePhotoPath(noteTime: Dayjs, photoKey: string): string {
 	const dirName: string = noteTime.format('MM/DD')
 	const fileName: string = makePhotoFileName(noteTime, photoKey)
 
-	return `${dirName}/${fileName}.webp`
+	return `${dirName}/${fileName}`
 }

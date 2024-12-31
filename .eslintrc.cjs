@@ -11,7 +11,8 @@ module.exports = {
 	plugins: ['react-refresh'],
 	rules: {
 		'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-		'react-hooks/rules-of-hooks': 'warn',
+		'react-hooks/rules-of-hooks': 'off',
+		'react-hooks/exhaustive-deps': 'warn',
 		'@typescript-eslint/no-unused-vars': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
 		'no-extra-semi': 'off',

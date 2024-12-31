@@ -6,6 +6,9 @@ import { intToRadix62 } from '../src/utils/intToRadix62'
 import { radix62ToInt } from '../src/utils/radix62ToInt'
 import { removeToneMarks } from '../src/utils/removeToneMarks'
 import { textToBase64 } from '../src/utils/textToBase64'
+import dayjs, { Dayjs } from 'dayjs'
+import { makePhotoFileName } from '../src/utils/makePhotoFileName'
+import { makePhotoPath } from '../src/utils/makePhotoPath'
 
 describe('utils', () => {
 	test('textToBase64', () => {
@@ -51,4 +54,16 @@ describe('utils', () => {
 	test('removeToneMarks', () => {
 		expect(removeToneMarks('nhật ký')).toBe('nhât ky')
 	})
+
+	{
+		const noteTime: Dayjs = dayjs('2024-10-05')
+
+		test('makePhotoFileName', () => {
+			expect(makePhotoFileName(noteTime, 'c5kJxW')).toBe('20241005-c5kJxW.webp')
+		})
+
+		test('makePhotoPath', () => {
+			expect(makePhotoPath(noteTime, 'c5kJxW')).toBe('10/05/20241005-c5kJxW.webp')
+		})
+	}
 })

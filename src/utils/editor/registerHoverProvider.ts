@@ -3,6 +3,7 @@ import { Entity } from '../../store/slices/settingsSlice'
 import { Store, useStore } from '../../store/useStore'
 import { Monaco } from '../../types/monaco'
 import { getEntityNameWithoutNote } from '../getEntityNameWithoutNote'
+import { Position, Range } from 'monaco-editor'
 
 interface FlatEntity extends Entity {
 	nameWithNote?: string
@@ -79,7 +80,7 @@ export function registerHoverProvider(): Monaco.IDisposable {
 								}
 							}
 						}
-						const start: Monaco.Position = new Monaco.Position(
+						const start: Monaco.Position = new Position(
 							position.lineNumber,
 							currentIndex + 1
 						)
@@ -87,7 +88,7 @@ export function registerHoverProvider(): Monaco.IDisposable {
 							break eating
 						}
 						const end: Monaco.Position = start.delta(0, entity.name.length)
-						const range: Monaco.Range = Monaco.Range.fromPositions(start, end)
+						const range: Monaco.Range = Range.fromPositions(start, end)
 						if (range.containsPosition(position)) {
 							return {
 								contents: [

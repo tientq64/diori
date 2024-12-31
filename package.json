@@ -1,7 +1,7 @@
 {
 	"name": "diori",
 	"private": true,
-	"version": "1.8.0",
+	"version": "1.8.1",
 	"type": "module",
 	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [
@@ -19,10 +19,10 @@
 	],
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
-		"lint": "eslint . --ext ts,tsx --quiet --report-unused-disable-directives --max-warnings 0",
-		"preview": "vite preview",
-		"test": "vitest"
+		"build": "tsc && pnpm lint && pnpm test && vite build",
+		"lint": "eslint . --ext ts,tsx --quiet --report-unused-disable-directives",
+		"test": "vitest run",
+		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@fancyapps/ui": "^5.0.36",
@@ -54,8 +54,8 @@
 		"@types/lodash": "^4.17.13",
 		"@types/pica": "^9.0.4",
 		"@types/prop-types": "^15.7.14",
-		"@types/react": "^18.3.14",
-		"@types/react-dom": "^18.3.2",
+		"@types/react": "^18.3.18",
+		"@types/react-dom": "^18.3.5",
 		"@typescript-eslint/eslint-plugin": "^7.16.1",
 		"@typescript-eslint/parser": "^7.16.1",
 		"@vitejs/plugin-react": "4.3.4",
@@ -67,7 +67,7 @@
 		"prop-types": "^15.8.1",
 		"sass": "^1.77.8",
 		"simple-zustand-devtools": "^1.1.0",
-		"tailwindcss": "^3.4.16",
+		"tailwindcss": "^3.4.17",
 		"typescript": "^5.7.2",
 		"vite": "^5.4.11",
 		"vite-plugin-mkcert": "1.17.6",

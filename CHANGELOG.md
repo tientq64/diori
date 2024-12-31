@@ -2,7 +2,7 @@
 
 ## 1.8.0 (30-12-2024)
 
-- Cải thiện giao diện nhìn đẹp hơn rất nhiều.
+- Cải thiện trình soạn thảo.
 
 ## 1.7.2 (12-12-2024)
 

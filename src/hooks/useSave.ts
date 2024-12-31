@@ -228,14 +228,18 @@ export function useSave() {
 				}
 			}
 
-			let photosCommitMessage: string = ''
+			const photosCommitMessages: string[] = []
 			if (addedImages.length > 0) {
-				photosCommitMessage += `Thêm ${addedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}\n`
+				photosCommitMessages.push(
+					`Thêm ${addedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}`
+				)
 			}
 			if (removedImages.length > 0) {
-				photosCommitMessage += `Xóa ${removedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}\n`
+				photosCommitMessages.push(
+					`Xóa ${removedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}`
+				)
 			}
-			photosCommitMessage = photosCommitMessage.trimEnd()
+			const photosCommitMessage: string = photosCommitMessages.join('\n')
 
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
 				await commitFiles(rest, {
