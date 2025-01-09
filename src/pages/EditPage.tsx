@@ -82,6 +82,7 @@ export function EditPage(): ReactNode {
 	const editorRef = useRef<CodeEditor | null>(null)
 	const editorDisposer = useRef<Monaco.IDisposable>()
 	const [previewImageVisible, setPreviewImageVisible] = useState<boolean>(false)
+	const previewerRef = useRef<Fancybox | null>(null)
 
 	const editorOptions: EditorOptions = useEditorOptions()
 
@@ -139,10 +140,23 @@ export function EditPage(): ReactNode {
 
 		model.setEOL(monaco.editor.EndOfLineSequence.LF)
 
-		// const { CtrlCmd } = monaco.KeyMod
-		// const { KeyCode } = monaco
+		const { CtrlCmd, chord } = monaco.KeyMod
+		const { KeyCode } = monaco
 
-		// editor.addCommand(CtrlCmd | KeyCode.Period, (): void => {})
+		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyL), (): void => {
+			const action = editor.getAction('editor.action.transformToLowercase')
+			action?.run()
+		})
+
+		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyU), (): void => {
+			const action = editor.getAction('editor.action.transformToUppercase')
+			action?.run()
+		})
+
+		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyE), (): void => {
+			const action = editor.getAction('editor.action.transformToTitlecase')
+			action?.run()
+		})
 
 		if (location.state?.findText) {
 			const matched = model
@@ -168,6 +182,7 @@ export function EditPage(): ReactNode {
 
 	/**
 	 * Hàm trả về đối tượng ảnh cần tải lên của component `ImageUploader`.
+	 *
 	 * @param file Tập tin ảnh.
 	 * @returns Đối tượng ảnh.
 	 */
@@ -184,20 +199,22 @@ export function EditPage(): ReactNode {
 	}
 
 	/**
-	 * Xem ảnh.
+	 * Mở trình xem ảnh.
+	 *
 	 * @param image Ảnh cần xem.
 	 */
 	const showPreviewImage = (image: ImageUploadItem): void => {
 		const startIndex: number = findIndex(images, { key: image.key })
 		setPreviewImageVisible(true)
 
-		const fancybox: Fancybox = new Fancybox(
+		previewerRef.current = new Fancybox(
 			images.map((image2) => ({
 				src: spinnerImage,
 				thumbSrc: image2.thumbnailUrl,
 				id: image2.key as string
 			})),
 			{
+				mainClass: 'z-50',
 				startIndex,
 				on: {
 					'Carousel.selectSlide': async (_, __, slide: slideType): Promise<void> => {
@@ -209,17 +226,24 @@ export function EditPage(): ReactNode {
 						if (imageEl === undefined) return
 						imageEl.src = url
 					},
-					close: (): void => {
-						setPreviewImageVisible(false)
-						fancybox.destroy()
-					}
+					close: closePreviewImage
 				}
 			}
 		)
 	}
 
 	/**
+	 * Đóng trình xem ảnh.
+	 */
+	const closePreviewImage = (): void => {
+		setPreviewImageVisible(false)
+		if (previewerRef.current === null) return
+		previewerRef.current.destroy()
+	}
+
+	/**
 	 * Lấy data URL của ảnh.
+	 *
 	 * @param image Ảnh chuẩn bị tải lên hoặc ảnh đã tải lên rồi.
 	 * @returns Data URL của ảnh.
 	 */
@@ -246,6 +270,11 @@ export function EditPage(): ReactNode {
 		return undefined
 	}
 
+	/**
+	 * Khôi phục lại hình ảnh đã loại bỏ. Những hình ảnh đã được lưu mới có thể khôi phục được.
+	 *
+	 * @param photo Hình ảnh cần khôi phục.
+	 */
 	const handleRestorePhoto = (photo: Photo): void => {
 		if (images.length >= maxImagesCount) return
 		const image = { ...photo } as ImageUploadItem
@@ -363,18 +392,19 @@ export function EditPage(): ReactNode {
 		return () => {
 			editorDisposer.current?.dispose()
 			useStore.setState({ monaco: null })
+			closePreviewImage()
 			// setEditingNote(null)
 		}
 	}, [])
 
 	return (
 		<Page>
-			<div className="flex flex-col h-full">
+			<div className="flex h-full flex-col">
 				<NavBar
 					onBack={() => history.back()}
 					back={isMd ? 'Trở về' : ''}
 					right={
-						<div className="flex justify-end items-center gap-4">
+						<div className="flex items-center justify-end gap-4">
 							<EntitiesManagerButton />
 							<QuickSettingsButton />
 						</div>
@@ -385,7 +415,7 @@ export function EditPage(): ReactNode {
 							editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
 						)}
 						{isMd && (
-							<span className="text-zinc-500 ml-2">
+							<span className="ml-2 text-zinc-500">
 								<>
 									({editingNote.lunar.day} tháng {editingNote.lunar.month} âm
 									lịch)
@@ -395,9 +425,9 @@ export function EditPage(): ReactNode {
 					</div>
 				</NavBar>
 
-				<div className="flex-1 min-h-0">
+				<div className="min-h-0 flex-1">
 					{getNoteEdit.loading && (
-						<div className="flex flex-col h-full p-4">
+						<div className="flex h-full flex-col p-4">
 							<Skeleton.Title />
 							<Skeleton.Paragraph lineCount={5} />
 							<br />
@@ -409,7 +439,7 @@ export function EditPage(): ReactNode {
 
 					{!getNoteEdit.loading && (
 						<Form
-							className="h-full adm-form-card-m0"
+							className="adm-form-card-m0 h-full"
 							form={form}
 							mode="card"
 							validateMessages={formValidateMessages}
@@ -437,7 +467,7 @@ export function EditPage(): ReactNode {
 							</Form.Item>
 
 							<Form.Item
-								className="flex-1 min-h-0 adm-list-item-no-padding"
+								className="adm-list-item-no-padding min-h-0 flex-1"
 								name="content"
 								rules={[
 									{
@@ -460,7 +490,7 @@ export function EditPage(): ReactNode {
 									/>
 								) : (
 									<textarea
-										className="size-full px-4 py-2 resize-none bg-zinc-900 outline-0"
+										className="size-full resize-none bg-zinc-900 px-4 py-2 outline-0"
 										style={{ fontSize }}
 									/>
 								)}
@@ -473,7 +503,7 @@ export function EditPage(): ReactNode {
 										{removedImages.map((photo) => (
 											<img
 												key={photo.key}
-												className="w-20 h-20 rounded object-cover opacity-50 grayscale hover:opacity-100 hover:grayscale-0 cursor-pointer"
+												className="h-20 w-20 cursor-pointer rounded object-cover opacity-50 grayscale hover:opacity-100 hover:grayscale-0"
 												src={photo.thumbnailUrl}
 												alt="Ảnh sẽ bị xóa"
 												onClick={() => handleRestorePhoto(photo)}

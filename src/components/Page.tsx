@@ -21,14 +21,14 @@ export function Page({ children }: PageProps): ReactNode {
 	const isMd = useStore((state) => state.isMd)
 
 	return (
-		<div className="flex flex-col h-full">
-			<div className="flex-1 min-h-0">{children}</div>
+		<div className="flex h-full flex-col">
+			<div className="min-h-0 flex-1">{children}</div>
 
-			<div className="flex justify-between align-middle px-4 py-1 text-sm bg-zinc-900/90 light:bg-zinc-200/90 z-10">
-				<div className="flex align-middle gap-4">
+			<div className="z-10 flex justify-between bg-zinc-900/90 px-4 py-1 align-middle text-sm light:bg-zinc-200/90">
+				<div className="flex gap-4 align-middle">
 					{userName && (
-						<div className="flex xs:hidden gap-3">
-							<img className="w-5 h-5 rounded" src={userAvatar} alt="Ảnh đại diện" />
+						<div className="flex gap-3 xs:hidden">
+							<img className="h-5 w-5 rounded" src={userAvatar} alt="Ảnh đại diện" />
 							<div className="flex gap-1">
 								Người dùng:
 								<Link2 href="https://github.com/settings/tokens?type=beta">
@@ -39,7 +39,7 @@ export function Page({ children }: PageProps): ReactNode {
 					)}
 
 					{orgName && (
-						<div className="flex xs:hidden gap-1">
+						<div className="flex gap-1 xs:hidden">
 							Tổ chức:
 							<Link2 href={`https://github.com/${orgName}/diori-main`}>
 								{orgName}
@@ -48,7 +48,7 @@ export function Page({ children }: PageProps): ReactNode {
 					)}
 				</div>
 
-				<div className="flex align-middle gap-4">
+				<div className="flex gap-4 align-middle">
 					<div className="xs:hidden">{dayjs().format('HH:mm:ss.SSS')}</div>
 
 					{rateLimitTimeReset && (

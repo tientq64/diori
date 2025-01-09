@@ -14,9 +14,12 @@ export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 export function usePhotosLoader() {
 	const orgName = useStore((state) => state.orgName)
 
+	/**
+	 * Các blob URL hình ảnh đã tạo.
+	 */
 	const createdBlobUrls = useRef<string[]>([])
 
-	// Biến promise cache các bước lấy hình ảnh bằng GitHub API.
+	// Các biến promise cache các bước lấy hình ảnh bằng GitHub API.
 	const promiseA = useRef<Promise<ReposGetCommitResponse>>()
 	const promiseB = useRef<Promise<GitGetTreeResponse>>()
 	const promiseC = useRef<Promise<GitGetTreeResponse>>()
@@ -26,12 +29,17 @@ export function usePhotosLoader() {
 	const request = useRequest(
 		async (time: Dayjs, image: ImageUploadItem): Promise<string> => {
 			if (typeof image.key !== 'string') {
-				throw TypeError('Hình ảnh không hợp lệ')
+				throw TypeError('Hình ảnh có key không hợp lệ')
 			}
 
 			const rest: Octokit = getOctokit()
+
+			/**
+			 * Tên của repo chứa hình ảnh này.
+			 */
 			const photoRepoName: string = `diori-photos-${time.year()}`
 
+			// Lấy commit mới nhất.
 			promiseA.current ??= rest.repos.getCommit({
 				owner: orgName,
 				repo: photoRepoName,
@@ -39,6 +47,7 @@ export function usePhotosLoader() {
 			})
 			const resA = await promiseA.current
 
+			// Lấy SHA thư mục tháng.
 			promiseB.current ??= rest.git.getTree({
 				owner: orgName,
 				repo: photoRepoName,
@@ -50,6 +59,7 @@ export function usePhotosLoader() {
 				throw Error('Không tìm thấy thư mục ảnh')
 			}
 
+			// Lấy SHA thư mục ngày.
 			promiseC.current ??= rest.git.getTree({
 				owner: orgName,
 				repo: photoRepoName,
@@ -61,6 +71,7 @@ export function usePhotosLoader() {
 				throw Error('Không tìm thấy thư mục ảnh')
 			}
 
+			// Lấy SHA của hình ảnh.
 			promiseD.current ??= rest.git.getTree({
 				owner: orgName,
 				repo: photoRepoName,
@@ -75,6 +86,7 @@ export function usePhotosLoader() {
 				throw Error('Không tìm thấy tập tin ảnh')
 			}
 
+			// Lấy nội dung của hình ảnh và tạo blob URL.
 			promiseE.current ??= rest.git.getBlob({
 				owner: orgName,
 				repo: photoRepoName,

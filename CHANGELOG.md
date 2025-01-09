@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.8.2 (09-01-2025)
+
+- Sửa lỗi trình xem hình ảnh khi nhấn nút trở về của trình duyệt.
+
 ## 1.8.0 (30-12-2024)
 
 - Cải thiện trình soạn thảo.

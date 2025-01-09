@@ -1,8 +1,7 @@
 {
 	"name": "diori",
+	"version": "1.8.2",
 	"private": true,
-	"version": "1.8.1",
-	"type": "module",
 	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [
 		"diary",
@@ -17,12 +16,13 @@
 		"antd-mobile",
 		"vite"
 	],
+	"type": "module",
 	"scripts": {
-		"dev": "vite",
 		"build": "tsc && pnpm lint && pnpm test && vite build",
+		"dev": "vite",
 		"lint": "eslint . --ext ts,tsx --quiet --report-unused-disable-directives",
-		"test": "vitest run",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@fancyapps/ui": "^5.0.36",
@@ -64,6 +64,8 @@
 		"eslint-plugin-react-refresh": "^0.4.16",
 		"postcss": "^8.4.49",
 		"prettier": "^3.4.2",
+		"prettier-plugin-jsdoc": "1.3.2",
+		"prettier-plugin-tailwindcss": "0.6.9",
 		"prop-types": "^15.8.1",
 		"sass": "^1.77.8",
 		"simple-zustand-devtools": "^1.1.0",

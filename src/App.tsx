@@ -56,6 +56,15 @@ export function App(): ReactNode {
 			<ConfigProvider locale={antdLocaleEnUS}>
 				<RouterProvider router={router} />
 			</ConfigProvider>
+
+			<style>{`
+				:root {
+					--adm-font-family: ${fontFamily};
+				}
+				.monaco-hover {
+					font-family: ${fontFamily};
+				}
+			`}</style>
 		</div>
 	)
 }
