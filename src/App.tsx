@@ -32,7 +32,7 @@ export function App(): ReactNode {
 	}, [isDarkMode])
 
 	useEffect(() => {
-		const intervalId: number = setInterval(() => {
+		const intervalId: number = window.setInterval(() => {
 			setNowPerMinute(dayjs())
 		}, 1000 * 60)
 

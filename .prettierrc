@@ -11,5 +11,6 @@
 		"prettier-plugin-tailwindcss",
 		"prettier-plugin-packagejson"
 	],
+	"jsdocDescriptionWithDot": true,
 	"jsdocCommentLineStrategy": "multiline"
 }

@@ -33,13 +33,14 @@ export function getOctokit(token?: string): Octokit {
 	}
 
 	rest.hook.before('request', (options) => {
-		const repo = options.repo as string | undefined
-		const url: string = options.url
-		if (
-			repo?.startsWith('diori-photos-') &&
-			url === '/repos/{owner}/{repo}/git/blobs/{file_sha}'
-		)
-			return
+		if (typeof options.repo === 'string') {
+			// Cache những request này.
+			const isPhotoBlobRequest: boolean =
+				options.repo.startsWith('diori-photos-') &&
+				options.url === '/repos/{owner}/{repo}/git/blobs/{file_sha}'
+			if (isPhotoBlobRequest) return
+		}
+		// Không cache request này.
 		options.headers['if-none-match'] = ''
 	})
 

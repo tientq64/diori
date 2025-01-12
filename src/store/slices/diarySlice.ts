@@ -4,9 +4,8 @@ import VietnameseDate from 'vietnamese-date'
 import { SliceCreator } from '../useStore'
 
 /**
- * Một mục trong nhật ký.
- * Mục nhật ký giống như một mục nhập, chỉ bao gồm ngày, tiêu đề, ảnh thu nhỏ, vv,
- * không bao gồm nội dung chi tiết.
+ * Một mục trong nhật ký. Mục nhật ký giống như một mục nhập, chỉ bao gồm ngày, tiêu đề, ảnh thu
+ * nhỏ, vv, không bao gồm nội dung chi tiết.
  */
 export interface Note {
 	/**
@@ -14,7 +13,8 @@ export interface Note {
 	 */
 	readonly date: string
 	/**
-	 * Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới mỗi khi dùng.
+	 * Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới
+	 * mỗi khi dùng.
 	 */
 	readonly time: Dayjs
 	/**
@@ -82,8 +82,6 @@ export type NoteData = Required<
  */
 export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
 
-export type Statuses = Record<string, Status>
-
 export interface Diary {
 	/**
 	 * Danh sách các mục nhật ký. Các mục này đã được lưu trên GitHub.
@@ -92,20 +90,22 @@ export interface Diary {
 	/**
 	 * Danh sách trạng thái tải của năm.
 	 */
-	readonly years: Statuses
+	readonly years: Record<string, Status>
 	/**
 	 * Ngày đang xem trong trang `/notes`.
 	 */
 	currentTime: Dayjs
 	/**
 	 * Trả về một mục nhật ký trong danh sách.
+	 *
 	 * @param date Ngày cần lấy.
 	 * @returns Mục nhật ký cần lấy.
 	 */
 	getNote: (date: string | Dayjs) => Note
 	/**
-	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách.
-	 * Nếu cần thêm vào danh sách, hãy thêm nó vào bằng hàm `updateOrAddNote`.
+	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách. Nếu
+	 * cần thêm vào danh sách, hãy thêm nó vào bằng hàm `updateOrAddNote`.
+	 *
 	 * @param time Ngày của mục nhật ký cần tạo.
 	 * @returns Mục nhật ký đã tạo.
 	 */
@@ -120,6 +120,7 @@ export interface Diary {
 	removeNote: (note: Note) => void
 	/**
 	 * Cập nhật trạng thái tải của năm.
+	 *
 	 * @param year Năm cần cập nhật.
 	 * @param status Trạng thái tải của năm.
 	 */

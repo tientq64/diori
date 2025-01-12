@@ -19,3 +19,7 @@
 - Dung lượng và kích cỡ của hình ảnh không nên quá lớn. Nếu hình ảnh quá lớn, hãy nén hoặc giảm kích cỡ ảnh xuống độ lớn phù hợp.
 
 - Tập tin `settings.json` dùng để lưu các cài đặt của người dùng.
+
+## Quy ước về code
+
+- Chỉ sử dụng 2 giá trị responsive, `md` (>= 768px) và `sm` (< 768px).
