@@ -15,14 +15,14 @@ import { filter, groupBy, isEqual, some, toPairs } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
 import { Entity, EntityTypes } from '../store/slices/settingsSlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { emptyArray } from '../utils/constants'
 import { removeToneMarks } from '../utils/removeToneMarks'
 
 export function EntitiesManager(): ReactNode {
-	const entities = useStore((state) => state.entities)
-	const removeEntity = useStore((state) => state.removeEntity)
-	const addOrUpdateEntity = useStore((state) => state.addOrUpdateEntity)
+	const entities = useAppStore((state) => state.entities)
+	const removeEntity = useAppStore((state) => state.removeEntity)
+	const addOrUpdateEntity = useAppStore((state) => state.addOrUpdateEntity)
 
 	const [form] = Form.useForm()
 	const [editingEntity, setEditingEntity] = useState<Entity | undefined>()
@@ -119,7 +119,7 @@ export function EntitiesManager(): ReactNode {
 	}
 
 	return (
-		<div className="flex flex-col h-[82vh]">
+		<div className="flex h-[82vh] flex-col">
 			<CapsuleTabs activeKey={filteredEntityType} onChange={handleFilteredEntityTypeChange}>
 				<CapsuleTabs.Tab title="Tất cả" key="" />
 				<CapsuleTabs.Tab title="Mọi người" key={EntityTypes.Person} />
@@ -128,7 +128,7 @@ export function EntitiesManager(): ReactNode {
 
 			<div className="flex-1 overflow-hidden">
 				{groups.length === 0 && (
-					<div className="flex justify-center items-center h-full">
+					<div className="flex h-full items-center justify-center">
 						<ErrorBlock
 							className="py-4"
 							status="empty"

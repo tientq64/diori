@@ -1,5 +1,6 @@
 /**
  * Mã hóa văn bản sang chuỗi base64.
+ *
  * @param text Văn bản cần mã hóa.
  * @returns Chuỗi base64.
  */

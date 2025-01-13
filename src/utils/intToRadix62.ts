@@ -1,6 +1,9 @@
 export const radix62Charset: string =
 	'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
+/**
+ * Convert số từ base-10 sang base-62.
+ */
 export function intToRadix62(int: number): string {
 	let radix62: string = ''
 	while (int > 0) {

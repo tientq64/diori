@@ -1,5 +1,5 @@
 import { findIndex, remove } from 'lodash'
-import { SliceCreator } from '../useStore'
+import { SliceCreator } from '../useAppStore'
 
 /**
  * Kiểu của đối tượng.
@@ -9,6 +9,7 @@ export enum EntityTypes {
 	 * Tên người.
 	 */
 	Person = 'person',
+
 	/**
 	 * Danh từ riêng.
 	 */
@@ -16,8 +17,8 @@ export enum EntityTypes {
 }
 
 /**
- * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng.
- * Dùng trong tô sáng cú pháp khi viết nhật ký.
+ * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng. Dùng trong tô sáng cú pháp khi viết
+ * nhật ký.
  */
 export interface Entity {
 	/**
@@ -45,7 +46,7 @@ export interface Entity {
 /**
  * Các thuộc tính của cài đặt.
  */
-export interface SettingsProps {
+export interface SettingsState {
 	/**
 	 * Phông chữ.
 	 */
@@ -64,29 +65,33 @@ export interface SettingsProps {
 	entities: Entity[]
 }
 
-export interface Settings extends SettingsProps {
+export interface Settings extends SettingsState {
 	setFontFamily: (fontFamily: string) => void
 	setFontSize: (fontSize: number) => void
 	setIsDarkMode: (isDarkMode: boolean) => void
 	setEntities: (entities: Entity[]) => void
+
 	/**
 	 * Thêm mới hoặc cập nhật đối tượng.
 	 */
 	addOrUpdateEntity: (entity: Entity) => void
+
 	/**
 	 * Loại bỏ một đối tượng.
-	 * @param entity Đối tượng cần loại bỏ.
 	 */
 	removeEntity: (entity?: Entity) => void
+
 	/**
 	 * Trả về tất cả cài đặt hiện tại.
 	 */
-	getSettingsProps: () => SettingsProps
+	getSettingsState: () => SettingsState
+
 	/**
 	 * Cập nhật tất cả cài đặt.
-	 * @param settingsProps Tất cả các thuộc tính của cài đặt.
+	 *
+	 * @param settingsState Tất cả các thuộc tính của cài đặt.
 	 */
-	setSettingsProps: (settingsProps: SettingsProps) => void
+	setSettingsState: (settingsState: SettingsState) => void
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
@@ -118,7 +123,7 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		})
 	},
 
-	getSettingsProps: () => {
+	getSettingsState: () => {
 		const state = get()
 		return {
 			fontFamily: state.fontFamily,
@@ -128,12 +133,12 @@ export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
 		}
 	},
 
-	setSettingsProps: (settingsProps) => {
+	setSettingsState: (settingsState) => {
 		set({
-			fontFamily: settingsProps.fontFamily,
-			fontSize: settingsProps.fontSize,
-			isDarkMode: settingsProps.isDarkMode,
-			entities: settingsProps.entities
+			fontFamily: settingsState.fontFamily,
+			fontSize: settingsState.fontSize,
+			isDarkMode: settingsState.isDarkMode,
+			entities: settingsState.entities
 		})
 	}
 })

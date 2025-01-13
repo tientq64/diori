@@ -1,4 +1,4 @@
-import { useStore } from '../../store/useStore'
+import { useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 import { defineTheme } from './defineTheme'
 import { registerCompletionItemProvider } from './registerCompletionItemProvider'
@@ -8,8 +8,11 @@ import { setLanguageConfiguration } from './setLanguageConfiguration'
 import { setMonarchTokensProvider } from './setMonarchTokensProvider'
 
 export function setupEditor(): Monaco.IDisposable {
-	const monaco: typeof Monaco = useStore.getState().monaco!
+	const monaco: typeof Monaco | null = useAppStore.getState().monaco
 
+	if (monaco === null) {
+		throw Error('Trình soạn thảo chưa được khởi tạo trong khi setup')
+	}
 	monaco.languages.register({ id: 'diori' })
 
 	const monarchTokensDisposer: Monaco.IDisposable = setMonarchTokensProvider()

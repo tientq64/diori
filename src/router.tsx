@@ -1,13 +1,13 @@
 import { Navigate, createBrowserRouter } from 'react-router'
-import { Auth } from './pages/Auth'
+import { AuthLayout } from './pages/AuthLayout'
 import { EditPage } from './pages/EditPage'
 import { Layout } from './pages/Layout'
-import { Logged } from './pages/Logged'
-import { Login } from './pages/Login'
+import { LoggedLayout } from './pages/LoggedLayout'
+import { LoginPage } from './pages/LoginPage'
 import { NotesPage } from './pages/NotesPage'
-import { Register } from './pages/Register'
+import { RegisterPage } from './pages/RegisterPage'
 import { SearchPage } from './pages/SearchPage'
-import { Settings } from './pages/Settings'
+import { SettingsPage } from './pages/SettingsPage'
 
 export const router = createBrowserRouter([
 	{
@@ -20,25 +20,25 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'settings',
-				element: <Settings />
+				element: <SettingsPage />
 			},
 			{
 				path: '',
-				element: <Auth />,
+				element: <AuthLayout />,
 				children: [
 					{
 						path: 'login',
-						element: <Login />
+						element: <LoginPage />
 					},
 					{
 						path: 'register',
-						element: <Register />
+						element: <RegisterPage />
 					}
 				]
 			},
 			{
 				path: '',
-				element: <Logged />,
+				element: <LoggedLayout />,
 				children: [
 					{
 						path: 'notes',

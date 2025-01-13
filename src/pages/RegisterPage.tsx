@@ -1,10 +1,10 @@
+import { useRequest } from 'ahooks'
 import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { Link2 } from '../components/Link2'
-import { Page } from '../components/Page'
-import { useRegister } from '../hooks/useRegister'
-import { Store, useStore } from '../store/useStore'
+import { register } from '../services/register'
+import { AppStore, useAppStore } from '../store/useAppStore'
 import { formValidateMessages } from '../utils/formValidateMessages'
 
 /**
@@ -14,11 +14,11 @@ export interface RegisterValues {
 	/**
 	 * Personal access token đã nhập trong phần đăng ký.
 	 */
-	token: Store['token']
+	token: AppStore['token']
 	/**
 	 * Tên tổ chức GitHub đã nhập trong phần đăng ký.
 	 */
-	orgName: Store['orgName']
+	orgName: AppStore['orgName']
 	/**
 	 * Mã bảo mật đã nhập trong phần đăng ký.
 	 */
@@ -27,17 +27,18 @@ export interface RegisterValues {
 
 /**
  * Trang đăng ký.
+ *
  * @returns React node.
  */
-export function Register(): ReactNode {
-	const isMd = useStore((state) => state.isMd)
+export function RegisterPage(): ReactNode {
+	const isMd = useAppStore((state) => state.isMd)
 
 	const [form] = Form.useForm()
-	const register = useRegister()
+	const registerApi = useRequest(register, { manual: true })
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		const error: any = register.error
+		const error: any = registerApi.error
 		if (!error) return
 		if (error.status === 401) {
 			form.setFields([
@@ -53,10 +54,10 @@ export function Register(): ReactNode {
 			content: error.message,
 			confirmText: 'OK'
 		})
-	}, [register.error])
+	}, [registerApi.error])
 
 	useEffect(() => {
-		if (!register.data) return
+		if (!registerApi.data) return
 		Modal.alert({
 			title: 'Đăng ký thành công',
 			content: 'Bạn đã đăng ký thành công, hãy đăng nhập!',
@@ -64,29 +65,29 @@ export function Register(): ReactNode {
 		}).then(() => {
 			navigate('/login')
 		})
-	}, [register.data])
+	}, [registerApi.data])
 
 	return (
-		<Page>
-			<div className="h-full">
-				<NavBar
-					back={
-						<Button fill="none" onClick={() => navigate('/login')}>
-							Đăng nhập
-						</Button>
-					}
-				>
-					Đăng ký
-				</NavBar>
+		<div className="flex flex-1 flex-col">
+			<NavBar
+				back={
+					<Button fill="none" onClick={() => navigate('/login')}>
+						Đăng nhập
+					</Button>
+				}
+			>
+				Đăng ký
+			</NavBar>
 
+			<div className="flex flex-1 flex-col items-center justify-center">
 				<Form
-					className="md:w-[1200px] max-w-full mx-auto"
+					className="max-w-full md:w-[1200px]"
 					form={form}
 					mode="card"
 					layout={isMd ? 'horizontal' : 'vertical'}
-					disabled={register.loading || register.data}
+					disabled={registerApi.loading || registerApi.data}
 					validateMessages={formValidateMessages}
-					onFinish={register.run}
+					onFinish={registerApi.run}
 				>
 					<Form.Item
 						label="Personal access token"
@@ -139,7 +140,7 @@ export function Register(): ReactNode {
 					<Form.Item
 						label="Mã bảo mật"
 						name="pass"
-						description="Bạn phải có mã này mới mở được nhật ký."
+						description="Tương tự như mật khẩu. Bạn phải có mã này mới mở được nhật ký."
 						rules={[
 							{
 								min: 4,
@@ -148,7 +149,7 @@ export function Register(): ReactNode {
 							}
 						]}
 					>
-						<Input className="text-security" autoComplete="current-password" />
+						<Input className="text-security" autoComplete="off" />
 					</Form.Item>
 
 					<Form.Item>
@@ -157,13 +158,13 @@ export function Register(): ReactNode {
 							color="primary"
 							size="large"
 							block
-							loading={register.loading}
+							loading={registerApi.loading}
 						>
 							Đăng ký
 						</Button>
 					</Form.Item>
 				</Form>
 			</div>
-		</Page>
+		</div>
 	)
 }

@@ -1,4 +1,4 @@
-import { SliceCreator } from '../useStore'
+import { SliceCreator } from '../useAppStore'
 import { Note } from './diarySlice'
 
 export interface Search {

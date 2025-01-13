@@ -1,7 +1,7 @@
 import clsx from 'clsx'
-import { KeyboardEvent, ReactNode, useMemo } from 'react'
+import { KeyboardEvent, ReactNode } from 'react'
 import { Note, Status } from '../store/slices/diarySlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
 interface NoteCardProps {
@@ -11,16 +11,11 @@ interface NoteCardProps {
 }
 
 export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactNode {
-	const years = useStore((state) => state.years)
-	const isMd = useStore<boolean>((state) => state.isMd)
+	const isMd = useAppStore((state) => state.isMd)
+	const getYear = useAppStore((state) => state.getYear)
 
-	const status = useMemo<Status>(() => {
-		return years[note.year]
-	}, [years, note.year])
-
-	const loaded = useMemo<boolean>(() => {
-		return checkIsLoadedStatus(status)
-	}, [status])
+	const status: Status = getYear(note.year)
+	const loaded: boolean = checkIsLoadedStatus(status)
 
 	const handleClick = (): void => {
 		if (!loaded) return
@@ -36,9 +31,9 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 	return (
 		<div
 			className={clsx(
-				'flex md:flex-col xs:items-start gap-3 xs:gap-6 p-2 rounded-md',
-				'bg-zinc-800 light:bg-zinc-50 cursor-pointer group',
-				!loaded && 'opacity-50 pointer-events-none'
+				'flex gap-3 rounded-md p-2 xs:items-start xs:gap-6 md:flex-col',
+				'group cursor-pointer bg-zinc-800 light:bg-zinc-50',
+				!loaded && 'pointer-events-none opacity-50'
 			)}
 			tabIndex={tabIndex}
 			onClick={handleClick}
@@ -48,7 +43,7 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 				<div className="flex xs:justify-center">
 					{note.thumbnailUrl && (
 						<img
-							className="w-20 md:min-w-20 xs:w-16 rounded image-contrast"
+							className="image-contrast w-20 rounded xs:w-16 md:min-w-20"
 							src={note.thumbnailUrl}
 							loading="lazy"
 							alt="Thumbnail"
@@ -57,7 +52,7 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 					{!note.thumbnailUrl && (
 						<div
 							className={clsx(
-								'w-20 md:min-w-20 xs:w-16 aspect-square rounded',
+								'aspect-square w-20 rounded xs:w-16 md:min-w-20',
 								'bg-zinc-700 light:bg-zinc-200',
 								note.sha ? 'visible' : 'invisible'
 							)}
@@ -65,7 +60,7 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 					)}
 				</div>
 
-				<div className="flex-1 text-right xs:text-left text-sm">
+				<div className="flex-1 text-right text-sm xs:text-left">
 					<div
 						className={clsx(
 							'font-semibold',
@@ -86,13 +81,13 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 				</div>
 			</div>
 
-			<div className="xs:flex-1 text-sm line-clamp-2 xs:line-clamp-3 break-words text-zinc-400 light:text-zinc-600">
+			<div className="line-clamp-2 break-words text-sm text-zinc-400 light:text-zinc-600 xs:line-clamp-3 xs:flex-1">
 				{note.title}
 			</div>
 
 			{note.time.isToday() && (
-				<div className="md:flex-1 flex justify-center items-end xs:items-center xs:h-full">
-					<div className="md:w-12 md:h-1 xs:w-1 xs:h-12 rounded-full bg-blue-500" />
+				<div className="flex items-end justify-center xs:h-full xs:items-center md:flex-1">
+					<div className="rounded-full bg-blue-500 xs:h-12 xs:w-1 md:h-1 md:w-12" />
 				</div>
 			)}
 		</div>

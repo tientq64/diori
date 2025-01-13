@@ -4,14 +4,14 @@ import dayjs from 'dayjs'
 import { ReactNode, useEffect } from 'react'
 import { RouterProvider } from 'react-router'
 import { router } from './router'
-import { useStore } from './store/useStore'
+import { useAppStore } from './store/useAppStore'
 
 export function App(): ReactNode {
-	const isDarkMode = useStore((state) => state.isDarkMode)
-	const fontFamily = useStore((state) => state.fontFamily)
-	const fontSize = useStore((state) => state.fontSize)
-	const updateResponsive = useStore((state) => state.updateResponsive)
-	const setNowPerMinute = useStore((state) => state.setNowPerMinute)
+	const isDarkMode = useAppStore((state) => state.isDarkMode)
+	const fontFamily = useAppStore((state) => state.fontFamily)
+	const fontSize = useAppStore((state) => state.fontSize)
+	const updateResponsive = useAppStore((state) => state.updateResponsive)
+	const setNowPerMinute = useAppStore((state) => state.setNowPerMinute)
 
 	const resizeHandle = (): void => {
 		updateResponsive()
@@ -46,13 +46,7 @@ export function App(): ReactNode {
 	}, [])
 
 	return (
-		<div
-			className="h-full"
-			style={{
-				fontFamily: fontFamily,
-				fontSize: fontSize
-			}}
-		>
+		<div className="h-full" style={{ fontFamily, fontSize }}>
 			<ConfigProvider locale={antdLocaleEnUS}>
 				<RouterProvider router={router} />
 			</ConfigProvider>

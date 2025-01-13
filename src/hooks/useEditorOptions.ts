@@ -1,16 +1,16 @@
 import { useMemo } from 'react'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { EditorOptions } from '../types/monaco'
 
 export function useEditorOptions(): EditorOptions {
-	const isMd = useStore((state) => state.isMd)
-	const fontFamily = useStore((state) => state.fontFamily)
-	const fontSize = useStore((state) => state.fontSize)
+	const isMd = useAppStore((state) => state.isMd)
+	const fontFamily = useAppStore((state) => state.fontFamily)
+	const fontSize = useAppStore((state) => state.fontSize)
 
 	const editorOptions = useMemo<EditorOptions>(
 		() => ({
-			fontFamily: fontFamily,
-			fontSize: fontSize,
+			fontFamily,
+			fontSize,
 			wordWrap: isMd ? 'bounded' : 'on',
 			wordWrapColumn: 160,
 			wrappingStrategy: 'advanced',

@@ -1,5 +1,8 @@
 import { radix62Charset } from './intToRadix62'
 
+/**
+ * Convert số từ base-62 sang base-10.
+ */
 export function radix62ToInt(radix62: string): number {
 	let int: number = 0
 	for (const letter of radix62) {

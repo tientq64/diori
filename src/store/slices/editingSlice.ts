@@ -1,5 +1,5 @@
 import { Monaco } from '../../types/monaco'
-import { SliceCreator } from '../useStore'
+import { SliceCreator } from '../useAppStore'
 import { Note } from './diarySlice'
 
 export type NoteEdit = Pick<Note, 'date' | 'title' | 'isTitled'> & {
@@ -16,15 +16,19 @@ export interface Photo {
 }
 
 export interface Editing {
+	/**
+	 * Mục nhật ký đang được sửa đổi.
+	 */
 	editingNote: Note | null
+
 	monaco: typeof Monaco | null
 
-	setEditingNote: (note: Note | null) => void
+	setEditingNote: (editingNote: Note | null) => void
 }
 
 export const editingSlice: SliceCreator<Editing> = (set) => ({
 	editingNote: null,
 	monaco: null,
 
-	setEditingNote: (note) => set({ editingNote: note })
+	setEditingNote: (editingNote) => set({ editingNote })
 })

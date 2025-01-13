@@ -3,21 +3,13 @@
 	"editor.insertSpaces": false,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"[typescript]": {
-		"editor.formatOnSave": true,
-		"files.trimFinalNewlines": true
+		"editor.formatOnSave": true
 	},
 	"[typescriptreact]": {
-		"editor.formatOnSave": true,
-		"files.trimFinalNewlines": true
+		"editor.formatOnSave": true
 	},
 	"[scss]": {
-		"editor.formatOnSave": true,
-		"files.trimFinalNewlines": true
+		"editor.formatOnSave": true
 	},
-	"tailwindCSS.experimental.classRegex": [
-		[
-			"clsx\\(([^)]*)\\)",
-			"(?:'|\"|`)([^']*)(?:'|\"|`)"
-		]
-	]
+	"tailwindCSS.experimental.classRegex": [["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]]
 }

@@ -1,8 +1,8 @@
-import { useStore } from '../../store/useStore'
+import { useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 
 export function defineTheme(): void {
-	const monaco: typeof Monaco = useStore.getState().monaco!
+	const monaco: typeof Monaco = useAppStore.getState().monaco!
 
 	monaco.editor.defineTheme('diori-dark', {
 		base: 'vs-dark',
@@ -94,6 +94,11 @@ export function defineTheme(): void {
 				token: 'yellow-italic',
 				foreground: '#ffcb6b',
 				fontStyle: 'italic'
+			},
+			{
+				token: 'invalid',
+				foreground: '#ff5874',
+				fontStyle: 'underline'
 			}
 		]
 	})

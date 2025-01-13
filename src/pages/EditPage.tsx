@@ -2,17 +2,16 @@ import { Fancybox } from '@fancyapps/ui'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 import { slideType } from '@fancyapps/ui/types/Carousel/types'
 import { Editor } from '@monaco-editor/react'
-import { useUpdateEffect } from 'ahooks'
 import {
 	Button,
-	Form,
+	Dialog,
+	Divider,
 	ImageUploader,
 	Input,
-	Modal,
 	NavBar,
 	Popover,
 	Skeleton,
-	Space,
+	TextArea,
 	Toast
 } from 'antd-mobile'
 import {
@@ -21,27 +20,27 @@ import {
 	InformationCircleOutline,
 	PictureOutline
 } from 'antd-mobile-icons'
+import { produce } from 'immer'
 import { differenceBy, find, findIndex, reject, some, upperFirst } from 'lodash'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { Blocker, Navigate, useBlocker, useLocation } from 'react-router'
+import { Blocker, Navigate, useBlocker, useLocation, useNavigate, useParams } from 'react-router'
 import spinnerImage from '../assets/images/spinner.svg'
 import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
-import { Page } from '../components/Page'
 import { QuickSettingsButton } from '../components/QuickSettingsButton'
 import { useEditorOptions } from '../hooks/useEditorOptions'
 import { useGetNoteEdit } from '../hooks/useGetNoteEdit'
 import { usePhotosLoader } from '../hooks/usePhotosLoader'
 import { useSave } from '../hooks/useSave'
-import { Note } from '../store/slices/diarySlice'
+import { Note, Status } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
-import { useStore } from '../store/useStore'
-import { CodeEditor, EditorOptions, Monaco } from '../types/monaco'
-import { emptyArray } from '../utils/constants'
+import { useAppStore } from '../store/useAppStore'
+import { CodeEditor, EditorOptions, FindMatch, IEditorAction, Monaco } from '../types/monaco'
 import { setupEditor } from '../utils/editor/setupEditor'
-import { formValidateMessages } from '../utils/formValidateMessages'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
+import { useLoadYear } from '../hooks/useLoadYear'
+import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
 export interface ImageUploadItem {
 	key?: string | number
@@ -52,29 +51,35 @@ export interface ImageUploadItem {
 }
 
 export function EditPage(): ReactNode {
-	const editingNote = useStore((state) => state.editingNote)
+	const params = useParams()
 
-	if (!editingNote) {
+	if (params.date === undefined || !/^\d{4}-\d\d-\d\d$/.test(params.date)) {
 		return <Navigate to="/login" replace />
 	}
 
-	const entities = useStore((state) => state.entities)
-	const notes = useStore((state) => state.notes)
-	const isMd = useStore((state) => state.isMd)
-	const isDarkMode = useStore((state) => state.isDarkMode)
-	const fontSize = useStore((state) => state.fontSize)
-	const monaco = useStore((state) => state.monaco)
-	const getNote = useStore((state) => state.getNote)
-	const makeNote = useStore((state) => state.makeNote)
-	const setEditingNote = useStore((state) => state.setEditingNote)
+	const dateParam: string = params.date
+	const getNote = useAppStore((state) => state.getNote)
+	const makeNote = useAppStore((state) => state.makeNote)
+
+	const editingNote = useMemo<Note>(() => {
+		return getNote(dateParam) ?? makeNote(dateParam)
+	}, [getNote(dateParam)])
+
+	const isMd = useAppStore((state) => state.isMd)
+	const isDarkMode = useAppStore((state) => state.isDarkMode)
+	const fontSize = useAppStore((state) => state.fontSize)
+	const monaco = useAppStore((state) => state.monaco)
+	const setEditingNote = useAppStore((state) => state.setEditingNote)
+	const getYear = useAppStore((state) => state.getYear)
 
 	const location = useLocation()
-	const getNoteEdit = useGetNoteEdit()
-	const save = useSave()
-	const [form] = Form.useForm()
-	const title = Form.useWatch<string>('title', form) ?? ''
-	const content = Form.useWatch<string>('content', form) ?? ''
-	const images = Form.useWatch<ImageUploadItem[]>('images', form) ?? emptyArray
+	const navigate = useNavigate()
+	const getNoteEditApi = useGetNoteEdit()
+	const loadYearApi = useLoadYear()
+	const saveApi = useSave()
+	const [title, setTitle] = useState<string>('')
+	const [content, setContent] = useState<string>('')
+	const [images, setImages] = useState<ImageUploadItem[]>([])
 	const [maxImagesCount] = useState<number>(4)
 	const [defaultPhotoKey, setDefaultPhotoKey] = useState<string>('')
 	const usedPhotoKeys = useRef<string[]>([])
@@ -103,31 +108,61 @@ export function EditPage(): ReactNode {
 		return differenceBy(noteEdit.photos, images, 'key')
 	}, [images, noteEdit.photos])
 
+	const currentErrorMessage = useMemo<string | undefined>(() => {
+		if (title.length > 0 && title.trim() === '') {
+			return 'Tiêu đề không được chứa chỉ toàn khoảng trắng'
+		}
+		if (title.length > 60) {
+			return `Tiêu đề tối đa 60 ký tự, hãy xóa bớt ${title.length - 60} ký tự`
+		}
+		if (content.length > 0 && content.trim() === '') {
+			return 'Nội dung không được chứa chỉ toàn khoảng trắng'
+		}
+		if (content.length > 10000) {
+			return `Nội dung tối đa 10,000 ký tự, hãy xóa bớt ${content.length - 10000} ký tự`
+		}
+		if (images.length > 4) {
+			return 'Tối đa 4 hình ảnh'
+		}
+	}, [title, content, images])
+
+	const yearStatus: Status = getYear(editingNote.year)
+
+	const isLoading = useMemo<boolean>(() => {
+		return getNoteEditApi.loading || !checkIsLoadedStatus(yearStatus)
+	}, [getNoteEditApi.loading, yearStatus])
+
 	const unsaved = useMemo<boolean>(() => {
-		if (getNoteEdit.loading) return false
-		if (content && content.trim() === '') return false
-		if (title && title.trim() === '') return false
+		if (getNoteEditApi.loading) return false
 
 		if (content !== noteEdit.content) return true
 		if (noteEdit.isTitled ? title !== noteEdit.title : title) return true
-		if (addedImages.length || removedImages.length) return true
+		if (addedImages.length > 0 || removedImages.length > 0) return true
 		if (defaultPhotoKey !== noteEdit.defaultPhotoKey) return true
 
 		return false
-	}, [getNoteEdit.loading, title, content, addedImages, removedImages, defaultPhotoKey, noteEdit])
-
-	const blocker: Blocker = useBlocker(unsaved || save.loading)
+	}, [
+		getNoteEditApi.loading,
+		title,
+		content,
+		addedImages,
+		removedImages,
+		defaultPhotoKey,
+		noteEdit
+	])
 
 	const canSave = useMemo<boolean>(() => {
-		if (save.loading) return false
+		if (saveApi.loading) return false
 		if (!unsaved) return false
 		if (previewImageVisible) return false
 
 		return true
-	}, [save.loading, unsaved, previewImageVisible])
+	}, [saveApi.loading, unsaved, previewImageVisible])
+
+	const blocker: Blocker = useBlocker(unsaved || saveApi.loading)
 
 	const beforeEditorMount = (monaco: typeof Monaco): void => {
-		useStore.setState({ monaco })
+		useAppStore.setState({ monaco })
 		editorDisposer.current?.dispose()
 		editorDisposer.current = setupEditor()
 	}
@@ -142,30 +177,31 @@ export function EditPage(): ReactNode {
 
 		const { CtrlCmd, chord } = monaco.KeyMod
 		const { KeyCode } = monaco
+		const { KeyK } = KeyCode
 
-		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyL), (): void => {
+		editor.addCommand(chord(CtrlCmd | KeyK, CtrlCmd | KeyCode.KeyL), (): void => {
 			const action = editor.getAction('editor.action.transformToLowercase')
 			action?.run()
 		})
 
-		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyU), (): void => {
+		editor.addCommand(chord(CtrlCmd | KeyK, CtrlCmd | KeyCode.KeyU), (): void => {
 			const action = editor.getAction('editor.action.transformToUppercase')
 			action?.run()
 		})
 
-		editor.addCommand(chord(CtrlCmd | KeyCode.KeyK, CtrlCmd | KeyCode.KeyE), (): void => {
+		editor.addCommand(chord(CtrlCmd | KeyK, CtrlCmd | KeyCode.KeyE), (): void => {
 			const action = editor.getAction('editor.action.transformToTitlecase')
 			action?.run()
 		})
 
 		if (location.state?.findText) {
-			const matched = model
+			const matched: FindMatch | undefined = model
 				.findMatches(location.state.findText, false, false, false, null, true)
 				.at(0)
-			if (matched) {
+			if (matched !== undefined) {
 				editor.setSelection(matched.range)
-				const action = editor.getAction('actions.find')
-				if (action) {
+				const action: IEditorAction | null = editor.getAction('actions.find')
+				if (action !== null) {
 					action.run()
 					setTimeout(editor.setScrollTop.bind(editor), 10, 0)
 				}
@@ -173,15 +209,21 @@ export function EditPage(): ReactNode {
 		}
 	}
 
-	const filterValidImageFile = async (file: File): Promise<File | null> => {
+	/**
+	 * Lọc tập tin ảnh cần tải lên.
+	 *
+	 * @returns Trả về `null` nếu tập tin không hợp lệ, còn không trả về tập tin đó.
+	 */
+	const filterValidImageFile = (file: File): File | null => {
 		if (!/^image\/(jpeg|webp|png)$/.test(file.type)) {
+			Toast.show('Tập tin đã chọn không phải hình ảnh hợp lệ')
 			return null
 		}
 		return file
 	}
 
 	/**
-	 * Hàm trả về đối tượng ảnh cần tải lên của component `ImageUploader`.
+	 * Trả về đối tượng ảnh cần tải lên của component `ImageUploader`.
 	 *
 	 * @param file Tập tin ảnh.
 	 * @returns Đối tượng ảnh.
@@ -220,8 +262,7 @@ export function EditPage(): ReactNode {
 					'Carousel.selectSlide': async (_, __, slide: slideType): Promise<void> => {
 						const image: ImageUploadItem | undefined = find(images, { key: slide.id })
 						if (image === undefined) return
-						const url: string | undefined = await loadImagePhotoUrl(image)
-						if (url === undefined) return
+						const url: string = await loadImagePhotoUrl(image)
 						const imageEl = slide.imageEl as HTMLImageElement | undefined
 						if (imageEl === undefined) return
 						imageEl.src = url
@@ -247,7 +288,7 @@ export function EditPage(): ReactNode {
 	 * @param image Ảnh chuẩn bị tải lên hoặc ảnh đã tải lên rồi.
 	 * @returns Data URL của ảnh.
 	 */
-	const loadImagePhotoUrl = async (image: ImageUploadItem): Promise<string | undefined> => {
+	const loadImagePhotoUrl = async (image: ImageUploadItem): Promise<string> => {
 		if (image.url) {
 			return image.url
 		}
@@ -255,58 +296,62 @@ export function EditPage(): ReactNode {
 			return image.loadUrlPromise
 		}
 		const loadUrlPromise: Promise<string> = photosLoader.runAsync(editingNote.time, image)
-		const images2: ImageUploadItem[] = form.getFieldValue('images')
-		const image2: ImageUploadItem = find(images2, { key: image.key })!
-		image2.loadUrlPromise = loadUrlPromise
-		form.setFieldValue('images', images2)
+		image.loadUrlPromise = loadUrlPromise
 		const blobUrl: string = await loadUrlPromise
-		const images3: ImageUploadItem[] = form.getFieldValue('images')
-		const image3: ImageUploadItem | undefined = find(images3, { key: image.key })
-		if (image3) {
-			image3.url = blobUrl
-			form.setFieldValue('images', images3)
-			return blobUrl
-		}
-		return undefined
+		setImages(
+			produce((images) => {
+				const image2 = find(images, { key: image.key })
+				if (image2 === undefined) return
+				image2.url = blobUrl
+			})
+		)
+		return blobUrl
+	}
+
+	/**
+	 * Loại bỏ hình ảnh.
+	 */
+	const removeImage = (image: ImageUploadItem): void => {
+		setImages(reject(images, { key: image.key }))
 	}
 
 	/**
 	 * Khôi phục lại hình ảnh đã loại bỏ. Những hình ảnh đã được lưu mới có thể khôi phục được.
-	 *
-	 * @param photo Hình ảnh cần khôi phục.
 	 */
-	const handleRestorePhoto = (photo: Photo): void => {
-		if (images.length >= maxImagesCount) return
-		const image = { ...photo } as ImageUploadItem
-		form.setFieldValue('images', [...images, image])
+	const restoreRemovedPhoto = (photo: Photo): void => {
+		if (images.length >= maxImagesCount) {
+			Toast.show('Danh sách không thể nhiều hơn 4 hình ảnh')
+			return
+		}
+		const image = photo as ImageUploadItem
+		setImages([...images, image])
 	}
 
 	const handleSave = (): void => {
 		if (!canSave) return
-		save.run(title, content, images, addedImages, removedImages, defaultPhotoKey, noteEdit)
+		if (currentErrorMessage !== undefined) return
+		saveApi.run(title, content, images, addedImages, removedImages, defaultPhotoKey, noteEdit)
 	}
 
 	useHotkeys(
 		'ctrl+s',
 		() => {
-			form.submit()
+			handleSave()
 		},
 		{
 			preventDefault: true,
 			enableOnFormTags: true,
-			enabled: () => {
-				return canSave
-			}
+			enabled: () => canSave
 		}
 	)
 
 	useEffect(() => {
 		if (blocker.state !== 'blocked') return
-		if (save.loading) {
+		if (saveApi.loading) {
 			Toast.show('Không thể trở về trong khi đang lưu')
 			return
 		}
-		Modal.show({
+		Dialog.show({
 			title: 'Dữ liệu chưa được lưu',
 			content: 'Dữ liệu chưa được lưu sẽ bị mất, bạn vẫn muốn trở về?',
 			closeOnMaskClick: true,
@@ -315,14 +360,14 @@ export function EditPage(): ReactNode {
 				{
 					key: 'save',
 					text: 'Lưu',
-					primary: true,
+					bold: true,
 					onClick: () => {
-						form.submit()
+						handleSave()
 					}
 				},
 				{
 					key: 'back',
-					text: 'Trở về',
+					text: 'Bỏ các thay đổi và trở về',
 					danger: true,
 					onClick: () => {
 						blocker.proceed()
@@ -330,7 +375,7 @@ export function EditPage(): ReactNode {
 				},
 				{
 					key: 'cancel',
-					text: 'Đóng',
+					text: 'Tiếp tục chỉnh sửa',
 					className: 'text-zinc-400'
 				}
 			],
@@ -340,256 +385,228 @@ export function EditPage(): ReactNode {
 		})
 	}, [blocker.state])
 
-	useUpdateEffect(() => {
-		const newEditingNote: Note = getNote(editingNote.time) ?? makeNote(editingNote.time)
-		setEditingNote(newEditingNote)
-	}, [notes[editingNote.date]])
-
 	useEffect(() => {
 		if (monaco === null) return
 		beforeEditorMount(monaco)
-	}, [entities])
+	}, [monaco])
 
+	// Đặt key hình ảnh mặc định là hình ảnh đầu tiên khi danh sách thay đổi.
 	useEffect(() => {
-		if (!save.data) return
-		setNoteEdit(save.data)
-	}, [save.data])
-
-	useEffect(() => {
-		if (images.length <= 4) return
-		form.setFieldValue('images', images.slice(0, 4))
-	}, [images.length])
-
-	useEffect(() => {
-		const hasDefaultPhoto = some(images, { key: defaultPhotoKey })
+		const hasDefaultPhoto: boolean = some(images, { key: defaultPhotoKey })
 		if (hasDefaultPhoto) return
 		const photoKey = images.length > 0 ? images[0].key : ''
-		setDefaultPhotoKey(photoKey as string)
+		if (typeof photoKey !== 'string') return
+		setDefaultPhotoKey(photoKey)
 	}, [images])
 
 	useEffect(() => {
-		if (!getNoteEdit.data) return
-		setNoteEdit(getNoteEdit.data)
-	}, [getNoteEdit.data])
+		if (!getNoteEditApi.data) return
+		setNoteEdit(getNoteEditApi.data)
+	}, [getNoteEditApi.data])
 
 	useEffect(() => {
-		if (editingNote.sha && !getNoteEdit.data) return
-		const { title, isTitled, content, photos, defaultPhotoKey } = noteEdit
-		form.setFieldsValue({
-			title: isTitled ? title : '',
-			content,
-			images: structuredClone(photos)
-		})
-		setDefaultPhotoKey(defaultPhotoKey)
-		usedPhotoKeys.current = photos.map((photo) => photo.key)
+		if (!saveApi.data) return
+		setNoteEdit(saveApi.data)
+	}, [saveApi.data])
+
+	useEffect(() => {
+		if (editingNote.sha && !getNoteEditApi.data) return
+		setTitle(noteEdit.isTitled ? noteEdit.title : '')
+		setContent(noteEdit.content)
+		setImages(noteEdit.photos as ImageUploadItem[])
+		setDefaultPhotoKey(noteEdit.defaultPhotoKey)
+		usedPhotoKeys.current = noteEdit.photos.map((photo) => photo.key)
 	}, [noteEdit])
 
 	useLayoutEffect(() => {
-		getNoteEdit.run(editingNote)
-	}, [])
+		setEditingNote(editingNote)
+		loadYearApi.run(editingNote.year)
+	}, [editingNote])
+
+	useEffect(() => {
+		getNoteEditApi.run(editingNote)
+		return () => {
+			getNoteEditApi.cancel()
+		}
+	}, [Boolean(editingNote.sha)])
 
 	useEffect(() => {
 		return () => {
 			editorDisposer.current?.dispose()
-			useStore.setState({ monaco: null })
+			useAppStore.setState({ monaco: null })
 			closePreviewImage()
 			// setEditingNote(null)
 		}
 	}, [])
 
 	return (
-		<Page>
-			<div className="flex h-full flex-col">
-				<NavBar
-					onBack={() => history.back()}
-					back={isMd ? 'Trở về' : ''}
-					right={
-						<div className="flex items-center justify-end gap-4">
-							<EntitiesManagerButton />
-							<QuickSettingsButton />
-						</div>
-					}
-				>
-					<div className="font-semibold xs:text-base">
-						{upperFirst(
-							editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
-						)}
-						{isMd && (
-							<span className="ml-2 text-zinc-500">
-								<>
-									({editingNote.lunar.day} tháng {editingNote.lunar.month} âm
-									lịch)
-								</>
-							</span>
-						)}
+		<div className="flex flex-1 flex-col">
+			<NavBar
+				onBack={() => navigate(-1)}
+				back={isMd ? 'Trở về' : ''}
+				right={
+					<div className="flex items-center justify-end gap-4">
+						<EntitiesManagerButton />
+						<QuickSettingsButton />
 					</div>
-				</NavBar>
-
-				<div className="min-h-0 flex-1">
-					{getNoteEdit.loading && (
-						<div className="flex h-full flex-col p-4">
-							<Skeleton.Title />
-							<Skeleton.Paragraph lineCount={5} />
-							<br />
-							<Skeleton.Paragraph className="flex-1" lineCount={3} />
-							<Skeleton.Title className="h-12" />
-							<Skeleton.Title />
-						</div>
+				}
+			>
+				<div className="font-semibold xs:text-base">
+					{upperFirst(
+						editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
 					)}
-
-					{!getNoteEdit.loading && (
-						<Form
-							className="adm-form-card-m0 h-full"
-							form={form}
-							mode="card"
-							validateMessages={formValidateMessages}
-							onFinish={handleSave}
-						>
-							<Form.Item
-								name="title"
-								layout="horizontal"
-								rules={[
-									{
-										max: 60,
-										whitespace: true
-									}
-								]}
-							>
-								<Input
-									className="font-semibold [&>input]:text-[#c3e88d] [&>input]:placeholder:text-[#6a7a91]"
-									autoComplete="off"
-									placeholder={
-										noteEdit && noteEdit.title && !noteEdit.isTitled
-											? noteEdit.title
-											: ''
-									}
-								/>
-							</Form.Item>
-
-							<Form.Item
-								className="adm-list-item-no-padding min-h-0 flex-1"
-								name="content"
-								rules={[
-									{
-										max: 10000,
-										whitespace: true
-									}
-								]}
-								messageVariables={{
-									label: 'Nội dung'
-								}}
-							>
-								{isMd ? (
-									<Editor
-										theme={isDarkMode ? 'diori-dark' : 'vs'}
-										language="diori"
-										options={editorOptions}
-										defaultValue={content}
-										beforeMount={beforeEditorMount}
-										onMount={handleEditorMount}
-									/>
-								) : (
-									<textarea
-										className="size-full resize-none bg-zinc-900 px-4 py-2 outline-0"
-										style={{ fontSize }}
-									/>
-								)}
-							</Form.Item>
-
-							<Form.Item
-								name="images"
-								extra={
-									<div className="flex items-center gap-3">
-										{removedImages.map((photo) => (
-											<img
-												key={photo.key}
-												className="h-20 w-20 cursor-pointer rounded object-cover opacity-50 grayscale hover:opacity-100 hover:grayscale-0"
-												src={photo.thumbnailUrl}
-												alt="Ảnh sẽ bị xóa"
-												onClick={() => handleRestorePhoto(photo)}
-											/>
-										))}
-									</div>
-								}
-							>
-								<ImageUploader
-									accept="image/jpeg, image/webp, image/png"
-									maxCount={maxImagesCount}
-									multiple
-									preview={false}
-									beforeUpload={filterValidImageFile}
-									upload={makeImageFromFile}
-									renderItem={(imageNode, image) => (
-										<Popover.Menu
-											key={image.key}
-											mode="dark"
-											trigger="click"
-											actions={[
-												{
-													key: 'key',
-													text: image.key,
-													icon: <InformationCircleOutline />
-												},
-												{
-													key: 'preview',
-													text: 'Xem ảnh',
-													icon: <EyeOutline />,
-													onClick: () => {
-														showPreviewImage(image)
-													}
-												},
-												{
-													key: 'setDefault',
-													text: 'Đặt làm ảnh mặc định',
-													icon: <PictureOutline />,
-													disabled: image.key === defaultPhotoKey,
-													onClick: () => {
-														setDefaultPhotoKey(image.key as string)
-													}
-												},
-												{
-													key: 'remove',
-													text: 'Xóa bỏ',
-													icon: <DeleteOutline />,
-													onClick: () => {
-														form.setFieldValue(
-															'images',
-															reject(images, { key: image.key })
-														)
-													}
-												}
-											]}
-										>
-											<div
-												className="image-contrast"
-												onDoubleClick={() => showPreviewImage(image)}
-											>
-												{imageNode}
-											</div>
-										</Popover.Menu>
-									)}
-								/>
-							</Form.Item>
-
-							<Form.Item>
-								<Space>
-									<Button
-										type="submit"
-										color="primary"
-										disabled={!canSave}
-										loading={save.loading}
-										loadingText="Đang lưu"
-									>
-										Lưu
-									</Button>
-
-									<Button onClick={() => history.back()}>Trở về</Button>
-								</Space>
-							</Form.Item>
-						</Form>
+					{isMd && (
+						<span className="ml-2 text-zinc-500">
+							<>
+								({editingNote.lunar.day} tháng {editingNote.lunar.month} âm lịch)
+							</>
+						</span>
 					)}
 				</div>
+			</NavBar>
+
+			<div className="min-h-0 flex-1">
+				{isLoading && (
+					<div className="flex h-full flex-col p-4">
+						<Skeleton.Title />
+						<Skeleton.Paragraph lineCount={5} />
+						<br />
+						<Skeleton.Paragraph className="flex-1" lineCount={3} />
+						<Skeleton.Title className="h-12" />
+						<Skeleton.Title />
+					</div>
+				)}
+
+				{!isLoading && (
+					<div className="flex h-full flex-col">
+						<div className="p-4 md:px-[4.75rem]">
+							<Input
+								className="font-semibold [&>input]:text-[#6a9955] [&>input]:placeholder:text-[#6a7a91]"
+								autoComplete="off"
+								placeholder={noteEdit.title}
+								value={title}
+								onChange={setTitle}
+							/>
+						</div>
+
+						<Divider className="m-0" />
+
+						<div className="min-h-0 flex-1">
+							{isMd ? (
+								<Editor
+									theme={isDarkMode ? 'diori-dark' : 'vs'}
+									language="diori"
+									options={editorOptions}
+									beforeMount={beforeEditorMount}
+									onMount={handleEditorMount}
+									value={content}
+									onChange={(value) => setContent(value ?? '')}
+								/>
+							) : (
+								<TextArea
+									className="size-full resize-none bg-zinc-900 outline-0 [&>textarea]:px-4"
+									style={{ fontSize }}
+									value={content}
+									onChange={setContent}
+								/>
+							)}
+						</div>
+
+						<Divider className="m-0 md:px-4" />
+
+						<div className="flex items-center justify-between p-4 pb-0">
+							<ImageUploader
+								accept="image/jpeg, image/webp, image/png"
+								maxCount={maxImagesCount}
+								multiple
+								preview={false}
+								beforeUpload={filterValidImageFile}
+								upload={makeImageFromFile}
+								value={images}
+								onChange={setImages}
+								renderItem={(imageNode, image) => (
+									<Popover.Menu
+										key={image.key}
+										mode="dark"
+										trigger="click"
+										actions={[
+											{
+												key: 'key',
+												text: image.key,
+												icon: <InformationCircleOutline />
+											},
+											{
+												key: 'preview',
+												text: 'Xem ảnh',
+												icon: <EyeOutline />,
+												onClick: () => {
+													showPreviewImage(image)
+												}
+											},
+											{
+												key: 'setDefault',
+												text: 'Đặt làm ảnh mặc định',
+												icon: <PictureOutline />,
+												disabled: image.key === defaultPhotoKey,
+												onClick: () => {
+													setDefaultPhotoKey(image.key as string)
+												}
+											},
+											{
+												key: 'remove',
+												text: 'Xóa bỏ',
+												icon: <DeleteOutline />,
+												onClick: () => removeImage(image)
+											}
+										]}
+									>
+										<div
+											className="image-contrast cursor-pointer"
+											title="Nhấn để mở menu. Nhấn đúp để xem ảnh"
+											onDoubleClick={() => showPreviewImage(image)}
+										>
+											{imageNode}
+										</div>
+									</Popover.Menu>
+								)}
+							/>
+
+							<div className="flex items-center gap-3">
+								{removedImages.map((photo) => (
+									<img
+										key={photo.key}
+										className="h-20 w-20 cursor-pointer rounded object-cover opacity-50 grayscale hover:opacity-100 hover:grayscale-0"
+										src={photo.thumbnailUrl}
+										alt="Ảnh sẽ bị xóa"
+										title="Ảnh sẽ bị xóa bỏ khi lưu. Nhấn để khôi phục lại"
+										onClick={() => restoreRemovedPhoto(photo)}
+									/>
+								))}
+							</div>
+						</div>
+
+						<div className="flex items-center gap-4 p-4 xs:flex-col xs:items-start">
+							<div className="flex gap-3">
+								<Button
+									color={currentErrorMessage === undefined ? 'primary' : 'danger'}
+									disabled={!canSave}
+									loading={saveApi.loading}
+									loadingText="Đang lưu"
+									onClick={handleSave}
+								>
+									Lưu
+								</Button>
+
+								<Button onClick={() => history.back()}>Trở về</Button>
+							</div>
+
+							{currentErrorMessage !== undefined && (
+								<div className="text-rose-500">{currentErrorMessage}</div>
+							)}
+						</div>
+					</div>
+				)}
 			</div>
-		</Page>
+		</div>
 	)
 }

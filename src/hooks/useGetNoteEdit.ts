@@ -2,13 +2,13 @@ import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { NoteEdit, NoteEditJSON } from '../store/slices/editingSlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { base64ToText } from '../utils/base64ToText'
 import { getOctokit } from '../utils/getOctokit'
 
 export function useGetNoteEdit() {
-	const token = useStore((state) => state.token)
-	const orgName = useStore((state) => state.orgName)
+	const token = useAppStore((state) => state.token)
+	const orgName = useAppStore((state) => state.orgName)
 
 	const request = useRequest(
 		async (note: Note): Promise<NoteEdit | undefined> => {

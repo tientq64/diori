@@ -4,7 +4,7 @@ import { ImageUploadItem } from 'antd-mobile'
 import { Dayjs } from 'dayjs'
 import { find } from 'lodash'
 import { useEffect, useRef } from 'react'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { GitGetBlobResponse, GitGetTreeResponse, ReposGetCommitResponse } from '../types/octokit'
 import { getOctokit } from '../utils/getOctokit'
 import { makePhotoFileName } from '../utils/makePhotoFileName'
@@ -12,7 +12,7 @@ import { makePhotoFileName } from '../utils/makePhotoFileName'
 export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
 
 export function usePhotosLoader() {
-	const orgName = useStore((state) => state.orgName)
+	const orgName = useAppStore((state) => state.orgName)
 
 	/**
 	 * Các blob URL hình ảnh đã tạo.

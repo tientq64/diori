@@ -3,10 +3,12 @@ import { SearchOutline } from 'antd-mobile-icons'
 import { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { useSearch } from '../hooks/useSearch'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 
 export function SearchInput(): ReactNode {
-	const store = useStore()
+	const searchLoading = useAppStore((state) => state.searchLoading)
+	const searchText = useAppStore((state) => state.searchText)
+
 	const search = useSearch()
 	const navigate = useNavigate()
 
@@ -17,9 +19,9 @@ export function SearchInput(): ReactNode {
 
 	return (
 		<SearchBar
-			className={store.searchLoading ? 'pointer-events-none opacity-50' : ''}
+			className={searchLoading ? 'pointer-events-none opacity-50' : ''}
 			maxLength={80}
-			defaultValue={store.searchText}
+			defaultValue={searchText}
 			searchIcon={<SearchOutline fontSize={20} />}
 			placeholder="Tìm kiếm..."
 			onSearch={handleSearch}

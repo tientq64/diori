@@ -8,11 +8,11 @@ import { Search, searchSlice } from './slices/searchSlice'
 import { Settings, settingsSlice } from './slices/settingsSlice'
 import { User, userSlice } from './slices/userSlice'
 
-export type SliceCreator<T> = StateCreator<Store, [['zustand/immer', never]], [], T>
+export type SliceCreator<T> = StateCreator<AppStore, [['zustand/immer', never]], [], T>
 
-export type Store = User & Settings & Diary & Editing & Search
+export type AppStore = User & Settings & Diary & Editing & Search
 
-const store: StateCreator<Store, [['zustand/immer', never]]> = (...args) => ({
+const store: StateCreator<AppStore, [['zustand/immer', never]]> = (...args) => ({
 	...userSlice(...args),
 	...settingsSlice(...args),
 	...diarySlice(...args),
@@ -20,7 +20,7 @@ const store: StateCreator<Store, [['zustand/immer', never]]> = (...args) => ({
 	...searchSlice(...args)
 })
 
-export const useStore = create<Store>()(
+export const useAppStore = create<AppStore>()(
 	immer(
 		persist(store, {
 			name: 'diori:store',
@@ -38,5 +38,5 @@ export const useStore = create<Store>()(
 )
 
 if (import.meta.env.DEV) {
-	mountStoreDevtool('dev:store', useStore)
+	mountStoreDevtool('dev:store', useAppStore)
 }

@@ -1,6 +1,6 @@
 {
 	"name": "diori",
-	"version": "1.8.2",
+	"version": "1.9.0",
 	"private": true,
 	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [
@@ -21,6 +21,7 @@
 		"build": "tsc && pnpm lint && pnpm test && vite build",
 		"dev": "vite",
 		"lint": "eslint . --ext ts,tsx --quiet --report-unused-disable-directives",
+		"pretty": "prettier . --write",
 		"preview": "vite preview",
 		"test": "vitest run"
 	},

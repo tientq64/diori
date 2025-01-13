@@ -1,7 +1,7 @@
 import { Octokit } from '@octokit/rest'
 import dayjs, { Dayjs } from 'dayjs'
 import { getOctokit } from '../../utils/getOctokit'
-import { SliceCreator } from '../useStore'
+import { SliceCreator } from '../useAppStore'
 
 export interface User {
 	/**
@@ -17,17 +17,19 @@ export interface User {
 	 */
 	userAvatar: string
 	/**
-	 * GitHub personal access token đã được mã hóa. Được lưu trong `localStorage` để xác thực khi đăng nhập.
+	 * GitHub personal access token đã được mã hóa. Được lưu trong `localStorage` để xác thực khi
+	 * đăng nhập.
 	 */
 	encryptedToken: string
 	/**
-	 * GitHub personal access token.
+	 * GitHub personal access token hiện tại. Có thể dùng để kiểm tra xem người dùng đã đăng nhập
+	 * chưa.
 	 */
 	token: string
 	/**
 	 * Tổng số giới hạn lệnh gọi GitHub API.
 	 */
-	rateLimit: number
+	rateLimitTotal: number
 	/**
 	 * Giới hạn lệnh gọi GitHub API còn lại.
 	 */
@@ -52,7 +54,7 @@ export interface User {
 	setOrgName: (orgName: string) => void
 	setEncryptedToken: (encryptedToken: string) => void
 	setToken: (token: string) => void
-	setRateLimit: (rateLimit: number) => void
+	setRateLimitTotal: (rateLimit: number) => void
 	setRateLimitRemaining: (rateLimitRemaining: number) => void
 	setRateLimitTimeReset: (timestamp: number) => void
 	setNowPerMinute: (time: Dayjs) => void
@@ -69,7 +71,7 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	userAvatar: '',
 	encryptedToken: '',
 	token: '',
-	rateLimit: 5000,
+	rateLimitTotal: 5000,
 	rateLimitRemaining: 5000,
 	rateLimitTimeReset: null,
 	nowPerMinute: dayjs(),
@@ -79,7 +81,7 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	setOrgName: (orgName) => set({ orgName }),
 	setEncryptedToken: (encryptedToken) => set({ encryptedToken }),
 	setToken: (token) => set({ token }),
-	setRateLimit: (rateLimit) => set({ rateLimit }),
+	setRateLimitTotal: (rateLimitTotal) => set({ rateLimitTotal }),
 	setRateLimitRemaining: (rateLimitRemaining) => set({ rateLimitRemaining }),
 
 	setRateLimitTimeReset: (timestamp) => {
@@ -91,7 +93,8 @@ export const userSlice: SliceCreator<User> = (set) => ({
 
 	updateResponsive: () => {
 		const isMd: boolean = window.innerWidth >= 768
-		set({ isMd, isXs: !isMd })
+		const isXs: boolean = !isMd
+		set({ isMd, isXs })
 	},
 
 	fetchUserData: async (token) => {

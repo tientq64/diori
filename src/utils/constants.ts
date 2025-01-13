@@ -1,1 +1,1 @@
-export const emptyArray: readonly never[] = []
+export const emptyArray: never[] = []

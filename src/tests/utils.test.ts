@@ -9,17 +9,23 @@ import { makePhotoPath } from '../utils/makePhotoPath'
 import { radix62ToInt } from '../utils/radix62ToInt'
 import { removeToneMarks } from '../utils/removeToneMarks'
 import { textToBase64 } from '../utils/textToBase64'
+import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
+import { Status } from '../store/slices/diarySlice'
 
 describe('utils', () => {
-	test('textToBase64', () => {
-		expect(textToBase64('')).toBe('')
-		expect(textToBase64('nhật ký')).toBe('bmjhuq10IGvDvQ==')
-	})
+	{
+		const text: string = 'nhật ký'
+		const base64: string = 'bmjhuq10IGvDvQ=='
 
-	test('base64ToText', () => {
-		expect(base64ToText('')).toBe('')
-		expect(base64ToText('bmjhuq10IGvDvQ==')).toBe('nhật ký')
-	})
+		test('textToBase64', () => {
+			expect(textToBase64('')).toBe('')
+			expect(textToBase64(text)).toBe(base64)
+		})
+		test('base64ToText', () => {
+			expect(base64ToText('')).toBe('')
+			expect(base64ToText(base64)).toBe(text)
+		})
+	}
 
 	test('intToRadix62', () => {
 		expect(intToRadix62(0)).toBe('0')
@@ -28,7 +34,6 @@ describe('utils', () => {
 		expect(intToRadix62(1047)).toBe('gT')
 		expect(intToRadix62(16000)).toBe('4a4')
 	})
-
 	test('radix62ToInt', () => {
 		expect(radix62ToInt('0')).toBe(0)
 		expect(radix62ToInt('3')).toBe(3)
@@ -37,19 +42,19 @@ describe('utils', () => {
 		expect(radix62ToInt('4a4')).toBe(16000)
 	})
 
-	test('compressBase64', () => {
-		expect(compressBase64('')).toBe('')
-		expect(compressBase64('bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ===')).toBe(
-			'bmj.h~1uq10~3_IGvvD-~cvQ=~'
-		)
-	})
+	{
+		const base64: string = 'bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ==='
+		const minBase64: string = 'bmj.h~1uq10~3_IGvvD-~cvQ=~'
 
-	test('decompressBase64', () => {
-		expect(decompressBase64('')).toBe('')
-		expect(decompressBase64('bmj.h~1uq10~3_IGvvD-~cvQ=~')).toBe(
-			'bmjAAhAAAAuq10AAAAAA/IGvvD+AAAAAAAAAAAAAAAvQ==='
-		)
-	})
+		test('compressBase64', () => {
+			expect(compressBase64('')).toBe('')
+			expect(compressBase64(base64)).toBe(minBase64)
+		})
+		test('decompressBase64', () => {
+			expect(decompressBase64('')).toBe('')
+			expect(decompressBase64(minBase64)).toBe(base64)
+		})
+	}
 
 	test('removeToneMarks', () => {
 		expect(removeToneMarks('nhật ký')).toBe('nhât ky')
@@ -66,4 +71,12 @@ describe('utils', () => {
 			expect(makePhotoPath(noteTime, 'c5kJxW')).toBe('10/05/20241005-c5kJxW.webp')
 		})
 	}
+
+	test('checkIsLoadedStatus', () => {
+		expect(checkIsLoadedStatus(Status.Loaded)).toBe(true)
+		expect(checkIsLoadedStatus(Status.NotFound)).toBe(true)
+		expect(checkIsLoadedStatus(Status.Unloaded)).toBe(false)
+		expect(checkIsLoadedStatus(Status.Loading)).toBe(false)
+		expect(checkIsLoadedStatus(Status.Failed)).toBe(false)
+	})
 })

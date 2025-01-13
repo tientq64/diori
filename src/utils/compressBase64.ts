@@ -2,6 +2,7 @@ import { intToRadix62 } from './intToRadix62'
 
 /**
  * Nén chuỗi base64.
+ *
  * @param base64 Chuỗi base64 cần nén.
  * @returns Chuỗi base64 đã được nén.
  */

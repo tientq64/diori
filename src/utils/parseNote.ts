@@ -6,6 +6,7 @@ import { minBase64ToText } from './minBase64ToText'
 
 /**
  * Phân giải thành mục nhật ký từ path file GitHub và SHA.
+ *
  * @param path Đường dẫn file GitHub của mục nhật ký này.
  * @param sha SHA của file GitHub.
  * @returns Mục nhật ký.
@@ -43,6 +44,7 @@ export function parseNoteFromPathAndSha(path: string, sha: string): Note {
 
 /**
  * Phân tích thành mục nhật ký từ data.
+ *
  * @param data Data để phân tích, thường là data của trường `data` trả về từ REST API.
  * @returns Một mục nhật ký mới.
  */

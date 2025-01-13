@@ -1,13 +1,13 @@
 import { useRequest } from 'ahooks'
 import { nanoid } from 'nanoid'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
 import { textToBase64 } from '../utils/textToBase64'
-import { SettingsProps } from '../store/slices/settingsSlice'
+import { SettingsState } from '../store/slices/settingsSlice'
 import { Dialog } from 'antd-mobile'
 
 export function useSaveSettings() {
-	const store = useStore()
+	const store = useAppStore()
 
 	const request = useRequest(
 		async () => {
@@ -27,8 +27,8 @@ export function useSaveSettings() {
 					if (error.status !== 404) throw error
 				}
 
-				const settingsProps: SettingsProps = store.getSettingsProps()
-				const json: string = JSON.stringify(settingsProps, null, '\t')
+				const settingsState: SettingsState = store.getSettingsState()
+				const json: string = JSON.stringify(settingsState, null, '\t')
 				const base64: string = textToBase64(json)
 				res = await rest.repos.createOrUpdateFileContents({
 					owner: store.orgName,

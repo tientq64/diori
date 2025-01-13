@@ -1,5 +1,13 @@
 # Nhật ký thay đổi
 
+## 1.9.0 (14-01-2025)
+
+- Trang soạn thảo bây giờ sẽ hoạt động độc lập, không phụ thuộc vào trang danh sách nữa.
+
+## 1.8.3 (12-01-2025)
+
+- Cải thiện trang trình soạn thảo.
+
 ## 1.8.2 (09-01-2025)
 
 - Sửa lỗi trình xem hình ảnh khi nhấn nút trở về của trình duyệt.

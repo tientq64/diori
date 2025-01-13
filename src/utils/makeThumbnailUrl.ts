@@ -2,6 +2,7 @@ import Pica from 'pica'
 
 /**
  * Tạo hình thu nhỏ, kích thước 80x80, định dạng webp, trả về data URL.
+ *
  * @param blobUrl Blob URL.
  * @returns Data URL hình thu nhỏ.
  */

@@ -16,6 +16,9 @@ module.exports = {
 		'@typescript-eslint/no-unused-vars': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
 		'no-extra-semi': 'off',
-		'no-constant-condition': 'warn'
+		'no-constant-condition': 'warn',
+		'no-useless-rename': 'error',
+		'no-new-wrappers': 'error',
+		'object-shorthand': 'error'
 	}
 }

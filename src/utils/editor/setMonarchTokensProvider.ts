@@ -1,11 +1,11 @@
 import { IDisposable } from 'monaco-editor'
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
-import { Store, useStore } from '../../store/useStore'
+import { AppStore, useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 import { getEntityNameWithoutNote } from '../getEntityNameWithoutNote'
 
 export function setMonarchTokensProvider(): Monaco.IDisposable {
-	const store: Store = useStore.getState()
+	const store: AppStore = useAppStore.getState()
 	const monaco: typeof Monaco = store.monaco!
 	const entities: Entity[] = store.entities
 
@@ -31,6 +31,9 @@ export function setMonarchTokensProvider(): Monaco.IDisposable {
 	const disposer: IDisposable = monaco.languages.setMonarchTokensProvider('diori', {
 		tokenizer: {
 			root: [
+				{
+					include: '@invalid'
+				},
 				{
 					// Trích dẫn, lời nói.
 					regex: /"/,
@@ -89,6 +92,12 @@ export function setMonarchTokensProvider(): Monaco.IDisposable {
 				},
 				{
 					regex: /[\p{L}\d]+/u
+				}
+			],
+			invalid: [
+				{
+					regex: /\s\s+|\t+|\s+$/,
+					action: 'invalid'
 				}
 			],
 			link: [

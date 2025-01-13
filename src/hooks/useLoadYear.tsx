@@ -1,22 +1,25 @@
 import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Note, NoteData, Status } from '../store/slices/diarySlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
 import { parseNoteFromNoteData } from '../utils/parseNote'
 
 export function useLoadYear() {
-	const years = useStore((state) => state.years)
-	const orgName = useStore((state) => state.orgName)
-	const setYear = useStore((state) => state.setYear)
-	const updateOrAddNote = useStore((state) => state.updateOrAddNote)
+	const token = useAppStore((state) => state.token)
+	const orgName = useAppStore((state) => state.orgName)
+	const getYear = useAppStore((state) => state.getYear)
+	const setYear = useAppStore((state) => state.setYear)
+	const updateOrAddNote = useAppStore((state) => state.updateOrAddNote)
 
 	const request = useRequest(
 		async (year: number): Promise<boolean> => {
-			const status: Status = years[year]
-			if (status !== undefined) return false
+			if (token === '') return false
 
-			setYear(year, 'loading')
+			const status: Status = getYear(year)
+			if (status !== Status.Unloaded) return false
+
+			setYear(year, Status.Loading)
 			const rest: Octokit = getOctokit()
 
 			try {
@@ -31,15 +34,15 @@ export function useLoadYear() {
 				}
 			} catch (error: any) {
 				if (error.status === 404) {
-					setYear(year, 'loaded-404')
+					setYear(year, Status.NotFound)
 					return true
 				}
 
-				setYear(year, 'failed')
+				setYear(year, Status.Failed)
 				throw error
 			}
 
-			setYear(year, 'loaded')
+			setYear(year, Status.Loaded)
 			return true
 		},
 		{ manual: true }

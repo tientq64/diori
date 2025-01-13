@@ -1,5 +1,5 @@
 import { Entity, EntityTypes } from '../../store/slices/settingsSlice'
-import { useStore } from '../../store/useStore'
+import { useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 
 const emojis: [string, string[]][] = [
@@ -36,7 +36,7 @@ const emojis: [string, string[]][] = [
 ]
 
 export function registerCompletionItemProvider(): Monaco.IDisposable {
-	const store = useStore.getState()
+	const store = useAppStore.getState()
 	const monaco: typeof Monaco = store.monaco!
 	const entities: Entity[] = store.entities
 

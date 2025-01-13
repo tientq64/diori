@@ -1,8 +1,8 @@
-import { useStore } from '../../store/useStore'
+import { useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 
 export function setLanguageConfiguration(): Monaco.IDisposable {
-	const monaco = useStore.getState().monaco!
+	const monaco = useAppStore.getState().monaco!
 
 	const disposer: Monaco.IDisposable = monaco.languages.setLanguageConfiguration('diori', {
 		autoClosingPairs: [

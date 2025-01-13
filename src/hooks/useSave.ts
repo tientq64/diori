@@ -4,7 +4,7 @@ import { ImageUploadItem, Toast } from 'antd-mobile'
 import { find, truncate } from 'lodash'
 import { Note, NoteData } from '../store/slices/diarySlice'
 import { NoteEdit, NoteEditJSON, Photo } from '../store/slices/editingSlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { AddedCommitFile, commitFiles } from '../utils/commitFiles'
 import { compressBase64 } from '../utils/compressBase64'
 import { getOctokit } from '../utils/getOctokit'
@@ -18,10 +18,10 @@ import { textToMinBase64 } from '../utils/textToMinBase64'
  * Hook để lưu nhật ký đang viết.
  */
 export function useSave() {
-	const editingNote = useStore((state) => state.editingNote)
-	const orgName = useStore((state) => state.orgName)
-	const updateOrAddNote = useStore((state) => state.updateOrAddNote)
-	const removeNote = useStore((state) => state.removeNote)
+	const editingNote = useAppStore((state) => state.editingNote)
+	const orgName = useAppStore((state) => state.orgName)
+	const updateOrAddNote = useAppStore((state) => state.updateOrAddNote)
+	const removeNote = useAppStore((state) => state.removeNote)
 
 	const request = useRequest(
 		async (
@@ -37,11 +37,13 @@ export function useSave() {
 
 			const { time, sha, year } = editingNote
 
+			const formatedContent: string = content.trim()
+
 			// Tạo tiêu đề mới dựa trên nội dung đã viết nếu người dùng không đặt tiêu đề.
 			let newTitle: string = title
-			if (!title && content.length > 0) {
+			if (!title && formatedContent.length > 0) {
 				// Lấy dòng dài nhất.
-				const longestLine: string = content
+				const longestLine: string = formatedContent
 					.split(/\n+/)
 					.map((line) => line.replace(/ +/g, ' ').trim())
 					.filter((line) => !/^\[.+?\]: *[^"\n]+?(?: *".+?")?$/.test(line[0]))
@@ -63,23 +65,25 @@ export function useSave() {
 			const defaultPhoto: ImageUploadItem | undefined = find(images, { key: defaultPhotoKey })
 
 			/**
+			 * Chuỗi base64 được nén của hình thu nhỏ của ảnh mặc định.
+			 */
+			const defaultPhotoThumbnailUrlMinBase64: string = defaultPhoto
+				? compressBase64(defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', ''))
+				: ''
+			/**
 			 * Các phần của đường dẫn tập tin GitHub.
 			 */
 			const chunks = [
 				time.format('MMDD'),
 				textToMinBase64(newTitle),
 				title ? 'T' : '',
-				defaultPhoto
-					? compressBase64(
-							defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', '')
-						)
-					: '',
+				defaultPhotoThumbnailUrlMinBase64,
 				defaultPhotoKey.substring(2),
 				images.length >= 2 ? images.length : ''
 			]
 			/**
-			 * Đường dẫn mới cho tập tin GitHub.
-			 * Đường dẫn mới không nhất thiết phải khác đường dẫn cũ.
+			 * Đường dẫn mới cho tập tin GitHub. Đường dẫn mới không nhất thiết phải khác đường dẫn
+			 * cũ.
 			 */
 			const path = `days/${year}/${chunks.join(';').replace(/;+$/, '')}.json`
 			const hasSha = sha !== undefined
@@ -87,7 +91,8 @@ export function useSave() {
 			/**
 			 * Chỉ xóa tập tin.
 			 */
-			const isDeleteOnly: boolean = hasSha && !newTitle && !content && images.length === 0
+			const isDeleteOnly: boolean =
+				hasSha && !newTitle && !formatedContent && images.length === 0
 			/**
 			 * Chỉ tạo mới tập tin.
 			 */
@@ -110,7 +115,7 @@ export function useSave() {
 				date: noteEdit.date,
 				title: newTitle,
 				isTitled: title.length > 0,
-				content: content,
+				content: formatedContent,
 				photos: images.map<Photo>((image) => ({
 					key: image.key as string,
 					thumbnailUrl: image.thumbnailUrl as string
@@ -124,7 +129,7 @@ export function useSave() {
 				date: newNoteEdit.date,
 				title: newNoteEdit.title || undefined,
 				isTitled: newNoteEdit.isTitled || undefined,
-				content: newNoteEdit.content || '',
+				content: newNoteEdit.content,
 				photos: newNoteEdit.photos.length > 0 ? newNoteEdit.photos : undefined,
 				defaultPhotoKey:
 					newNoteEdit.photos.length >= 2 ? newNoteEdit.defaultPhotoKey : undefined
@@ -134,9 +139,8 @@ export function useSave() {
 			 */
 			const newNoteEditJson: string = JSON.stringify(newNoteEditData)
 			/**
-			 * Chuỗi base64 nội dung nhật ký.
-			 * Dùng để truyền dữ liệu vào các hàm GitHub API,
-			 * vì API chỉ chấp nhận dữ liệu dạng base64.
+			 * Chuỗi base64 nội dung nhật ký. Dùng để truyền dữ liệu vào các hàm GitHub API, vì API
+			 * chỉ chấp nhận dữ liệu dạng base64.
 			 */
 			const newNoteEditBase64: string = textToBase64(newNoteEditJson)
 
@@ -146,7 +150,7 @@ export function useSave() {
 				const res = await rest.repos.createOrUpdateFileContents({
 					owner: orgName,
 					repo: 'diori-main',
-					path: path,
+					path,
 					content: newNoteEditBase64,
 					message: `${isCreateNewOnly ? 'Thêm' : 'Cập nhật'} ngày ${time.format('DD-MM-YYYY')}`,
 					sha: isCreateNewOnly ? undefined : sha
@@ -168,7 +172,7 @@ export function useSave() {
 
 			if (isCreateNewAndDeleteOldOnly) {
 				const [newNoteSHA] = await commitFiles(rest, {
-					orgName: orgName,
+					orgName,
 					repoName: 'diori-main',
 					message: `Tạo lại ngày ${time.format('DD-MM-YYYY')}`,
 					addedFiles: [
@@ -243,7 +247,7 @@ export function useSave() {
 
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
 				await commitFiles(rest, {
-					orgName: orgName,
+					orgName,
 					repoName: photosRepoName,
 					message: photosCommitMessage,
 					addedFiles,

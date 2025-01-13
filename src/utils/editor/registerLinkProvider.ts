@@ -1,8 +1,8 @@
-import { useStore } from '../../store/useStore'
+import { useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 
 export function registerLinkProvider(): Monaco.IDisposable {
-	const monaco: typeof Monaco = useStore.getState().monaco!
+	const monaco: typeof Monaco = useAppStore.getState().monaco!
 
 	const disposer: Monaco.IDisposable = monaco.languages.registerLinkProvider('diori', {
 		provideLinks(model) {

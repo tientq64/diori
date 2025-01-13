@@ -1,6 +1,6 @@
 import { findIndex, some } from 'lodash'
 import { Entity } from '../../store/slices/settingsSlice'
-import { Store, useStore } from '../../store/useStore'
+import { AppStore, useAppStore } from '../../store/useAppStore'
 import { Monaco } from '../../types/monaco'
 import { getEntityNameWithoutNote } from '../getEntityNameWithoutNote'
 import { Position, Range } from 'monaco-editor'
@@ -11,7 +11,7 @@ interface FlatEntity extends Entity {
 }
 
 export function registerHoverProvider(): Monaco.IDisposable {
-	const store: Store = useStore.getState()
+	const store: AppStore = useAppStore.getState()
 	const monaco: typeof Monaco = store.monaco!
 	const entities: Entity[] = store.entities
 

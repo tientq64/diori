@@ -36,6 +36,10 @@
 	}
 }
 
+.adm-nav-bar-left {
+	@apply text-base;
+}
+
 .adm-nav-bar-right {
 	display: flex;
 	justify-content: end;
@@ -76,6 +80,10 @@
 .adm-form-item-child {
 	min-height: 0;
 	flex: 1;
+}
+
+.adm-list-item-description {
+	@apply text-base;
 }
 
 .adm-list-item-content-main,
@@ -202,9 +210,17 @@
 	user-select: none;
 }
 
-.adm-toast-icon {
-	display: flex;
-	justify-content: center;
+.adm-toast-mask {
+	.adm-toast-main {
+		@apply bg-zinc-950/95 text-base;
+		text-align: center;
+		word-break: normal;
+	}
+
+	.adm-toast-icon {
+		display: flex;
+		justify-content: center;
+	}
 }
 
 .adm-error-block-image {
@@ -213,10 +229,8 @@
 }
 
 .monaco-editor {
-	// position: absolute;
-
 	.view-ruler {
-		border-right: 1px dashed #3f3f46;
+		border-right: 1px solid #3f3f46;
 		box-shadow: none !important;
 
 		.light & {

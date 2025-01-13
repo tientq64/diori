@@ -1,7 +1,7 @@
 import { RestEndpointMethodTypes } from '@octokit/rest'
 import dayjs, { Dayjs } from 'dayjs'
 import VietnameseDate from 'vietnamese-date'
-import { SliceCreator } from '../useStore'
+import { SliceCreator } from '../useAppStore'
 
 /**
  * Một mục trong nhật ký. Mục nhật ký giống như một mục nhập, chỉ bao gồm ngày, tiêu đề, ảnh thu
@@ -26,7 +26,7 @@ export interface Note {
 	 */
 	readonly year: number
 	/**
-	 * Tiêu đề. Nếu không được đặt khi lưu, sẽ được tạo tự động dựa trên nội dung.
+	 * Tiêu đề. Nếu không được đặt khi lưu, sẽ được tạo tự động dựa trên nội dung đã viết.
 	 */
 	title: string
 	/**
@@ -59,7 +59,6 @@ export interface Note {
  * Đối tượng lưu các mục nhật ký. Chỉ các mục có thuộc tính `path` và `sha` mới được lưu vào đây.
  * Key là thuộc tính `date` của mục.
  */
-
 export type Notes = Record<Note['date'], Note>
 
 /**
@@ -73,51 +72,78 @@ export type NoteData = Required<
 
 /**
  * Trạng thái tải của năm.
- *
- * - `undefined`: Chưa tải.
- * - `loading`: Đang tải.
- * - `loaded`: Đã tải thành công.
- * - `loaded-404`: Đã tải thành công nhưng năm đã tải không tồn tại.
- * - `failed`: Tải thất bại.
  */
-export type Status = undefined | 'loading' | 'loaded' | 'loaded-404' | 'failed'
+export enum Status {
+	/**
+	 * Chưa tải.
+	 */
+	Unloaded,
+	/**
+	 * Đang tải.
+	 */
+	Loading,
+	/**
+	 * Đã tải thành công.
+	 */
+	Loaded,
+	/**
+	 * Đã tải thành công nhưng năm đã tải không tồn tại.
+	 */
+	NotFound,
+	/**
+	 * Tải thất bại.
+	 */
+	Failed
+}
 
 export interface Diary {
 	/**
 	 * Danh sách các mục nhật ký. Các mục này đã được lưu trên GitHub.
 	 */
 	readonly notes: Notes
+
 	/**
 	 * Danh sách trạng thái tải của năm.
 	 */
 	readonly years: Record<string, Status>
+
 	/**
 	 * Ngày đang xem trong trang `/notes`.
 	 */
 	currentTime: Dayjs
+
 	/**
 	 * Trả về một mục nhật ký trong danh sách.
 	 *
 	 * @param date Ngày cần lấy.
 	 * @returns Mục nhật ký cần lấy.
 	 */
-	getNote: (date: string | Dayjs) => Note
+	getNote: (date: string | Dayjs) => Note | undefined
+
 	/**
 	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách. Nếu
 	 * cần thêm vào danh sách, hãy thêm nó vào bằng hàm `updateOrAddNote`.
 	 *
-	 * @param time Ngày của mục nhật ký cần tạo.
+	 * @param date Ngày của mục nhật ký cần tạo.
 	 * @returns Mục nhật ký đã tạo.
 	 */
-	makeNote: (time: Dayjs) => Note
+	makeNote: (date: string | Dayjs) => Note
+
 	/**
 	 * Cập nhật hoặc thêm mục nhật ký vào danh sách nếu chưa tồn tại.
 	 */
 	updateOrAddNote: (note: Note) => void
+
 	/**
 	 * Loại bỏ một mục nhật ký trong danh sách.
 	 */
 	removeNote: (note: Note) => void
+
+	/**
+	 * Trả về trạng thái tải của năm.
+	 */
+	getYear: (year: number) => Status
+
 	/**
 	 * Cập nhật trạng thái tải của năm.
 	 *
@@ -125,6 +151,7 @@ export interface Diary {
 	 * @param status Trạng thái tải của năm.
 	 */
 	setYear: (year: number, status: Status) => void
+
 	/**
 	 * Cập nhật ngày đang xem trong trang `/notes`.
 	 */
@@ -134,7 +161,6 @@ export interface Diary {
 export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 	notes: {},
 	years: {},
-	editingNote: null,
 	currentTime: dayjs(),
 
 	getNote: (date) => {
@@ -144,8 +170,9 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 		return get().notes[date]
 	},
 
-	makeNote: (time) => {
-		return {
+	makeNote: (date) => {
+		const time = dayjs(date)
+		const newNote: Note = {
 			date: time.format('YYYY-MM-DD'),
 			time,
 			lunar: new VietnameseDate(time.toDate()),
@@ -156,13 +183,14 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 			photoKey: '',
 			numberPhotos: 0
 		}
+		return newNote
 	},
 
 	updateOrAddNote: (note) => {
 		set((state) => {
 			const { notes } = state
 			const { date } = note
-			if (!notes[date]) {
+			if (notes[date] === undefined) {
 				notes[date] = note
 			} else {
 				Object.assign(notes[date], note)
@@ -174,6 +202,10 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 		set((state) => {
 			delete state.notes[note.date]
 		})
+	},
+
+	getYear: (year) => {
+		return get().years[year] ?? Status.Unloaded
 	},
 
 	setYear: (year, status) => {

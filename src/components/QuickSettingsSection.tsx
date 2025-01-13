@@ -5,26 +5,32 @@ import { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { useSaveSettings } from '../hooks/useSaveSettings'
 import { useSyncSettings } from '../hooks/useSyncSettings'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { formValidateMessages } from '../utils/formValidateMessages'
 import { Kbd } from './Kbd'
 
 export function QuickSettingsSection(): ReactNode {
+	const isMd = useAppStore((state) => state.isMd)
+	const fontFamily = useAppStore((state) => state.fontFamily)
+	const fontSize = useAppStore((state) => state.fontSize)
+	const isDarkMode = useAppStore((state) => state.isDarkMode)
+	const setFontFamily = useAppStore((state) => state.setFontFamily)
+	const setFontSize = useAppStore((state) => state.setFontSize)
+	const setIsDarkMode = useAppStore((state) => state.setIsDarkMode)
+
 	const navigate = useNavigate()
-	const store = useStore()
 	const [form] = Form.useForm()
-	const fontFamily = Form.useWatch('fontFamily', form)
 	const saveSettings = useSaveSettings()
 	const syncSettings = useSyncSettings()
 
 	const initialValues = {
-		fontFamily: store.fontFamily,
-		fontSize: store.fontSize,
-		isDarkMode: store.isDarkMode
+		fontFamily,
+		fontSize,
+		isDarkMode
 	}
 
 	const handleSaveSettings = (values: typeof initialValues): void => {
-		store.setFontFamily(values.fontFamily)
+		setFontFamily(values.fontFamily)
 	}
 
 	const handleSyncSettingsFromGitHub = async (): Promise<void> => {
@@ -53,7 +59,7 @@ export function QuickSettingsSection(): ReactNode {
 				className="xs:adm-form-card-m0"
 				form={form}
 				mode="card"
-				layout={store.isMd ? 'horizontal' : 'vertical'}
+				layout={isMd ? 'horizontal' : 'vertical'}
 				initialValues={initialValues}
 				validateMessages={formValidateMessages}
 				onFinish={handleSaveSettings}
@@ -70,7 +76,7 @@ export function QuickSettingsSection(): ReactNode {
 				>
 					<Input
 						style={{
-							fontFamily: `${fontFamily}, ${store.fontFamily}`
+							fontFamily: `${form.getFieldValue('fontFamily')}, ${fontFamily}`
 						}}
 					/>
 				</Form.Item>
@@ -83,7 +89,7 @@ export function QuickSettingsSection(): ReactNode {
 						marks={Object.fromEntries(
 							range(10, 21).map((fontSize) => [fontSize, fontSize])
 						)}
-						onChange={store.setFontSize as (fontSize: SliderValue) => void}
+						onChange={setFontSize as (fontSize: SliderValue) => void}
 					/>
 				</Form.Item>
 
@@ -92,9 +98,9 @@ export function QuickSettingsSection(): ReactNode {
 					name="isDarkMode"
 					valuePropName="checked"
 					layout="horizontal"
-					childElementPosition={store.isMd ? 'normal' : 'right'}
+					childElementPosition={isMd ? 'normal' : 'right'}
 				>
-					<Switch onChange={store.setIsDarkMode} />
+					<Switch onChange={setIsDarkMode} />
 				</Form.Item>
 
 				<Form.Item className="text-center">
@@ -103,27 +109,27 @@ export function QuickSettingsSection(): ReactNode {
 						trường văn bản.
 					</div>
 
-					<div className="flex xs:flex-wrap justify-center gap-2">
-						<Button type="submit" color="primary" disabled={store.isXs}>
-							{store.isMd ? 'Áp dụng cài đặt' : 'Áp dụng c.đặt'}
+					<div className="flex justify-center gap-2 xs:flex-wrap">
+						<Button type="submit" color="primary">
+							{isMd ? 'Áp dụng cài đặt' : 'Áp dụng c.đặt'}
 						</Button>
 
 						<Button disabled onClick={() => navigate('/settings')}>
-							{store.isMd ? 'Cài đặt khác' : 'C.đặt khác'}
+							{isMd ? 'Cài đặt khác' : 'C.đặt khác'}
 						</Button>
 
 						<Button
 							disabled={syncSettings.loading || saveSettings.loading}
 							onClick={handleSyncSettingsFromGitHub}
 						>
-							{store.isMd ? 'Đồng bộ cài đặt từ GitHub' : 'Đ.bộ c.đặt từ Git'}
+							{isMd ? 'Đồng bộ cài đặt từ GitHub' : 'Đ.bộ c.đặt từ Git'}
 						</Button>
 
 						<Button
 							disabled={syncSettings.loading || saveSettings.loading}
 							onClick={handleSaveSettingsToGitHub}
 						>
-							{store.isMd ? 'Lưu cài đặt lên GitHub' : 'Lưu c.đặt lên Git'}
+							{isMd ? 'Lưu cài đặt lên GitHub' : 'Lưu c.đặt lên Git'}
 						</Button>
 					</div>
 				</Form.Item>

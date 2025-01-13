@@ -1,5 +1,6 @@
 /**
  * Giải mã chuỗi base64 sang văn bản.
+ *
  * @param text Chuỗi base64 cần giải mã.
  * @returns Văn bản đã được giải mã.
  */

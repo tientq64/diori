@@ -1,24 +1,24 @@
 import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
-import { useStore } from '../store/useStore'
+import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
 import { parseNoteFromNoteData } from '../utils/parseNote'
 import { useLoadYear } from './useLoadYear'
 
 export function useSearch() {
-	const searchLoading = useStore((state) => state.searchLoading)
-	const searchPageTotal = useStore((state) => state.searchPageTotal)
-	const searchNotes = useStore((state) => state.searchNotes)
-	const notes = useStore((state) => state.notes)
-	const orgName = useStore((state) => state.orgName)
-	const setSearchText = useStore((state) => state.setSearchText)
-	const setSearchNotes = useStore((state) => state.setSearchNotes)
-	const setSearchNotesTotal = useStore((state) => state.setSearchNotesTotal)
-	const setSearchPage = useStore((state) => state.setSearchPage)
-	const setSearchPageTotal = useStore((state) => state.setSearchPageTotal)
-	const setSearchLoading = useStore((state) => state.setSearchLoading)
-	const setSearchError = useStore((state) => state.setSearchError)
+	const searchLoading = useAppStore((state) => state.searchLoading)
+	const searchPageTotal = useAppStore((state) => state.searchPageTotal)
+	const searchNotes = useAppStore((state) => state.searchNotes)
+	const notes = useAppStore((state) => state.notes)
+	const orgName = useAppStore((state) => state.orgName)
+	const setSearchText = useAppStore((state) => state.setSearchText)
+	const setSearchNotes = useAppStore((state) => state.setSearchNotes)
+	const setSearchNotesTotal = useAppStore((state) => state.setSearchNotesTotal)
+	const setSearchPage = useAppStore((state) => state.setSearchPage)
+	const setSearchPageTotal = useAppStore((state) => state.setSearchPageTotal)
+	const setSearchLoading = useAppStore((state) => state.setSearchLoading)
+	const setSearchError = useAppStore((state) => state.setSearchError)
 
 	const loadYear = useLoadYear()
 
@@ -49,6 +49,7 @@ export function useSearch() {
 				const newSearchNotes: Note[] = searchPage === 1 ? [] : [...searchNotes]
 				const searchNotesTotal: number = res.data.total_count
 				const years = new Set<number>()
+
 				for (const data of res.data.items) {
 					let searchNote: Note = parseNoteFromNoteData(data)
 					if (notes[searchNote.date] === undefined) {
