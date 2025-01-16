@@ -228,6 +228,10 @@
 	justify-content: center;
 }
 
+.adm-dialog-content {
+	@apply text-base;
+}
+
 .monaco-editor {
 	.view-ruler {
 		border-right: 1px solid #3f3f46;
@@ -272,5 +276,9 @@
 	.text-security {
 		-webkit-text-security: square;
 		text-security: square;
+	}
+
+	.decoration-skip-ink-none {
+		text-decoration-skip-ink: none;
 	}
 }

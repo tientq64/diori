@@ -18,9 +18,8 @@ import { textToMinBase64 } from '../utils/textToMinBase64'
  * Hook để lưu nhật ký đang viết.
  */
 export function useSave() {
-	const editingNote = useAppStore((state) => state.editingNote)
 	const orgName = useAppStore((state) => state.orgName)
-	const updateOrAddNote = useAppStore((state) => state.updateOrAddNote)
+	const setOrAddNote = useAppStore((state) => state.setOrAddNote)
 	const removeNote = useAppStore((state) => state.removeNote)
 
 	const request = useRequest(
@@ -31,7 +30,8 @@ export function useSave() {
 			addedImages: ImageUploadItem[],
 			removedImages: Photo[],
 			defaultPhotoKey: string,
-			noteEdit: NoteEdit
+			noteEdit: NoteEdit,
+			editingNote: Note
 		): Promise<NoteEdit | undefined> => {
 			if (editingNote === null) return
 
@@ -156,7 +156,7 @@ export function useSave() {
 					sha: isCreateNewOnly ? undefined : sha
 				})
 				const newNote: Note = parseNoteFromNoteData(res.data.content as NoteData)
-				updateOrAddNote(newNote)
+				setOrAddNote(newNote)
 			}
 
 			if (isDeleteOnly) {
@@ -184,7 +184,7 @@ export function useSave() {
 					deletedPaths: editingNote.path ? [editingNote.path] : []
 				})
 				const newNote: Note = parseNoteFromPathAndSha(path, newNoteSHA)
-				updateOrAddNote(newNote)
+				setOrAddNote(newNote)
 			}
 
 			const isCreateNewPhotosOnly: boolean =

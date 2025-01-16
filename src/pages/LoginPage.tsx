@@ -1,22 +1,19 @@
-import { useAsyncEffect, useRequest } from 'ahooks'
-import { Button, Divider, Form, Input, Modal, NavBar } from 'antd-mobile'
+import { Button, Divider, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
-import { Navigate, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { usePWAInstall } from 'react-use-pwa-install'
 import logoImage from '../assets/images/book.png'
 import { Brand } from '../components/Brand'
 import { Link2 } from '../components/Link2'
-import { login } from '../services/login'
-import { useAppStore } from '../store/useAppStore'
-import { formValidateMessages } from '../utils/formValidateMessages'
 import { LoginForm } from '../components/LoginForm'
+import { useAppStore } from '../store/useAppStore'
 
 /**
  * Thông tin đăng nhập đã nhập trong phần đăng nhập.
  */
 export interface LoginValues {
 	/**
-	 * Mã bảo mật đã nhập trong phần đăng nhập.
+	 * Mật khẩu nhật ký đã nhập trong phần đăng nhập.
 	 */
 	pass: string
 }

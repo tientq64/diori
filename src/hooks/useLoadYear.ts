@@ -10,7 +10,7 @@ export function useLoadYear() {
 	const orgName = useAppStore((state) => state.orgName)
 	const getYear = useAppStore((state) => state.getYear)
 	const setYear = useAppStore((state) => state.setYear)
-	const updateOrAddNote = useAppStore((state) => state.updateOrAddNote)
+	const setOrAddNote = useAppStore((state) => state.setOrAddNote)
 
 	const request = useRequest(
 		async (year: number): Promise<boolean> => {
@@ -30,7 +30,7 @@ export function useLoadYear() {
 				})
 				for (const data of res.data as NoteData[]) {
 					const newNote: Note = parseNoteFromNoteData(data)
-					updateOrAddNote(newNote)
+					setOrAddNote(newNote)
 				}
 			} catch (error: any) {
 				if (error.status === 404) {

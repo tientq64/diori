@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/rest'
 import dayjs, { Dayjs } from 'dayjs'
 import { getOctokit } from '../../utils/getOctokit'
 import { SliceCreator } from '../useAppStore'
+import { nanoid } from 'nanoid'
 
 export interface User {
 	/**
@@ -26,6 +27,10 @@ export interface User {
 	 * chưa.
 	 */
 	token: string
+	/**
+	 * Một phần salt, ngẫu nhiên, dùng trong xác thực.
+	 */
+	registerSalt: string
 	/**
 	 * Tổng số giới hạn lệnh gọi GitHub API.
 	 */
@@ -54,6 +59,7 @@ export interface User {
 	setOrgName: (orgName: string) => void
 	setEncryptedToken: (encryptedToken: string) => void
 	setToken: (token: string) => void
+	setRegisterSalt: (registerSalt: string) => void
 	setRateLimitTotal: (rateLimit: number) => void
 	setRateLimitRemaining: (rateLimitRemaining: number) => void
 	setRateLimitTimeReset: (timestamp: number) => void
@@ -71,6 +77,7 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	userAvatar: '',
 	encryptedToken: '',
 	token: '',
+	registerSalt: '',
 	rateLimitTotal: 5000,
 	rateLimitRemaining: 5000,
 	rateLimitTimeReset: null,
@@ -81,6 +88,7 @@ export const userSlice: SliceCreator<User> = (set) => ({
 	setOrgName: (orgName) => set({ orgName }),
 	setEncryptedToken: (encryptedToken) => set({ encryptedToken }),
 	setToken: (token) => set({ token }),
+	setRegisterSalt: (registerSalt) => set({ registerSalt }),
 	setRateLimitTotal: (rateLimitTotal) => set({ rateLimitTotal }),
 	setRateLimitRemaining: (rateLimitRemaining) => set({ rateLimitRemaining }),
 

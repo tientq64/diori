@@ -1,41 +1,45 @@
-import { useAsyncEffect, useRequest } from 'ahooks'
-import { Button, Form, Input, Modal } from 'antd-mobile'
+import { useAsyncEffect } from 'ahooks'
+import { Button, Form, Input } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
-import { login } from '../services/login'
+import { useLogin } from '../hooks/useLogin'
 import { formValidateMessages } from '../utils/formValidateMessages'
+import { showConfirm } from '../utils/showConfirm'
+import { useAppStore } from '../store/useAppStore'
 
 export function LoginForm(): ReactNode {
+	const isMd = useAppStore((state) => state.isMd)
+
 	const [form] = Form.useForm()
-	const loginApi = useRequest(login, { manual: true })
+	const loginApi = useLogin()
 
 	useAsyncEffect(async () => {
 		const error: any = loginApi.error
 		if (!error) return
 		if (error.status === 401) {
-			const isGoToGitHubSetting: boolean = await Modal.confirm({
+			const isGoToGitHubSetting: boolean = await showConfirm({
 				title: 'Đã xảy ra lỗi',
 				content: 'Personal access token đã hết hạn. Tạo một cái mới?',
-				confirmText: 'OK',
+				confirmText: 'OK, đi đến cài đặt GitHub',
 				cancelText: 'Để sau'
 			})
 			if (isGoToGitHubSetting) {
 				window.open('https://github.com/settings/tokens?type=beta', '_blank')
 			}
-			return
+		} else {
+			form.setFields([
+				{
+					name: 'pass',
+					errors: [error.message]
+				}
+			])
 		}
-		form.setFields([
-			{
-				name: 'pass',
-				errors: [error.message]
-			}
-		])
 	}, [loginApi.error])
 
 	// Tự động đăng nhập khi dev.
 	useEffect(() => {
 		if (import.meta.env.DEV) {
-			form.setFieldValue('pass', 'test')
-			form.submit()
+			// form.setFieldValue('pass', 'test')
+			// form.submit()
 		}
 	}, [])
 
@@ -44,13 +48,13 @@ export function LoginForm(): ReactNode {
 			className="w-full max-w-full md:w-[800px]"
 			form={form}
 			mode="card"
-			layout="horizontal"
+			layout={isMd ? 'horizontal' : 'vertical'}
 			disabled={loginApi.loading || loginApi.data}
 			validateMessages={formValidateMessages}
 			onFinish={loginApi.run}
 		>
 			<Form.Item
-				label="Mã bảo mật"
+				label="Mật khẩu nhật ký"
 				name="pass"
 				rules={[
 					{
@@ -68,8 +72,8 @@ export function LoginForm(): ReactNode {
 			</Form.Item>
 
 			<div className="mt-4 px-4 text-center text-zinc-500">
-				Nếu quên mã bảo mật, hãy vào phần đăng ký và đăng ký lại. Đừng lo lắng, dữ liệu của
-				bạn sẽ không bị mất.
+				Nếu quên mật khẩu nhật ký, hãy vào phần đăng ký và đăng ký lại. Đừng lo lắng, dữ
+				liệu của bạn sẽ không bị mất.
 			</div>
 		</Form>
 	)

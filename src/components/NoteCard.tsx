@@ -6,11 +6,12 @@ import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
 interface NoteCardProps {
 	note: Note
+	showYear?: boolean
 	tabIndex?: number
 	onNoteClick?: (note: Note) => void
 }
 
-export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactNode {
+export function NoteCard({ note, showYear, tabIndex, onNoteClick }: NoteCardProps): ReactNode {
 	const isMd = useAppStore((state) => state.isMd)
 	const getYear = useAppStore((state) => state.getYear)
 
@@ -70,7 +71,14 @@ export function NoteCard({ note, tabIndex, onNoteClick }: NoteCardProps): ReactN
 						{isMd && (
 							<>
 								{note.time.format('DD-MM')}
-								<span className="hidden md:group-hover:inline">-{note.year}</span>
+								<span
+									className={clsx(
+										'text-zinc-400',
+										!showYear && 'hidden md:group-hover:inline'
+									)}
+								>
+									-{note.year}
+								</span>
 							</>
 						)}
 						{!isMd && note.time.format('dd, DD-MM-YYYY')}

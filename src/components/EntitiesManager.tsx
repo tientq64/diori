@@ -10,7 +10,6 @@ import {
 	Radio,
 	Space
 } from 'antd-mobile'
-import { confirm } from 'antd-mobile/es/components/dialog/confirm'
 import { filter, groupBy, isEqual, some, toPairs } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
 import { TagsInput } from 'react-tag-input-component'
@@ -18,6 +17,7 @@ import { Entity, EntityTypes } from '../store/slices/settingsSlice'
 import { useAppStore } from '../store/useAppStore'
 import { emptyArray } from '../utils/constants'
 import { removeToneMarks } from '../utils/removeToneMarks'
+import { showConfirm } from '../utils/showConfirm'
 
 export function EntitiesManager(): ReactNode {
 	const entities = useAppStore((state) => state.entities)
@@ -89,7 +89,7 @@ export function EntitiesManager(): ReactNode {
 
 	const handleRemoveEntity = async (entity?: Entity): Promise<void> => {
 		if (!entity) return
-		const isRemoveConfirmed: boolean = await confirm({
+		const isRemoveConfirmed: boolean = await showConfirm({
 			title: 'Xác nhận xóa',
 			content: `Bạn chắc chắn muốn xóa "${entity.name}"?`,
 			confirmText: 'Xóa',

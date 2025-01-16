@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Slider, Switch } from 'antd-mobile'
+import { Button, Form, Input, Slider, Switch } from 'antd-mobile'
 import { SliderValue } from 'antd-mobile/es/components/slider'
 import { range } from 'lodash'
 import { ReactNode } from 'react'
@@ -7,6 +7,7 @@ import { useSaveSettings } from '../hooks/useSaveSettings'
 import { useSyncSettings } from '../hooks/useSyncSettings'
 import { useAppStore } from '../store/useAppStore'
 import { formValidateMessages } from '../utils/formValidateMessages'
+import { showConfirm } from '../utils/showConfirm'
 import { Kbd } from './Kbd'
 
 export function QuickSettingsSection(): ReactNode {
@@ -20,8 +21,8 @@ export function QuickSettingsSection(): ReactNode {
 
 	const navigate = useNavigate()
 	const [form] = Form.useForm()
-	const saveSettings = useSaveSettings()
-	const syncSettings = useSyncSettings()
+	const saveSettingsApi = useSaveSettings()
+	const syncSettingsApi = useSyncSettings()
 
 	const initialValues = {
 		fontFamily,
@@ -34,23 +35,23 @@ export function QuickSettingsSection(): ReactNode {
 	}
 
 	const handleSyncSettingsFromGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await Modal.confirm({
+		const confirmed: boolean = await showConfirm({
 			content: 'Bạn chắc chắn muốn đồng bộ cài đặt từ GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
 		})
 		if (!confirmed) return
-		syncSettings.run()
+		syncSettingsApi.run()
 	}
 
 	const handleSaveSettingsToGitHub = async (): Promise<void> => {
-		const confirmed: boolean = await Modal.confirm({
+		const confirmed: boolean = await showConfirm({
 			content: 'Bạn chắc chắn muốn lưu cài đặt lên GitHub?',
 			confirmText: 'Xác nhận',
 			cancelText: 'Hủy'
 		})
 		if (!confirmed) return
-		saveSettings.run()
+		saveSettingsApi.run()
 	}
 
 	return (
@@ -119,14 +120,14 @@ export function QuickSettingsSection(): ReactNode {
 						</Button>
 
 						<Button
-							disabled={syncSettings.loading || saveSettings.loading}
+							disabled={syncSettingsApi.loading || saveSettingsApi.loading}
 							onClick={handleSyncSettingsFromGitHub}
 						>
 							{isMd ? 'Đồng bộ cài đặt từ GitHub' : 'Đ.bộ c.đặt từ Git'}
 						</Button>
 
 						<Button
-							disabled={syncSettings.loading || saveSettings.loading}
+							disabled={syncSettingsApi.loading || saveSettingsApi.loading}
 							onClick={handleSaveSettingsToGitHub}
 						>
 							{isMd ? 'Lưu cài đặt lên GitHub' : 'Lưu c.đặt lên Git'}

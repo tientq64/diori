@@ -28,6 +28,7 @@ export const useAppStore = create<AppStore>()(
 			partialize: (state) => ({
 				orgName: state.orgName,
 				encryptedToken: state.encryptedToken,
+				registerSalt: state.registerSalt,
 				fontFamily: state.fontFamily,
 				fontSize: state.fontSize,
 				isDarkMode: state.isDarkMode,
@@ -36,6 +37,8 @@ export const useAppStore = create<AppStore>()(
 		})
 	)
 )
+
+export const getAppState = useAppStore.getState
 
 if (import.meta.env.DEV) {
 	mountStoreDevtool('dev:store', useAppStore)

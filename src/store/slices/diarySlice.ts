@@ -122,7 +122,7 @@ export interface Diary {
 
 	/**
 	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách. Nếu
-	 * cần thêm vào danh sách, hãy thêm nó vào bằng hàm `updateOrAddNote`.
+	 * cần thêm vào danh sách, hãy thêm nó vào bằng hàm `setOrAddNote`.
 	 *
 	 * @param date Ngày của mục nhật ký cần tạo.
 	 * @returns Mục nhật ký đã tạo.
@@ -132,7 +132,7 @@ export interface Diary {
 	/**
 	 * Cập nhật hoặc thêm mục nhật ký vào danh sách nếu chưa tồn tại.
 	 */
-	updateOrAddNote: (note: Note) => void
+	setOrAddNote: (note: Note) => void
 
 	/**
 	 * Loại bỏ một mục nhật ký trong danh sách.
@@ -153,7 +153,7 @@ export interface Diary {
 	setYear: (year: number, status: Status) => void
 
 	/**
-	 * Cập nhật ngày đang xem trong trang `/notes`.
+	 * Cập nhật ngày đang xem trong trang danh sách.
 	 */
 	setCurrentTime: (time: Dayjs) => void
 }
@@ -186,15 +186,9 @@ export const diarySlice: SliceCreator<Diary> = (set, get) => ({
 		return newNote
 	},
 
-	updateOrAddNote: (note) => {
+	setOrAddNote: (note) => {
 		set((state) => {
-			const { notes } = state
-			const { date } = note
-			if (notes[date] === undefined) {
-				notes[date] = note
-			} else {
-				Object.assign(notes[date], note)
-			}
+			state.notes[note.date] = note
 		})
 	},
 

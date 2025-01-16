@@ -9,11 +9,11 @@ export function SearchInput(): ReactNode {
 	const searchLoading = useAppStore((state) => state.searchLoading)
 	const searchText = useAppStore((state) => state.searchText)
 
-	const search = useSearch()
+	const searchApi = useSearch()
 	const navigate = useNavigate()
 
 	const handleSearch = (searchText: string): void => {
-		search.run(searchText)
+		searchApi.run(searchText)
 		navigate('/search')
 	}
 

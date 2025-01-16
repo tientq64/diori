@@ -5,6 +5,8 @@ import { getOctokit } from '../utils/getOctokit'
 import { textToBase64 } from '../utils/textToBase64'
 import { SettingsState } from '../store/slices/settingsSlice'
 import { Dialog } from 'antd-mobile'
+import { MD5 } from 'crypto-js'
+import { showAlert } from '../utils/showAlert'
 
 export function useSaveSettings() {
 	const store = useAppStore()
@@ -39,22 +41,16 @@ export function useSaveSettings() {
 					sha
 				})
 
-				Dialog.alert({
-					content: 'Đã lưu cài đặt lên GitHub.',
-					confirmText: 'OK'
-				})
+				showAlert('Đã lưu cài đặt lên GitHub.')
+
+				return MD5(json)
 			} catch (error: any) {
-				Dialog.alert({
-					content: `Lưu cài đặt lên GitHub thất bại: ${String(error)}`,
-					confirmText: 'OK'
-				})
+				showAlert(`Lưu cài đặt lên GitHub thất bại: ${String(error)}`)
 			}
 
-			return nanoid()
+			return undefined
 		},
-		{
-			manual: true
-		}
+		{ manual: true }
 	)
 	return request
 }

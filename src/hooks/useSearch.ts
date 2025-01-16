@@ -20,7 +20,7 @@ export function useSearch() {
 	const setSearchLoading = useAppStore((state) => state.setSearchLoading)
 	const setSearchError = useAppStore((state) => state.setSearchError)
 
-	const loadYear = useLoadYear()
+	const loadYearApi = useLoadYear()
 
 	const request = useRequest(
 		async (searchText: string, searchPage: number = 1) => {
@@ -48,19 +48,19 @@ export function useSearch() {
 				})
 				const newSearchNotes: Note[] = searchPage === 1 ? [] : [...searchNotes]
 				const searchNotesTotal: number = res.data.total_count
-				const years = new Set<number>()
+				const foundYears = new Set<number>()
 
 				for (const data of res.data.items) {
 					let searchNote: Note = parseNoteFromNoteData(data)
 					if (notes[searchNote.date] === undefined) {
-						years.add(searchNote.year)
+						foundYears.add(searchNote.year)
 					} else {
 						searchNote = notes[searchNote.date]
 					}
 					newSearchNotes.push(searchNote)
 				}
-				for (const year of years) {
-					loadYear.run(year)
+				for (const year of foundYears) {
+					loadYearApi.run(year)
 				}
 
 				setSearchNotes(newSearchNotes)

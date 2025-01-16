@@ -96,7 +96,7 @@ export function setMonarchTokensProvider(): Monaco.IDisposable {
 			],
 			invalid: [
 				{
-					regex: /\s\s+|\t+|\s+$/,
+					regex: /\s\s+|\t+/,
 					action: 'invalid'
 				}
 			],

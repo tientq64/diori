@@ -31,16 +31,16 @@ import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
 import { QuickSettingsButton } from '../components/QuickSettingsButton'
 import { useEditorOptions } from '../hooks/useEditorOptions'
 import { useGetNoteEdit } from '../hooks/useGetNoteEdit'
+import { useLoadYear } from '../hooks/useLoadYear'
 import { usePhotosLoader } from '../hooks/usePhotosLoader'
 import { useSave } from '../hooks/useSave'
 import { Note, Status } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
 import { useAppStore } from '../store/useAppStore'
 import { CodeEditor, EditorOptions, FindMatch, IEditorAction, Monaco } from '../types/monaco'
+import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 import { setupEditor } from '../utils/editor/setupEditor'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
-import { useLoadYear } from '../hooks/useLoadYear'
-import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 
 export interface ImageUploadItem {
 	key?: string | number
@@ -127,10 +127,11 @@ export function EditPage(): ReactNode {
 	}, [title, content, images])
 
 	const yearStatus: Status = getYear(editingNote.year)
+	const isYearStatusLoaded: boolean = checkIsLoadedStatus(yearStatus)
 
 	const isLoading = useMemo<boolean>(() => {
-		return getNoteEditApi.loading || !checkIsLoadedStatus(yearStatus)
-	}, [getNoteEditApi.loading, yearStatus])
+		return getNoteEditApi.loading || !isYearStatusLoaded
+	}, [getNoteEditApi.loading, isYearStatusLoaded])
 
 	const unsaved = useMemo<boolean>(() => {
 		if (getNoteEditApi.loading) return false
@@ -330,7 +331,16 @@ export function EditPage(): ReactNode {
 	const handleSave = (): void => {
 		if (!canSave) return
 		if (currentErrorMessage !== undefined) return
-		saveApi.run(title, content, images, addedImages, removedImages, defaultPhotoKey, noteEdit)
+		saveApi.run(
+			title,
+			content,
+			images,
+			addedImages,
+			removedImages,
+			defaultPhotoKey,
+			noteEdit,
+			editingNote
+		)
 	}
 
 	useHotkeys(
@@ -428,7 +438,7 @@ export function EditPage(): ReactNode {
 		return () => {
 			getNoteEditApi.cancel()
 		}
-	}, [Boolean(editingNote.sha)])
+	}, [isYearStatusLoaded])
 
 	useEffect(() => {
 		return () => {

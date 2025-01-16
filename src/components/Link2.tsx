@@ -3,7 +3,7 @@ import { AnchorHTMLAttributes, ReactNode } from 'react'
 import { Link, LinkProps } from 'react-router'
 
 const defaultLinkClassName: string =
-	'hover:underline underline-offset-2 decoration-2 decoration-dotted text-blue-400 light:text-blue-600'
+	'hover:underline underline-offset-2 decoration-2 decoration-dotted text-blue-400 light:text-blue-600 decoration-skip-ink-none'
 
 type LinkProps2 = AnchorHTMLAttributes<HTMLAnchorElement> | LinkProps
 

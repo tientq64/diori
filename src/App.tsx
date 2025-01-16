@@ -40,7 +40,7 @@ export function App(): ReactNode {
 		resizeHandle()
 
 		return () => {
-			clearInterval(intervalId)
+			window.clearInterval(intervalId)
 			window.removeEventListener('resize', resizeHandle)
 		}
 	}, [])

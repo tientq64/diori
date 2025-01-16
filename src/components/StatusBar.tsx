@@ -18,7 +18,7 @@ export function StatusBar(): ReactNode {
 			<div className="flex gap-4 align-middle">
 				{userName && (
 					<div className="flex gap-3 xs:hidden">
-						<img className="h-5 w-5 rounded" src={userAvatar} alt="Ảnh đại diện" />
+						<img className="h-5 w-5 rounded-full" src={userAvatar} alt="Ảnh đại diện" />
 						<div className="flex gap-1">
 							Người dùng:
 							<Link2 href="https://github.com/settings/tokens?type=beta">

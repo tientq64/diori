@@ -25,7 +25,7 @@ export function NotesPage(): ReactNode {
 	const setCurrentTime = useAppStore((state) => state.setCurrentTime)
 
 	const navigate = useNavigate()
-	const loadYear = useLoadYear()
+	const loadYearApi = useLoadYear()
 	const [currentNotes, setCurrentNotes] = useState<Note[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -73,6 +73,7 @@ export function NotesPage(): ReactNode {
 
 	const handleScrollerFocus = (event: FocusEvent<HTMLDivElement>): void => {
 		if (event.currentTarget !== event.target) return
+		if (isXs) return
 		const middleNoteIndex: number = Math.floor(currentNotes.length / 2)
 		const gridEl = event.target.firstElementChild as HTMLDivElement
 		const middleNoteEl = gridEl.children.item(middleNoteIndex) as HTMLDivElement
@@ -94,7 +95,7 @@ export function NotesPage(): ReactNode {
 		}
 		setCurrentNotes(notes)
 		for (const year of years) {
-			loadYear.run(year)
+			loadYearApi.run(year)
 		}
 	}, [currentTime.format('YYYYMMDD'), notes])
 
@@ -131,7 +132,6 @@ export function NotesPage(): ReactNode {
 		<div className="flex flex-1 flex-col overflow-hidden">
 			<div className="bg-zinc-900/90 light:bg-zinc-200/90">
 				<NavBar
-					className="md:pl-4 md:pr-8"
 					backIcon={null}
 					left={
 						<>
@@ -175,11 +175,11 @@ export function NotesPage(): ReactNode {
 				onFocus={handleScrollerFocus}
 			>
 				<div className="grid gap-3 xs:gap-2 md:auto-rows-[17vh] md:grid-cols-7">
-					{currentNotes.map((note, index) => (
+					{currentNotes.map((note) => (
 						<NoteCard
 							key={note.date}
 							note={note}
-							tabIndex={index >= 21 && index <= 83 ? 0 : undefined}
+							tabIndex={0}
 							onNoteClick={handleNoteClick}
 						/>
 					))}

@@ -23,7 +23,7 @@ export function SearchPage(): ReactNode {
 	const searchLoading = useAppStore((state) => state.searchLoading)
 	const searchError = useAppStore((state) => state.searchError)
 
-	const search = useSearch()
+	const searchApi = useSearch()
 	const navigate = useNavigate()
 	const scrollRef = useRef<HTMLDivElement | null>(null)
 
@@ -40,7 +40,7 @@ export function SearchPage(): ReactNode {
 		const { scrollTop, scrollHeight, clientHeight } = scrollEl
 		currentScrollTop = scrollTop
 		if (scrollTop >= scrollHeight - clientHeight) {
-			search.run(searchText, searchPage + 1)
+			searchApi.run(searchText, searchPage + 1)
 		}
 	}
 
@@ -56,7 +56,7 @@ export function SearchPage(): ReactNode {
 	}, [scrollRef])
 
 	return (
-		<div className="flex flex-1 flex-col">
+		<div className="flex flex-1 flex-col overflow-hidden">
 			<div>
 				<NavBar
 					className="md:pl-4 md:pr-8"
@@ -92,11 +92,12 @@ export function SearchPage(): ReactNode {
 			>
 				{searchNotes.length > 0 && (
 					<>
-						<div className="grid gap-3 xs:gap-2 md:auto-rows-[17vh] md:grid-cols-7">
+						<div className="grid gap-3 pb-4 xs:gap-2 md:auto-rows-[17vh] md:grid-cols-7">
 							{searchNotes.map((note) => (
 								<NoteCard
 									key={note.date}
 									note={note}
+									showYear
 									onNoteClick={handleNoteClick}
 								/>
 							))}

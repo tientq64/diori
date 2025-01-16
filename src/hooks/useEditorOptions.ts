@@ -20,7 +20,7 @@ export function useEditorOptions(): EditorOptions {
 			smoothScrolling: true,
 			automaticLayout: true,
 			renderLineHighlightOnlyWhenFocus: true,
-			rulers: isMd ? [164] : undefined,
+			rulers: isMd ? [168] : undefined,
 			padding: {
 				top: 12
 			},

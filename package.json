@@ -1,6 +1,6 @@
 {
 	"name": "diori",
-	"version": "1.9.0",
+	"version": "1.10.0",
 	"private": true,
 	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [
@@ -16,6 +16,10 @@
 		"antd-mobile",
 		"vite"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tientq64/diori"
+	},
 	"type": "module",
 	"scripts": {
 		"build": "tsc && pnpm lint && pnpm test && vite build",

@@ -1,8 +1,8 @@
 import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
-import { Dialog } from 'antd-mobile'
 import { SettingsState } from '../store/slices/settingsSlice'
 import { useAppStore } from '../store/useAppStore'
+import { showAlert } from '../utils/showAlert'
 import { base64ToText } from '../utils/base64ToText'
 import { getOctokit } from '../utils/getOctokit'
 
@@ -28,21 +28,12 @@ export function useSyncSettings() {
 				const settingsState: SettingsState = JSON.parse(json)
 				setSettingsState(settingsState)
 
-				Dialog.alert({
-					content: 'Đã đồng bộ cài từ GitHub.',
-					confirmText: 'OK'
-				})
+				showAlert('Đã đồng bộ cài đặt từ GitHub.')
 			} catch (error: any) {
 				if (error.status === 404) {
-					Dialog.alert({
-						content: 'Không có cài đặt trên GitHub.',
-						confirmText: 'OK'
-					})
+					showAlert('Không có cài đặt trên GitHub.')
 				} else {
-					Dialog.alert({
-						content: `Đồng bộ cài đặt từ GitHub thất bại: ${String(error)}`,
-						confirmText: 'OK'
-					})
+					showAlert(`Đồng bộ cài đặt từ GitHub thất bại: ${String(error)}`)
 				}
 				throw error
 			}

@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.10.0 (16-01-2025)
+
+- Nâng cấp bảo mật.
+
 ## 1.9.0 (14-01-2025)
 
 - Trang soạn thảo bây giờ sẽ hoạt động độc lập, không phụ thuộc vào trang danh sách nữa.

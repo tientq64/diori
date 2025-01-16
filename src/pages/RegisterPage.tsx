@@ -1,11 +1,12 @@
-import { useRequest } from 'ahooks'
-import { Button, Form, Input, Modal, NavBar } from 'antd-mobile'
+import { useAsyncEffect } from 'ahooks'
+import { Button, Form, Input, NavBar } from 'antd-mobile'
 import { ReactNode, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { Link2 } from '../components/Link2'
-import { register } from '../services/register'
+import { useRegister } from '../hooks/useRegister'
 import { AppStore, useAppStore } from '../store/useAppStore'
 import { formValidateMessages } from '../utils/formValidateMessages'
+import { showAlert } from '../utils/showAlert'
 
 /**
  * Thông tin đăng ký đã nhập trong phần đăng ký.
@@ -20,7 +21,7 @@ export interface RegisterValues {
 	 */
 	orgName: AppStore['orgName']
 	/**
-	 * Mã bảo mật đã nhập trong phần đăng ký.
+	 * Mật khẩu nhật ký đã nhập trong phần đăng ký.
 	 */
 	pass: string
 }
@@ -32,39 +33,61 @@ export interface RegisterValues {
  */
 export function RegisterPage(): ReactNode {
 	const isMd = useAppStore((state) => state.isMd)
+	const setToken = useAppStore((state) => state.setToken)
 
 	const [form] = Form.useForm()
-	const registerApi = useRequest(register, { manual: true })
+	const registerApi = useRegister()
 	const navigate = useNavigate()
 
 	useEffect(() => {
 		const error: any = registerApi.error
 		if (!error) return
-		if (error.status === 401) {
-			form.setFields([
-				{
-					name: 'token',
-					errors: ['Personal access token không hợp lệ']
-				}
-			])
-			return
+
+		switch (error.status) {
+			case 401:
+				form.setFields([
+					{
+						name: 'token',
+						errors: ['Personal access token không hợp lệ']
+					}
+				])
+				break
+
+			case 403:
+				showAlert({
+					title: `Đã xảy ra lỗi: ${error.status}`,
+					content: 'Bạn cần quyền admin để truy cập vào tổ chức GitHub này',
+					confirmText: 'OK'
+				})
+				break
+
+			case 404:
+				form.setFields([
+					{
+						name: 'orgName',
+						errors: ['Tên tổ chức GitHub không tồn tại']
+					}
+				])
+				break
+
+			default:
+				showAlert({
+					title: `Đã xảy ra lỗi: ${error.status}`,
+					content: String(error),
+					confirmText: 'OK'
+				})
+				break
 		}
-		Modal.alert({
-			title: 'Đã xảy ra lỗi',
-			content: error.message,
-			confirmText: 'OK'
-		})
 	}, [registerApi.error])
 
-	useEffect(() => {
+	useAsyncEffect(async () => {
 		if (!registerApi.data) return
-		Modal.alert({
+		await showAlert({
 			title: 'Đăng ký thành công',
 			content: 'Bạn đã đăng ký thành công, hãy đăng nhập!',
-			confirmText: 'Đăng nhập'
-		}).then(() => {
-			navigate('/login')
+			confirmText: 'Đăng nhập ngay'
 		})
+		navigate('/login')
 	}, [registerApi.data])
 
 	return (
@@ -85,7 +108,7 @@ export function RegisterPage(): ReactNode {
 					form={form}
 					mode="card"
 					layout={isMd ? 'horizontal' : 'vertical'}
-					disabled={registerApi.loading || registerApi.data}
+					disabled={registerApi.loading}
 					validateMessages={formValidateMessages}
 					onFinish={registerApi.run}
 				>
@@ -94,16 +117,21 @@ export function RegisterPage(): ReactNode {
 						name="token"
 						description={
 							<>
-								Tạo và lấy nó{' '}
+								Tương tự như mật khẩu GitHub. Tuyệt đối không chia sẻ mã này với bất
+								kỳ ai. Tạo và lấy nó{' '}
 								<Link2 href="https://github.com/settings/tokens?type=beta">
 									tại đây
 								</Link2>
-								. Tuyệt đối không được chia sẻ mã này với bất kỳ ai.
+								.
 							</>
 						}
 						rules={[
 							{
 								required: true
+							},
+							{
+								pattern: /^[a-zA-Z0-9_]+$/,
+								message: '${label} chứa các ký tự không hợp lệ'
 							}
 						]}
 					>
@@ -138,14 +166,25 @@ export function RegisterPage(): ReactNode {
 					</Form.Item>
 
 					<Form.Item
-						label="Mã bảo mật"
+						label="Mật khẩu nhật ký"
 						name="pass"
-						description="Tương tự như mật khẩu. Bạn phải có mã này mới mở được nhật ký."
+						description="Mật khẩu nhật ký. Bạn phải có mã này mới mở được nhật ký."
+						validateFirst
 						rules={[
 							{
 								min: 4,
 								max: 128,
 								required: true
+							},
+							{
+								pattern: /^.{6,}$/,
+								message: '${label} có vẻ hơi ngắn',
+								warningOnly: true
+							},
+							{
+								pattern: /[^a-zA-Z0-9]/,
+								message: '${label} nên chứa cả ký tự đặc biệt',
+								warningOnly: true
 							}
 						]}
 					>
