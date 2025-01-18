@@ -1,5 +1,9 @@
 # Nhật ký thay đổi
 
+## 1.10.1 (18-01-2025)
+
+- Sửa lỗi ID hình ảnh mặc định bị sai trong đường dẫn file GitHub.
+
 ## 1.10.0 (16-01-2025)
 
 - Nâng cấp bảo mật.

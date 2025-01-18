@@ -1,18 +1,17 @@
 import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { ImageUploadItem, Toast } from 'antd-mobile'
-import { find, truncate } from 'lodash'
 import { Note, NoteData } from '../store/slices/diarySlice'
 import { NoteEdit, NoteEditJSON, Photo } from '../store/slices/editingSlice'
 import { useAppStore } from '../store/useAppStore'
 import { AddedCommitFile, commitFiles } from '../utils/commitFiles'
-import { compressBase64 } from '../utils/compressBase64'
 import { getOctokit } from '../utils/getOctokit'
 import { makeCompressImageBase64 } from '../utils/makeCompressImageBase64'
+import { makeNotePath } from '../utils/makeNotePath'
+import { makeNoteTitleFromNoteEditContent } from '../utils/makeNoteTitleFromNoteEditContent'
 import { makePhotoPath } from '../utils/makePhotoPath'
-import { parseNoteFromNoteData, parseNoteFromPathAndSha } from '../utils/parseNote'
+import { parseNoteFromPathAndSha, parseNoteFromRawNoteData } from '../utils/parseNote'
 import { textToBase64 } from '../utils/textToBase64'
-import { textToMinBase64 } from '../utils/textToMinBase64'
 
 /**
  * Hook để lưu nhật ký đang viết.
@@ -24,7 +23,7 @@ export function useSave() {
 
 	const request = useRequest(
 		async (
-			title: string,
+			userWrittenTitle: string,
 			content: string,
 			images: ImageUploadItem[],
 			addedImages: ImageUploadItem[],
@@ -37,62 +36,29 @@ export function useSave() {
 
 			const { time, sha, year } = editingNote
 
-			const formatedContent: string = content.trim()
+			const isTitled: boolean = userWrittenTitle !== ''
 
 			// Tạo tiêu đề mới dựa trên nội dung đã viết nếu người dùng không đặt tiêu đề.
-			let newTitle: string = title
-			if (!title && formatedContent.length > 0) {
-				// Lấy dòng dài nhất.
-				const longestLine: string = formatedContent
-					.split(/\n+/)
-					.map((line) => line.replace(/ +/g, ' ').trim())
-					.filter((line) => !/^\[.+?\]: *[^"\n]+?(?: *".+?")?$/.test(line[0]))
-					.sort((a, b) => b.length - a.length)[0]
-				// Tạo tiêu đề dựa trên dòng dài nhất.
-				// Xóa bỏ cú pháp link, chỉ bao gồm văn bản thuần.
-				const untruncatedTitle: string = longestLine.replace(/\[(.+?)\]\[\d+\]/g, '$1')
-				// Cắt ngắn tiêu đề.
-				newTitle = truncate(untruncatedTitle, {
-					length: 60,
-					separator: /\s+/,
-					omission: ''
-				})
-			}
+			const generatedTitle: string =
+				userWrittenTitle || makeNoteTitleFromNoteEditContent(content)
 
 			/**
-			 * Ảnh mặc định.
+			 * Đường dẫn mới cho file GitHub. Đường dẫn mới không nhất thiết phải khác đường dẫn cũ.
 			 */
-			const defaultPhoto: ImageUploadItem | undefined = find(images, { key: defaultPhotoKey })
-
-			/**
-			 * Chuỗi base64 được nén của hình thu nhỏ của ảnh mặc định.
-			 */
-			const defaultPhotoThumbnailUrlMinBase64: string = defaultPhoto
-				? compressBase64(defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', ''))
-				: ''
-			/**
-			 * Các phần của đường dẫn tập tin GitHub.
-			 */
-			const chunks = [
-				time.format('MMDD'),
-				textToMinBase64(newTitle),
-				title ? 'T' : '',
-				defaultPhotoThumbnailUrlMinBase64,
-				defaultPhotoKey.substring(2),
-				images.length >= 2 ? images.length : ''
-			]
-			/**
-			 * Đường dẫn mới cho tập tin GitHub. Đường dẫn mới không nhất thiết phải khác đường dẫn
-			 * cũ.
-			 */
-			const path = `days/${year}/${chunks.join(';').replace(/;+$/, '')}.json`
+			const path: string = makeNotePath(
+				time,
+				generatedTitle,
+				isTitled,
+				defaultPhotoKey,
+				images
+			)
 			const hasSha = sha !== undefined
 
 			/**
 			 * Chỉ xóa tập tin.
 			 */
 			const isDeleteOnly: boolean =
-				hasSha && !newTitle && !formatedContent && images.length === 0
+				hasSha && !generatedTitle && !content && images.length === 0
 			/**
 			 * Chỉ tạo mới tập tin.
 			 */
@@ -113,9 +79,9 @@ export function useSave() {
 			 */
 			const newNoteEdit: NoteEdit = {
 				date: noteEdit.date,
-				title: newTitle,
-				isTitled: title.length > 0,
-				content: formatedContent,
+				title: generatedTitle,
+				isTitled,
+				content,
 				photos: images.map<Photo>((image) => ({
 					key: image.key as string,
 					thumbnailUrl: image.thumbnailUrl as string
@@ -155,7 +121,7 @@ export function useSave() {
 					message: `${isCreateNewOnly ? 'Thêm' : 'Cập nhật'} ngày ${time.format('DD-MM-YYYY')}`,
 					sha: isCreateNewOnly ? undefined : sha
 				})
-				const newNote: Note = parseNoteFromNoteData(res.data.content as NoteData)
+				const newNote: Note = parseNoteFromRawNoteData(res.data.content as NoteData)
 				setOrAddNote(newNote)
 			}
 

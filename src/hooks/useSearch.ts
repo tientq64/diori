@@ -3,7 +3,7 @@ import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
-import { parseNoteFromNoteData } from '../utils/parseNote'
+import { parseNoteFromRawNoteData } from '../utils/parseNote'
 import { useLoadYear } from './useLoadYear'
 
 export function useSearch() {
@@ -51,7 +51,7 @@ export function useSearch() {
 				const foundYears = new Set<number>()
 
 				for (const data of res.data.items) {
-					let searchNote: Note = parseNoteFromNoteData(data)
+					let searchNote: Note = parseNoteFromRawNoteData(data)
 					if (notes[searchNote.date] === undefined) {
 						foundYears.add(searchNote.year)
 					} else {

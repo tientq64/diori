@@ -1,6 +1,6 @@
 {
 	"name": "diori",
-	"version": "1.10.0",
+	"version": "1.10.1",
 	"private": true,
 	"description": "📒 Viết nhật ký và lưu trữ trên GitHub, sử dụng GitHub API.",
 	"keywords": [

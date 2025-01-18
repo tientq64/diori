@@ -38,8 +38,8 @@ export function LoginForm(): ReactNode {
 	// Tự động đăng nhập khi dev.
 	useEffect(() => {
 		if (import.meta.env.DEV) {
-			// form.setFieldValue('pass', 'test')
-			// form.submit()
+			form.setFieldValue('pass', 'test')
+			form.submit()
 		}
 	}, [])
 
