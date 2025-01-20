@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
+import { nanoid } from 'nanoid'
 import { LoginValues } from '../pages/LoginPage'
 import { useAppStore } from '../store/useAppStore'
 import { decryptText } from '../utils/decryptText'
@@ -13,9 +14,9 @@ export function useLogin() {
 	const fetchUserData = useAppStore((state) => state.fetchUserData)
 
 	const request = useRequest(
-		async ({ pass }: LoginValues): Promise<boolean> => {
-			const key: string = await slowHashPassword(pass, registerSalt)
-			const token: string = decryptText(encryptedToken, key)
+		async ({ pass }: LoginValues): Promise<string | undefined> => {
+			const derivedKey: string = await slowHashPassword(pass, registerSalt)
+			const token: string = decryptText(encryptedToken, derivedKey)
 
 			if (token === '') {
 				throw Error('Mật khẩu nhật ký không đúng')
@@ -27,7 +28,8 @@ export function useLogin() {
 			setToken(token)
 			fetchUserData(token)
 
-			return true
+			// Trả về một chuỗi ngẫu nhiên tượng trưng cho mỗi lần đăng nhập thành công.
+			return nanoid()
 		},
 		{ manual: true }
 	)

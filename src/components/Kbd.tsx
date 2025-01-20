@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 
-type KbdProps = {
+interface KbdProps {
 	children: ReactNode
 }
 

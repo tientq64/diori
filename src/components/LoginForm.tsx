@@ -49,7 +49,7 @@ export function LoginForm(): ReactNode {
 			form={form}
 			mode="card"
 			layout={isMd ? 'horizontal' : 'vertical'}
-			disabled={loginApi.loading || loginApi.data}
+			disabled={loginApi.loading || loginApi.data !== undefined}
 			validateMessages={formValidateMessages}
 			onFinish={loginApi.run}
 		>

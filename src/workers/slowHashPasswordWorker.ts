@@ -7,7 +7,7 @@ self.addEventListener('message', (event: MessageEvent<[string, string]>): void =
 		keySize: 16,
 		iterations: 21045
 	})
-	const key: string = wordArray.toString()
+	const derivedKey: string = wordArray.toString()
 
-	self.postMessage(key)
+	self.postMessage(derivedKey)
 })

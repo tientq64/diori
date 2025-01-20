@@ -9,8 +9,6 @@ import { GitGetBlobResponse, GitGetTreeResponse, ReposGetCommitResponse } from '
 import { getOctokit } from '../utils/getOctokit'
 import { makePhotoFileName } from '../utils/makePhotoFileName'
 
-export type PhotoLoaderStatus = undefined | 'loading' | 'loaded' | 'failed'
-
 export function usePhotosLoader() {
 	const orgName = useAppStore((state) => state.orgName)
 

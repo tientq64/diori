@@ -2,7 +2,7 @@ import { Dayjs } from 'dayjs'
 import { makePhotoFileName } from './makePhotoFileName'
 
 /**
- * Tạo đường dẫn file ảnh trên GitHub.
+ * Tạo và trả về đường dẫn file ảnh trên GitHub.
  *
  * Đường dẫn ví dụ: `10/05/20241005-c5kJxW.webp`
  */

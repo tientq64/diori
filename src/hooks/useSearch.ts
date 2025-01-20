@@ -3,7 +3,7 @@ import { useRequest } from 'ahooks'
 import { Note } from '../store/slices/diarySlice'
 import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
-import { parseNoteFromRawNoteData } from '../utils/parseNote'
+import { parseNoteFromRawData } from '../utils/parseNoteFromRawData'
 import { useLoadYear } from './useLoadYear'
 
 export function useSearch() {
@@ -39,10 +39,10 @@ export function useSearch() {
 			setSearchLoading(true)
 			setSearchError(undefined)
 
-			const q: string = `"${searchText}"+in:file+repo:${orgName}/diori-main+path:days`
+			const searchQuery: string = `"${searchText}"+in:file+repo:${orgName}/diori-main+path:days`
 			try {
 				const res: any = await rest.search.code({
-					q,
+					q: searchQuery,
 					page: searchPage,
 					per_page: 98
 				})
@@ -51,7 +51,7 @@ export function useSearch() {
 				const foundYears = new Set<number>()
 
 				for (const data of res.data.items) {
-					let searchNote: Note = parseNoteFromRawNoteData(data)
+					let searchNote: Note = parseNoteFromRawData(data)
 					if (notes[searchNote.date] === undefined) {
 						foundYears.add(searchNote.year)
 					} else {

@@ -95,7 +95,7 @@ export interface Settings extends SettingsState {
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
-	fontFamily: 'Roboto, Arial, sans-serif',
+	fontFamily: 'Arial, Roboto, sans-serif',
 	fontSize: 16,
 	isDarkMode: true,
 	entities: [],

@@ -11,5 +11,10 @@
 	"[scss]": {
 		"editor.formatOnSave": true
 	},
-	"tailwindCSS.experimental.classRegex": [["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]]
+	"tailwindCSS.experimental.classRegex": [
+		[
+			"clsx\\(([^)]*)\\)",
+			"(?:'|\"|`)([^']*)(?:'|\"|`)"
+		]
+	]
 }

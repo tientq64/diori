@@ -1,7 +1,7 @@
 import { Dayjs } from 'dayjs'
 
 /**
- * Tạo tên file ảnh trên GitHub. File ảnh luôn có phần mở rộng là `.webp`.
+ * Tạo và trả về tên file ảnh trên GitHub. File ảnh luôn có phần mở rộng là `.webp`.
  *
  * Tên file ví dụ: `20241005-c5kJxW.webp`
  */

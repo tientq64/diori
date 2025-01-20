@@ -47,7 +47,7 @@ interface CommitFilesOptions {
  *
  * @returns Một mảng chứa SHA của các tập tin đã thêm.
  */
-export async function commitFiles(
+export async function commitAndPushFiles(
 	rest: Octokit,
 	{ orgName, repoName, message, addedFiles = [], deletedPaths = [] }: CommitFilesOptions
 ): Promise<string[]> {

@@ -3,7 +3,7 @@ import { useRequest } from 'ahooks'
 import { Note, NoteData, Status } from '../store/slices/diarySlice'
 import { useAppStore } from '../store/useAppStore'
 import { getOctokit } from '../utils/getOctokit'
-import { parseNoteFromRawNoteData } from '../utils/parseNote'
+import { parseNoteFromRawData } from '../utils/parseNoteFromRawData'
 
 export function useLoadYear() {
 	const token = useAppStore((state) => state.token)
@@ -29,7 +29,7 @@ export function useLoadYear() {
 					path: `days/${year}`
 				})
 				for (const data of res.data as NoteData[]) {
-					const newNote: Note = parseNoteFromRawNoteData(data)
+					const newNote: Note = parseNoteFromRawData(data)
 					setOrAddNote(newNote)
 				}
 			} catch (error: any) {

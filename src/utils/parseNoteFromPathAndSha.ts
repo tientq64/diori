@@ -44,14 +44,3 @@ export function parseNoteFromPathAndSha(path: string, sha: string): Note {
 	}
 	return newNote
 }
-
-/**
- * Phân tích thành mục nhật ký từ data.
- *
- * @param rawData Data để phân tích, thường là data của trường `data` trả về từ REST API.
- * @returns Một mục nhật ký mới.
- */
-export function parseNoteFromRawNoteData(rawData: NoteData): Note {
-	const { path, sha } = rawData
-	return parseNoteFromPathAndSha(path, sha)
-}

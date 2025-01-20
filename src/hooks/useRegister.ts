@@ -51,8 +51,8 @@ export function useRegister() {
 			}
 
 			const registerSalt: string = nanoid()
-			const key: string = await slowHashPassword(pass, registerSalt)
-			const encryptToken: string = encryptText(token, key)
+			const derivedKey: string = await slowHashPassword(pass, registerSalt)
+			const encryptToken: string = encryptText(token, derivedKey)
 
 			setOrgName(orgName)
 			setRegisterSalt(registerSalt)
@@ -60,6 +60,7 @@ export function useRegister() {
 
 			setToken(token)
 
+			// Trả về một chuỗi ngẫu nhiên tượng trưng cho mỗi lần đăng ký thành công.
 			return nanoid()
 		},
 		{ manual: true }

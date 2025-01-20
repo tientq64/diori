@@ -2,15 +2,17 @@ import { Octokit } from '@octokit/rest'
 import { useRequest } from 'ahooks'
 import { ImageUploadItem, Toast } from 'antd-mobile'
 import { Note, NoteData } from '../store/slices/diarySlice'
-import { NoteEdit, NoteEditJSON, Photo } from '../store/slices/editingSlice'
+import { NoteEdit, Photo } from '../store/slices/editingSlice'
 import { useAppStore } from '../store/useAppStore'
-import { AddedCommitFile, commitFiles } from '../utils/commitFiles'
+import { AddedCommitFile, commitAndPushFiles } from '../utils/commitAndPushFiles'
 import { getOctokit } from '../utils/getOctokit'
 import { makeCompressImageBase64 } from '../utils/makeCompressImageBase64'
 import { makeNotePath } from '../utils/makeNotePath'
-import { makeNoteTitleFromNoteEditContent } from '../utils/makeNoteTitleFromNoteEditContent'
+import { makeNoteTitleFromContent } from '../utils/makeNoteTitleFromContent'
 import { makePhotoPath } from '../utils/makePhotoPath'
-import { parseNoteFromPathAndSha, parseNoteFromRawNoteData } from '../utils/parseNote'
+import { parseNoteFromPathAndSha } from '../utils/parseNoteFromPathAndSha'
+import { parseNoteFromRawData } from '../utils/parseNoteFromRawData'
+import { stringifyNoteEdit } from '../utils/stringifyNoteEdit'
 import { textToBase64 } from '../utils/textToBase64'
 
 /**
@@ -39,8 +41,7 @@ export function useSave() {
 			const isTitled: boolean = userWrittenTitle !== ''
 
 			// Tạo tiêu đề mới dựa trên nội dung đã viết nếu người dùng không đặt tiêu đề.
-			const generatedTitle: string =
-				userWrittenTitle || makeNoteTitleFromNoteEditContent(content)
+			const generatedTitle: string = userWrittenTitle || makeNoteTitleFromContent(content)
 
 			/**
 			 * Đường dẫn mới cho file GitHub. Đường dẫn mới không nhất thiết phải khác đường dẫn cũ.
@@ -52,7 +53,9 @@ export function useSave() {
 				defaultPhotoKey,
 				images
 			)
-			const hasSha = sha !== undefined
+			const hasSha: boolean = sha !== undefined
+
+			const displayDate: string = time.format('DD-MM-YYYY')
 
 			/**
 			 * Chỉ xóa tập tin.
@@ -88,22 +91,12 @@ export function useSave() {
 				})),
 				defaultPhotoKey
 			}
-			/**
-			 * Nội dung nhật ký được tối ưu hóa.
-			 */
-			const newNoteEditData: NoteEditJSON = {
-				date: newNoteEdit.date,
-				title: newNoteEdit.title || undefined,
-				isTitled: newNoteEdit.isTitled || undefined,
-				content: newNoteEdit.content,
-				photos: newNoteEdit.photos.length > 0 ? newNoteEdit.photos : undefined,
-				defaultPhotoKey:
-					newNoteEdit.photos.length >= 2 ? newNoteEdit.defaultPhotoKey : undefined
-			}
+
 			/**
 			 * Chuỗi JSON nội dung nhật ký.
 			 */
-			const newNoteEditJson: string = JSON.stringify(newNoteEditData)
+			const newNoteEditJson: string = stringifyNoteEdit(newNoteEdit)
+
 			/**
 			 * Chuỗi base64 nội dung nhật ký. Dùng để truyền dữ liệu vào các hàm GitHub API, vì API
 			 * chỉ chấp nhận dữ liệu dạng base64.
@@ -113,15 +106,18 @@ export function useSave() {
 			const rest: Octokit = getOctokit()
 
 			if (isCreateNewOnly || isUpdateOnly) {
+				const message: string = isCreateNewOnly
+					? `Thêm ngày ${displayDate}`
+					: `Cập nhật ngày ${displayDate}`
 				const res = await rest.repos.createOrUpdateFileContents({
 					owner: orgName,
 					repo: 'diori-main',
 					path,
 					content: newNoteEditBase64,
-					message: `${isCreateNewOnly ? 'Thêm' : 'Cập nhật'} ngày ${time.format('DD-MM-YYYY')}`,
+					message,
 					sha: isCreateNewOnly ? undefined : sha
 				})
-				const newNote: Note = parseNoteFromRawNoteData(res.data.content as NoteData)
+				const newNote: Note = parseNoteFromRawData(res.data.content as NoteData)
 				setOrAddNote(newNote)
 			}
 
@@ -130,17 +126,17 @@ export function useSave() {
 					owner: orgName,
 					repo: 'diori-main',
 					path: editingNote.path!,
-					message: `Xóa ngày ${time.format('DD-MM-YYYY')}`,
+					message: `Xóa ngày ${displayDate}`,
 					sha: sha!
 				})
 				removeNote(editingNote)
 			}
 
 			if (isCreateNewAndDeleteOldOnly) {
-				const [newNoteSHA] = await commitFiles(rest, {
+				const [newNoteSHA] = await commitAndPushFiles(rest, {
 					orgName,
 					repoName: 'diori-main',
-					message: `Tạo lại ngày ${time.format('DD-MM-YYYY')}`,
+					message: `Tạo lại ngày ${displayDate}`,
 					addedFiles: [
 						{
 							path,
@@ -200,19 +196,15 @@ export function useSave() {
 
 			const photosCommitMessages: string[] = []
 			if (addedImages.length > 0) {
-				photosCommitMessages.push(
-					`Thêm ${addedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}`
-				)
+				photosCommitMessages.push(`Thêm ${addedImages.length} ảnh ngày ${displayDate}`)
 			}
 			if (removedImages.length > 0) {
-				photosCommitMessages.push(
-					`Xóa ${removedImages.length} ảnh ngày ${time.format('DD-MM-YYYY')}`
-				)
+				photosCommitMessages.push(`Xóa ${removedImages.length} ảnh ngày ${displayDate}`)
 			}
 			const photosCommitMessage: string = photosCommitMessages.join('\n')
 
 			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
-				await commitFiles(rest, {
+				await commitAndPushFiles(rest, {
 					orgName,
 					repoName: photosRepoName,
 					message: photosCommitMessage,

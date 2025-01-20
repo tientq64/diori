@@ -12,8 +12,8 @@ export function SearchInput(): ReactNode {
 	const searchApi = useSearch()
 	const navigate = useNavigate()
 
-	const handleSearch = (searchText: string): void => {
-		searchApi.run(searchText)
+	const handleSearch = (value: string): void => {
+		searchApi.run(value)
 		navigate('/search')
 	}
 

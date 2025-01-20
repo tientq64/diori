@@ -7,7 +7,7 @@ const linkReferenceLineRegex: RegExp = /^\[.+?\]: *[^"\n]+?(?: *".+?")?$/
  *
  * @param content Nội dung nhật ký.
  */
-export function makeNoteTitleFromNoteEditContent(content: string): string {
+export function makeNoteTitleFromContent(content: string): string {
 	if (content === '') return ''
 
 	// Lấy dòng dài nhất.

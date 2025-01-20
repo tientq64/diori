@@ -6,6 +6,8 @@ import { textToMinBase64 } from './textToMinBase64'
 /**
  * Tạo và trả về đường dẫn GitHub cho file ngày nhật ký.
  *
+ * Đường dẫn ví dụ: `days/2024/1005;xJDDonkgbMOgIHRpw6p1IMSR4buB;T.json`
+ *
  * @param time Ngày của nhật ký.
  * @param title Tiêu đề nhật ký, được tạo tự động hoặc do người dùng viết.
  * @param isTitled Tiêu đề có phải do người dùng viết hay không.
