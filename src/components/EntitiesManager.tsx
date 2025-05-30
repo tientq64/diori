@@ -28,7 +28,8 @@ export function EntitiesManager(): ReactNode {
 	const [editingEntity, setEditingEntity] = useState<Entity | undefined>()
 	const editingEntityName = Form.useWatch<string>('name', form) ?? ''
 	const editingEntityType = Form.useWatch<EntityTypes>('type', form) ?? 'person'
-	const editingEntityAliasNames = Form.useWatch<string[]>('aliasNames', form) ?? emptyArray
+	const editingEntityAliasNames =
+		Form.useWatch<string[]>('aliasNames', form) ?? emptyArray
 	const editingEntityDescription = Form.useWatch<string>('description', form) ?? ''
 	const [filteredEntityType, setFilteredEntityType] = useState<EntityTypes | ''>('')
 
@@ -51,9 +52,13 @@ export function EntitiesManager(): ReactNode {
 
 	const groups = useMemo<[string, Entity[]][]>(() => {
 		const sortedEntities = filteredEntities.toSorted((entityA, entityB) => {
-			return removeToneMarks(entityA.name).localeCompare(removeToneMarks(entityB.name))
+			return removeToneMarks(entityA.name).localeCompare(
+				removeToneMarks(entityB.name)
+			)
 		})
-		return toPairs(groupBy(sortedEntities, (entity) => removeToneMarks(entity.name[0])))
+		return toPairs(
+			groupBy(sortedEntities, (entity) => removeToneMarks(entity.name[0]))
+		)
 	}, [filteredEntities])
 
 	const unsaved = useMemo<boolean>(() => {
@@ -120,7 +125,10 @@ export function EntitiesManager(): ReactNode {
 
 	return (
 		<div className="flex h-[82vh] flex-col">
-			<CapsuleTabs activeKey={filteredEntityType} onChange={handleFilteredEntityTypeChange}>
+			<CapsuleTabs
+				activeKey={filteredEntityType}
+				onChange={handleFilteredEntityTypeChange}
+			>
 				<CapsuleTabs.Tab title="Tất cả" key="" />
 				<CapsuleTabs.Tab title="Mọi người" key={EntityTypes.Person} />
 				<CapsuleTabs.Tab title="Danh từ riêng" key={EntityTypes.ProperNoun} />
@@ -215,7 +223,9 @@ export function EntitiesManager(): ReactNode {
 						<Radio.Group>
 							<Space>
 								<Radio value={EntityTypes.Person}>Tên người</Radio>
-								<Radio value={EntityTypes.ProperNoun}>Danh từ riêng</Radio>
+								<Radio value={EntityTypes.ProperNoun}>
+									Danh từ riêng
+								</Radio>
 							</Space>
 						</Radio.Group>
 					</Form.Item>

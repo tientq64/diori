@@ -117,8 +117,8 @@ export function RegisterPage(): ReactNode {
 						name="token"
 						description={
 							<>
-								Tương tự như mật khẩu GitHub. Tuyệt đối không chia sẻ mã này với bất
-								kỳ ai. Tạo và lấy nó{' '}
+								Tương tự như mật khẩu GitHub. Tuyệt đối không chia sẻ mã
+								này với bất kỳ ai. Tạo và lấy nó{' '}
 								<Link2 href="https://github.com/settings/tokens?type=beta">
 									tại đây
 								</Link2>
@@ -143,9 +143,9 @@ export function RegisterPage(): ReactNode {
 						name="orgName"
 						description={
 							<>
-								Tài khoản tổ chức GitHub này sẽ được dùng để lưu trữ nhật ký. Nên
-								tạo một tài khoản tổ chức riêng, để tránh việc dữ liệu nhật ký làm
-								lộn xộn tài khoản của bạn. Tạo mới{' '}
+								Tài khoản tổ chức GitHub này sẽ được dùng để lưu trữ nhật
+								ký. Nên tạo một tài khoản tổ chức riêng, để tránh việc dữ
+								liệu nhật ký làm lộn xộn tài khoản của bạn. Tạo mới{' '}
 								<Link2 href="https://github.com/account/organizations/new?plan=free">
 									tại đây
 								</Link2>

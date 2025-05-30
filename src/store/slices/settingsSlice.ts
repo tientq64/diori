@@ -17,8 +17,8 @@ export enum EntityTypes {
 }
 
 /**
- * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng. Dùng trong tô sáng cú pháp khi viết
- * nhật ký.
+ * Đối tượng. Đối tượng có thể là tên người, hoặc danh từ riêng. Dùng trong tô sáng cú
+ * pháp khi viết nhật ký.
  */
 export interface Entity {
 	/**
@@ -95,7 +95,7 @@ export interface Settings extends SettingsState {
 }
 
 export const settingsSlice: SliceCreator<Settings> = (set, get) => ({
-	fontFamily: 'Arial, Roboto, sans-serif',
+	fontFamily: 'Archivo, Arial, Roboto, sans-serif',
 	fontSize: 16,
 	isDarkMode: true,
 	entities: [],

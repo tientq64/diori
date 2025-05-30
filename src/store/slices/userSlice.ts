@@ -18,13 +18,13 @@ export interface User {
 	 */
 	userAvatar: string
 	/**
-	 * GitHub personal access token đã được mã hóa. Được lưu trong `localStorage` để xác thực khi
-	 * đăng nhập.
+	 * GitHub personal access token đã được mã hóa. Được lưu trong `localStorage` để xác
+	 * thực khi đăng nhập.
 	 */
 	encryptedToken: string
 	/**
-	 * GitHub personal access token hiện tại. Có thể dùng để kiểm tra xem người dùng đã đăng nhập
-	 * chưa.
+	 * GitHub personal access token hiện tại. Có thể dùng để kiểm tra xem người dùng đã
+	 * đăng nhập chưa.
 	 */
 	token: string
 	/**

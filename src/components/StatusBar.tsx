@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore'
 import { Link2 } from './Link2'
 
 export function StatusBar(): ReactNode {
+	const token = useAppStore((state) => state.token)
 	const userName = useAppStore((state) => state.userName)
 	const userAvatar = useAppStore((state) => state.userAvatar)
 	const orgName = useAppStore((state) => state.orgName)
@@ -16,23 +17,33 @@ export function StatusBar(): ReactNode {
 	return (
 		<div className="z-10 flex justify-between bg-zinc-900/90 px-4 py-1 align-middle text-sm light:bg-zinc-200/90">
 			<div className="flex gap-4 align-middle">
-				{userName && (
-					<div className="flex gap-3 xs:hidden">
-						<img className="h-5 w-5 rounded-full" src={userAvatar} alt="Ảnh đại diện" />
-						<div className="flex gap-1">
-							Người dùng:
-							<Link2 href="https://github.com/settings/tokens?type=beta">
-								{userName}
-							</Link2>
-						</div>
-					</div>
-				)}
+				{token && (
+					<>
+						{userName && (
+							<div className="flex gap-3 xs:hidden">
+								<img
+									className="h-5 w-5 rounded-full"
+									src={userAvatar}
+									alt="Ảnh đại diện"
+								/>
+								<div className="flex gap-1">
+									Người dùng:
+									<Link2 href="https://github.com/settings/tokens?type=beta">
+										{userName}
+									</Link2>
+								</div>
+							</div>
+						)}
 
-				{orgName && (
-					<div className="flex gap-1 xs:hidden">
-						Tổ chức:
-						<Link2 href={`https://github.com/${orgName}/diori-main`}>{orgName}</Link2>
-					</div>
+						{orgName && (
+							<div className="flex gap-1 xs:hidden">
+								Tổ chức:
+								<Link2 href={`https://github.com/${orgName}/diori-main`}>
+									{orgName}
+								</Link2>
+							</div>
+						)}
+					</>
 				)}
 			</div>
 
@@ -43,8 +54,9 @@ export function StatusBar(): ReactNode {
 					<>
 						{isMd && (
 							<div>
-								Giới hạn API: Còn lại {rateLimitRemaining} / {rateLimitTotal}, đặt
-								lại sau {rateLimitTimeReset.from(nowPerMinute, true)}
+								Giới hạn API: Còn lại {rateLimitRemaining} /{' '}
+								{rateLimitTotal}, đặt lại sau{' '}
+								{rateLimitTimeReset.from(nowPerMinute, true)}
 							</div>
 						)}
 						{!isMd && (

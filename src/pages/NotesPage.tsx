@@ -1,7 +1,15 @@
 import { DatePickerView, Divider, Dropdown, NavBar } from 'antd-mobile'
 import dayjs, { Dayjs } from 'dayjs'
 import { upperFirst } from 'lodash'
-import { FocusEvent, ReactNode, WheelEvent, useEffect, useMemo, useRef, useState } from 'react'
+import {
+	FocusEvent,
+	ReactNode,
+	WheelEvent,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react'
 import { useNavigate } from 'react-router'
 import { Brand } from '../components/Brand'
 import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
@@ -36,12 +44,14 @@ export function NotesPage(): ReactNode {
 	/**
 	 * Cuộn thanh cuộn dọc đến vị trí xác định trong danh sách các mục nhật ký.
 	 *
-	 * @param scrollTop Vị trị thanh cuộn dọc. Nếu không được đặt, vị trí mặc định sẽ là ở giữa.
+	 * @param scrollTop Vị trị thanh cuộn dọc. Nếu không được đặt, vị trí mặc định sẽ là ở
+	 *   giữa.
 	 */
 	const scrollTo = (scrollTop?: number): void => {
 		const scrollEl = scrollRef.current!
 		if (scrollTop === undefined) {
-			const middleScrollTop: number = (scrollEl.scrollHeight - scrollEl.clientHeight) / 2
+			const middleScrollTop: number =
+				(scrollEl.scrollHeight - scrollEl.clientHeight) / 2
 			scrollTop = middleScrollTop
 		}
 		scrollEl.scrollTo(0, scrollTop)

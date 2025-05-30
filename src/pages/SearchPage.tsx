@@ -64,8 +64,12 @@ export function SearchPage(): ReactNode {
 					left={
 						<div className="flex items-center gap-2 text-base">
 							{isMd ? 'Kết quả tìm kiếm cho:' : 'Kết quả:'}
-							<span className="text-lime-200 light:text-lime-600">{searchText}</span>
-							<span className="text-zinc-500">- {searchNotesTotal} mục</span>
+							<span className="text-lime-200 light:text-lime-600">
+								{searchText}
+							</span>
+							<span className="text-zinc-500">
+								- {searchNotesTotal} mục
+							</span>
 						</div>
 					}
 					right={
@@ -108,7 +112,9 @@ export function SearchPage(): ReactNode {
 						)}
 
 						{searchError && (
-							<div className="mt-4 text-center text-rose-400">Đã xảy ra lỗi</div>
+							<div className="mt-4 text-center text-rose-400">
+								Đã xảy ra lỗi
+							</div>
 						)}
 					</>
 				)}
@@ -123,7 +129,9 @@ export function SearchPage(): ReactNode {
 								status="error"
 								title="Đã xảy ra lỗi"
 								description={
-									<div className="m-auto md:w-2/5">{String(searchError)}</div>
+									<div className="m-auto md:w-2/5">
+										{String(searchError)}
+									</div>
 								}
 							/>
 						)}

@@ -41,10 +41,12 @@ export function useSave() {
 			const isTitled: boolean = userWrittenTitle !== ''
 
 			// Tạo tiêu đề mới dựa trên nội dung đã viết nếu người dùng không đặt tiêu đề.
-			const generatedTitle: string = userWrittenTitle || makeNoteTitleFromContent(content)
+			const generatedTitle: string =
+				userWrittenTitle || makeNoteTitleFromContent(content)
 
 			/**
-			 * Đường dẫn mới cho file GitHub. Đường dẫn mới không nhất thiết phải khác đường dẫn cũ.
+			 * Đường dẫn mới cho file GitHub. Đường dẫn mới không nhất thiết phải khác
+			 * đường dẫn cũ.
 			 */
 			const path: string = makeNotePath(
 				time,
@@ -65,7 +67,8 @@ export function useSave() {
 			/**
 			 * Chỉ tạo mới tập tin.
 			 */
-			const isCreateNewOnly: boolean = !isDeleteOnly && !hasSha && path !== editingNote.path
+			const isCreateNewOnly: boolean =
+				!isDeleteOnly && !hasSha && path !== editingNote.path
 			/**
 			 * Chỉ tạo mới và xóa tập tin cũ.
 			 */
@@ -98,8 +101,8 @@ export function useSave() {
 			const newNoteEditJson: string = stringifyNoteEdit(newNoteEdit)
 
 			/**
-			 * Chuỗi base64 nội dung nhật ký. Dùng để truyền dữ liệu vào các hàm GitHub API, vì API
-			 * chỉ chấp nhận dữ liệu dạng base64.
+			 * Chuỗi base64 nội dung nhật ký. Dùng để truyền dữ liệu vào các hàm GitHub
+			 * API, vì API chỉ chấp nhận dữ liệu dạng base64.
 			 */
 			const newNoteEditBase64: string = textToBase64(newNoteEditJson)
 
@@ -153,7 +156,8 @@ export function useSave() {
 				addedImages.length > 0 && removedImages.length === 0
 			const isCreateNewAndDeletePhotosOnly: boolean =
 				addedImages.length > 0 && removedImages.length > 0
-			const isDeletePhotosOnly: boolean = addedImages.length === 0 && removedImages.length > 0
+			const isDeletePhotosOnly: boolean =
+				addedImages.length === 0 && removedImages.length > 0
 
 			const addedFiles: AddedCommitFile[] = []
 			for (const image of addedImages) {
@@ -196,20 +200,30 @@ export function useSave() {
 
 			const photosCommitMessages: string[] = []
 			if (addedImages.length > 0) {
-				photosCommitMessages.push(`Thêm ${addedImages.length} ảnh ngày ${displayDate}`)
+				photosCommitMessages.push(
+					`Thêm ${addedImages.length} ảnh ngày ${displayDate}`
+				)
 			}
 			if (removedImages.length > 0) {
-				photosCommitMessages.push(`Xóa ${removedImages.length} ảnh ngày ${displayDate}`)
+				photosCommitMessages.push(
+					`Xóa ${removedImages.length} ảnh ngày ${displayDate}`
+				)
 			}
 			const photosCommitMessage: string = photosCommitMessages.join('\n')
 
-			if (isCreateNewPhotosOnly || isCreateNewAndDeletePhotosOnly || isDeletePhotosOnly) {
+			if (
+				isCreateNewPhotosOnly ||
+				isCreateNewAndDeletePhotosOnly ||
+				isDeletePhotosOnly
+			) {
 				await commitAndPushFiles(rest, {
 					orgName,
 					repoName: photosRepoName,
 					message: photosCommitMessage,
 					addedFiles,
-					deletedPaths: removedImages.map((image) => makePhotoPath(time, image.key))
+					deletedPaths: removedImages.map((image) =>
+						makePhotoPath(time, image.key)
+					)
 				})
 			}
 

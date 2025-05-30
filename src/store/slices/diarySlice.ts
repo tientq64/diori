@@ -4,8 +4,8 @@ import VietnameseDate from 'vietnamese-date'
 import { SliceCreator } from '../useAppStore'
 
 /**
- * Một mục trong nhật ký. Mục nhật ký giống như một mục nhập, chỉ bao gồm ngày, tiêu đề, ảnh thu
- * nhỏ, vv, không bao gồm nội dung chi tiết.
+ * Một mục trong nhật ký. Mục nhật ký giống như một mục nhập, chỉ bao gồm ngày, tiêu đề,
+ * ảnh thu nhỏ, vv, không bao gồm nội dung chi tiết.
  */
 export interface Note {
 	/**
@@ -13,8 +13,8 @@ export interface Note {
 	 */
 	readonly date: string
 	/**
-	 * Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần tạo mới
-	 * mỗi khi dùng.
+	 * Đối tượng `Dayjs` của ngày. Mục đích thuận tiện cho việc thao tác ngày mà không cần
+	 * tạo mới mỗi khi dùng.
 	 */
 	readonly time: Dayjs
 	/**
@@ -56,8 +56,8 @@ export interface Note {
 }
 
 /**
- * Đối tượng lưu các mục nhật ký. Chỉ các mục có thuộc tính `path` và `sha` mới được lưu vào đây.
- * Key là thuộc tính `date` của mục.
+ * Đối tượng lưu các mục nhật ký. Chỉ các mục có thuộc tính `path` và `sha` mới được lưu
+ * vào đây. Key là thuộc tính `date` của mục.
  */
 export type Notes = Record<Note['date'], Note>
 
@@ -121,8 +121,8 @@ export interface Diary {
 	getNote: (date: string | Dayjs) => Note | undefined
 
 	/**
-	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh sách. Nếu
-	 * cần thêm vào danh sách, hãy thêm nó vào bằng hàm `setOrAddNote`.
+	 * Tạo một mục nhật ký và trả về. Hành động này không thêm mục nhật ký đã tạo vào danh
+	 * sách. Nếu cần thêm vào danh sách, hãy thêm nó vào bằng hàm `setOrAddNote`.
 	 *
 	 * @param date Ngày của mục nhật ký cần tạo.
 	 * @returns Mục nhật ký đã tạo.

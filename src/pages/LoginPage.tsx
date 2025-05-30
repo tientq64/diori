@@ -75,7 +75,9 @@ export function LoginPage(): ReactNode {
 						</Link2>
 						<Divider direction="vertical" />
 
-						<Link2 href="https://github.com/tientq64/diori/issues/new">Báo lỗi</Link2>
+						<Link2 href="https://github.com/tientq64/diori/issues/new">
+							Báo lỗi
+						</Link2>
 					</div>
 				</div>
 			</div>

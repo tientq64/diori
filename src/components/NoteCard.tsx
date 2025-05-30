@@ -11,7 +11,12 @@ interface NoteCardProps {
 	onNoteClick?: (note: Note) => void
 }
 
-export function NoteCard({ note, showYear, tabIndex, onNoteClick }: NoteCardProps): ReactNode {
+export function NoteCard({
+	note,
+	showYear,
+	tabIndex,
+	onNoteClick
+}: NoteCardProps): ReactNode {
 	const isMd = useAppStore((state) => state.isMd)
 	const getYear = useAppStore((state) => state.getYear)
 

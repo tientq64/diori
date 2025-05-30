@@ -106,8 +106,8 @@ export function QuickSettingsSection(): ReactNode {
 
 				<Form.Item className="text-center">
 					<div className="pb-4 text-center text-sm text-zinc-500">
-						Có thể nhấn <Kbd>Enter</Kbd> để áp dụng thay đổi khi đang gõ đối với các
-						trường văn bản.
+						Có thể nhấn <Kbd>Enter</Kbd> để áp dụng thay đổi khi đang gõ đối
+						với các trường văn bản.
 					</div>
 
 					<div className="flex justify-center gap-2 xs:flex-wrap">

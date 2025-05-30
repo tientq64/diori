@@ -25,7 +25,14 @@ import { differenceBy, find, findIndex, reject, some, upperFirst } from 'lodash'
 import { nanoid } from 'nanoid'
 import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { Blocker, Navigate, useBlocker, useLocation, useNavigate, useParams } from 'react-router'
+import {
+	Blocker,
+	Navigate,
+	useBlocker,
+	useLocation,
+	useNavigate,
+	useParams
+} from 'react-router'
 import spinnerImage from '../assets/images/spinner.svg'
 import { EntitiesManagerButton } from '../components/EntitiesManagerButton'
 import { QuickSettingsButton } from '../components/QuickSettingsButton'
@@ -37,7 +44,13 @@ import { useSave } from '../hooks/useSave'
 import { Note, Status } from '../store/slices/diarySlice'
 import { NoteEdit, Photo } from '../store/slices/editingSlice'
 import { useAppStore } from '../store/useAppStore'
-import { CodeEditor, EditorOptions, FindMatch, IEditorAction, Monaco } from '../types/monaco'
+import {
+	CodeEditor,
+	EditorOptions,
+	FindMatch,
+	IEditorAction,
+	Monaco
+} from '../types/monaco'
 import { checkIsLoadedStatus } from '../utils/checkIsLoadedStatus'
 import { setupEditor } from '../utils/editor/setupEditor'
 import { makeThumbnailUrl } from '../utils/makeThumbnailUrl'
@@ -260,8 +273,14 @@ export function EditPage(): ReactNode {
 				mainClass: 'z-50',
 				startIndex,
 				on: {
-					'Carousel.selectSlide': async (_, __, slide: slideType): Promise<void> => {
-						const image: ImageUploadItem | undefined = find(images, { key: slide.id })
+					'Carousel.selectSlide': async (
+						_,
+						__,
+						slide: slideType
+					): Promise<void> => {
+						const image: ImageUploadItem | undefined = find(images, {
+							key: slide.id
+						})
 						if (image === undefined) return
 						const url: string = await loadImagePhotoUrl(image)
 						const imageEl = slide.imageEl as HTMLImageElement | undefined
@@ -296,7 +315,10 @@ export function EditPage(): ReactNode {
 		if (image.loadUrlPromise) {
 			return image.loadUrlPromise
 		}
-		const loadUrlPromise: Promise<string> = photosLoader.runAsync(editingNote.time, image)
+		const loadUrlPromise: Promise<string> = photosLoader.runAsync(
+			editingNote.time,
+			image
+		)
 		image.loadUrlPromise = loadUrlPromise
 		const blobUrl: string = await loadUrlPromise
 		setImages(
@@ -317,7 +339,8 @@ export function EditPage(): ReactNode {
 	}
 
 	/**
-	 * Khôi phục lại hình ảnh đã loại bỏ. Những hình ảnh đã được lưu mới có thể khôi phục được.
+	 * Khôi phục lại hình ảnh đã loại bỏ. Những hình ảnh đã được lưu mới có thể khôi phục
+	 * được.
 	 */
 	const restoreRemovedPhoto = (photo: Photo): void => {
 		if (images.length >= maxImagesCount) {
@@ -463,12 +486,15 @@ export function EditPage(): ReactNode {
 			>
 				<div className="font-semibold xs:text-base">
 					{upperFirst(
-						editingNote.time.format(isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY')
+						editingNote.time.format(
+							isMd ? 'dddd, D MMMM, YYYY' : 'dd, DD-MM-YYYY'
+						)
 					)}
 					{isMd && (
 						<span className="ml-2 text-zinc-500">
 							<>
-								({editingNote.lunar.day} tháng {editingNote.lunar.month} âm lịch)
+								({editingNote.lunar.day} tháng {editingNote.lunar.month}{' '}
+								âm lịch)
 							</>
 						</span>
 					)}
@@ -559,7 +585,9 @@ export function EditPage(): ReactNode {
 												icon: <PictureOutline />,
 												disabled: image.key === defaultPhotoKey,
 												onClick: () => {
-													setDefaultPhotoKey(image.key as string)
+													setDefaultPhotoKey(
+														image.key as string
+													)
 												}
 											},
 											{
@@ -598,7 +626,11 @@ export function EditPage(): ReactNode {
 						<div className="flex items-center gap-4 p-4 xs:flex-col xs:items-start">
 							<div className="flex gap-3">
 								<Button
-									color={currentErrorMessage === undefined ? 'primary' : 'danger'}
+									color={
+										currentErrorMessage === undefined
+											? 'primary'
+											: 'danger'
+									}
 									disabled={!canSave}
 									loading={saveApi.loading}
 									loadingText="Đang lưu"

@@ -29,7 +29,8 @@ export function useGetNoteEdit() {
 				isTitled: noteEditData.isTitled ?? false,
 				content: noteEditData.content ?? '',
 				photos: noteEditData.photos ?? [],
-				defaultPhotoKey: noteEditData.defaultPhotoKey ?? noteEditData.photos?.[0].key ?? ''
+				defaultPhotoKey:
+					noteEditData.defaultPhotoKey ?? noteEditData.photos?.[0].key ?? ''
 			}
 
 			return noteEdit

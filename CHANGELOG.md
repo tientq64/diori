@@ -1,5 +1,11 @@
 # Nhật ký thay đổi
 
+## 1.10.3 (30-05-2025)
+
+- Đổi font mặc định thành "Archivo".
+- Link khi di chuột vào sẽ hiển thị gạch chân nét liền, không dùng nét đứt nữa.
+- Format lại code.
+
 ## 1.10.1 (18-01-2025)
 
 - Sửa lỗi ID hình ảnh mặc định bị sai trong đường dẫn file GitHub.

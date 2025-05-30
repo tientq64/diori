@@ -32,7 +32,9 @@ export function makeNotePath(
 	 * Chuỗi base64 được nén của hình thu nhỏ của ảnh mặc định.
 	 */
 	const defaultPhotoThumbnailUrlMinBase64: string = defaultPhoto
-		? compressBase64(defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', ''))
+		? compressBase64(
+				defaultPhoto.thumbnailUrl!.replace('data:image/webp;base64,', '')
+			)
 		: ''
 
 	/**

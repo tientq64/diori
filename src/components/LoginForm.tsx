@@ -66,14 +66,20 @@ export function LoginForm(): ReactNode {
 			</Form.Item>
 
 			<Form.Item>
-				<Button type="submit" color="primary" size="large" block loading={loginApi.loading}>
+				<Button
+					type="submit"
+					color="primary"
+					size="large"
+					block
+					loading={loginApi.loading}
+				>
 					Đăng nhập
 				</Button>
 			</Form.Item>
 
 			<div className="mt-4 px-4 text-center text-zinc-500">
-				Nếu quên mật khẩu nhật ký, hãy vào phần đăng ký và đăng ký lại. Đừng lo lắng, dữ
-				liệu của bạn sẽ không bị mất.
+				Nếu quên mật khẩu nhật ký, hãy vào phần đăng ký và đăng ký lại. Đừng lo
+				lắng, dữ liệu của bạn sẽ không bị mất.
 			</div>
 		</Form>
 	)

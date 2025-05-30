@@ -5,7 +5,11 @@ import { Dayjs } from 'dayjs'
 import { find } from 'lodash'
 import { useEffect, useRef } from 'react'
 import { useAppStore } from '../store/useAppStore'
-import { GitGetBlobResponse, GitGetTreeResponse, ReposGetCommitResponse } from '../types/octokit'
+import {
+	GitGetBlobResponse,
+	GitGetTreeResponse,
+	ReposGetCommitResponse
+} from '../types/octokit'
 import { getOctokit } from '../utils/getOctokit'
 import { makePhotoFileName } from '../utils/makePhotoFileName'
 
@@ -91,9 +95,12 @@ export function usePhotosLoader() {
 				file_sha: photoFileNode.sha
 			})
 			const resE = await promiseE.current
-			const buf: Uint8ClampedArray = Uint8ClampedArray.from(atob(resE.data.content), (ch) => {
-				return ch.charCodeAt(0)
-			})
+			const buf: Uint8ClampedArray = Uint8ClampedArray.from(
+				atob(resE.data.content),
+				(ch) => {
+					return ch.charCodeAt(0)
+				}
+			)
 			const blob: Blob = new Blob([buf], {
 				type: 'image/webp'
 			})
